@@ -4,7 +4,9 @@ import Chemistry.Element
 
 import Control.Applicative(liftA2)
 
-import Data.Scientific(Scientific)
+import Numeric.Units.Dimensional(DMass, Quantity, (*~), one)
+import qualified Numeric.Units.Dimensional as D
+import Numeric.Units.Dimensional.NonSI (dalton)
 
 data Formula
     = Element Element
@@ -21,8 +23,8 @@ _listElements = go 1 []
                     go' tl (Times f n') = go (n'*n) tl f
                     go' tl (Combine f1 f2) = go' (go' tl f2) f1
 
-molecularMass :: Formula -> Maybe Scientific
-molecularMass = foldr (liftA2 (+) . (\(e, n) -> (fromIntegral n *) <$> atomicWeight e)) (Just 0) . _listElements
+molecularMass :: Floating a => Formula -> Maybe (Quantity DMass a)
+molecularMass = foldr (liftA2 (D.+) . (\(e, n) -> ((fromIntegral n *~ one) D.*) <$> atomicWeight e)) (Just (0 *~ dalton)) . _listElements
 
 --toMolecular :: Formula -> Formula
 --toMolecular _ = _
