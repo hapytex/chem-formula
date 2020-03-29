@@ -2,6 +2,8 @@
 
 module Chemistry.Element where
 
+import Data.Scientific(Scientific)
+
 data Element
   = H -- ^ The /hydrogen/ element.
   | He -- ^ The /helium/ element.
@@ -196,13 +198,18 @@ pattern Uuo :: Element
 pattern Uuo = Og
 
 -- | Obtain the atomic number of the given 'Element'.
-atomNumber :: Element -> Int
+atomNumber :: Element -- ^ The element for which we want to calculate the atomic number.
+    -> Int -- ^ The atomic number of the given element.
 atomNumber = (1+) . fromEnum
 
-symbol :: Element -> String
+-- | Obtain the symbol of the given 'Element'.
+symbol :: Element -- ^ The given element for which we want to obtain the symbol.
+    -> String -- ^ The symbol of the given element.
 symbol = show
 
-elementName :: Element -> String
+-- | Obtain the name of the given 'Element'.
+elementName :: Element -- ^ The element for which we want to obtain the name.
+    -> String -- ^ The name of the given element.
 elementName H = "hydrogen"
 elementName He = "helium"
 elementName Li = "lithium"
@@ -321,3 +328,95 @@ elementName Mc = "moscovium"
 elementName Lv = "livermorium"
 elementName Ts = "tennessine"
 elementName Og = "oganesson"
+
+-- | Obtain the atomic weight of the given 'Element' given this is specified.
+atomicWeight :: Element -- ^ The element for which we want to obtain the atomic weight.
+    -> Maybe Scientific  -- ^ In case the atomic weight is known, the atomic weight wrapped in a 'Just' data constructor.
+atomicWeight H = Just 1.00797
+atomicWeight He = Just 4.00260
+atomicWeight Li = Just 6.941
+atomicWeight Be = Just 9.01218
+atomicWeight B = Just 10.81
+atomicWeight C = Just 12.011
+atomicWeight N = Just 14.0067
+atomicWeight O = Just 15.9994
+atomicWeight F = Just 18.998403
+atomicWeight Ne = Just 20.179
+atomicWeight Na = Just 22.98977
+atomicWeight Mg = Just 24.305
+atomicWeight Al = Just 26.98154
+atomicWeight Si = Just 28.0855
+atomicWeight P = Just 30.97376
+atomicWeight S = Just 32.06
+atomicWeight Cl = Just 35.453
+atomicWeight K = Just 39.0983
+atomicWeight Ar = Just 39.948
+atomicWeight Ca = Just 40.08
+atomicWeight Sc = Just 44.9559
+atomicWeight Ti = Just 47.90
+atomicWeight V = Just 50.9415
+atomicWeight Cr = Just 51.996
+atomicWeight Mn = Just 54.9380
+atomicWeight Fe = Just 55.847
+atomicWeight Ni = Just 58.70
+atomicWeight Co = Just 58.9332
+atomicWeight Cu = Just 63.546
+atomicWeight Zn = Just 65.38
+atomicWeight Ga = Just 69.72
+atomicWeight Ge = Just 72.59
+atomicWeight As = Just 74.9216
+atomicWeight Se = Just 78.96
+atomicWeight Br = Just 79.904
+atomicWeight Kr = Just 83.80
+atomicWeight Rb = Just 85.4678
+atomicWeight Sr = Just 87.62
+atomicWeight Y = Just 88.9059
+atomicWeight Zr = Just 91.22
+atomicWeight Nb = Just 92.9064
+atomicWeight Mo = Just 95.94
+atomicWeight Ru = Just 101.07
+atomicWeight Rh = Just 102.9055
+atomicWeight Pd = Just 106.4
+atomicWeight Ag = Just 107.868
+atomicWeight Cd = Just 112.41
+atomicWeight In = Just 114.82
+atomicWeight Sn = Just 118.69
+atomicWeight Sb = Just 121.75
+atomicWeight I = Just 126.9045
+atomicWeight Te = Just 127.60
+atomicWeight Xe = Just 131.30
+atomicWeight Cs = Just 132.9054
+atomicWeight Ba = Just 137.33
+atomicWeight La = Just 138.9055
+atomicWeight Ce = Just 140.12
+atomicWeight Pr = Just 140.9077
+atomicWeight Nd = Just 144.24
+atomicWeight Sm = Just 150.4
+atomicWeight Eu = Just 151.96
+atomicWeight Gd = Just 157.25
+atomicWeight Tb = Just 158.9254
+atomicWeight Dy = Just 162.50
+atomicWeight Ho = Just 164.9304
+atomicWeight Er = Just 167.26
+atomicWeight Tm = Just 168.9342
+atomicWeight Yb = Just 173.04
+atomicWeight Lu = Just 174.967
+atomicWeight Hf = Just 178.49
+atomicWeight Ta = Just 180.9479
+atomicWeight W = Just 183.85
+atomicWeight Re = Just 186.207
+atomicWeight Os = Just 190.2
+atomicWeight Ir = Just 192.22
+atomicWeight Pt = Just 195.09
+atomicWeight Au = Just 196.9665
+atomicWeight Hg = Just 200.59
+atomicWeight Tl = Just 204.37
+atomicWeight Pb = Just 207.2
+atomicWeight Bi = Just 208.9804
+atomicWeight Ra = Just 226.0254
+atomicWeight Ac = Just 227.0278
+atomicWeight Pa = Just 231.0359
+atomicWeight Th = Just 232.0381
+atomicWeight Np = Just 237.0482
+atomicWeight U = Just 238.029
+atomicWeight _ = Nothing
