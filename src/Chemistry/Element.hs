@@ -2,8 +2,13 @@
 
 module Chemistry.Element where
 
+import Data.Hashable(Hashable(hashWithSalt))
+import Data.Ix(Ix(range, index, inRange, rangeSize))
+
 import Numeric.Units.Dimensional(DMass, Quantity, (*~))
 import Numeric.Units.Dimensional.NonSI (dalton)
+
+import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), arbitraryBoundedEnum)
 
 data Element
   = H -- ^ The /hydrogen/ element.
@@ -421,3 +426,16 @@ atomicWeight Th = Just (232.0381 *~ dalton)
 atomicWeight Np = Just (237.0482 *~ dalton)
 atomicWeight U = Just (238.029 *~ dalton)
 atomicWeight _ = Nothing
+
+instance Hashable Element where
+    hashWithSalt = (. fromEnum) . hashWithSalt
+
+instance Ix Element where
+    range (ea, eb) = [ea .. eb]
+    index t@(ea, eb) e | inRange t e = fromEnum e - fromEnum eb
+                       | otherwise = error "Out of bounds."
+    inRange (ea, eb) e = ea <= e && e <= eb
+    rangeSize (ea, eb) = fromEnum eb - fromEnum ea + 1
+
+instance Arbitrary Element where
+    arbitrary = arbitraryBoundedEnum
