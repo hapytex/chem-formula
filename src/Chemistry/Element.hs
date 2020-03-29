@@ -1,6 +1,6 @@
 {-# LANGUAGE PatternSynonyms #-}
 
-module Chemistry.Core where
+module Chemistry.Element where
 
 data Element
   = H -- ^ The /hydrogen/ element.
