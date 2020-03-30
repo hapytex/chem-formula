@@ -2,8 +2,12 @@
 
 module Chemistry.Element where
 
+import Chemistry.Core(FormulaElement(toFormula, weight))
+
 import Data.Hashable(Hashable(hashWithSalt))
 import Data.Ix(Ix(range, index, inRange, rangeSize))
+import Data.String(IsString(fromString))
+import Data.Text(pack)
 
 import Numeric.Units.Dimensional(DMass, Quantity, (*~))
 import Numeric.Units.Dimensional.NonSI (dalton)
@@ -439,3 +443,10 @@ instance Ix Element where
 
 instance Arbitrary Element where
     arbitrary = arbitraryBoundedEnum
+
+instance FormulaElement Element where
+    toFormula = pack . symbol
+    weight = atomicWeight
+
+instance IsString Element where
+    fromString = read

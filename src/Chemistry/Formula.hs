@@ -1,6 +1,7 @@
 module Chemistry.Formula where
 
-import Chemistry.Element
+import Chemistry.Core(FormulaElement(toFormula, weight))
+import Chemistry.Element(Element)
 
 import Control.Applicative(liftA2)
 
@@ -29,8 +30,12 @@ _listElements' :: Formula -> HashMap Element Int
 _listElements' = fromListWith (+) . _listElements
 
 molecularMass :: Floating a => Formula -> Maybe (Quantity DMass a)
-molecularMass = foldr (liftA2 (D.+) . (\(e, n) -> ((fromIntegral n *~ one) D.*) <$> atomicWeight e)) (Just (0 *~ dalton)) . _listElements
+molecularMass = foldr (liftA2 (D.+) . (\(e, n) -> ((fromIntegral n *~ one) D.*) <$> weight e)) (Just (0 *~ dalton)) . _listElements
 
 toMolecular :: Formula -> Formula
 toMolecular = foldr1 (<>) . map (uncurry (Times . Element)) . toList . _listElements'
 -- toEmpirical :: Formula -> Formula
+
+instance FormulaElement Formula where
+    toFormula = undefined
+    weight = molecularMass

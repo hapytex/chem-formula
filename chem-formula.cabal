@@ -16,8 +16,9 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:
-      Chemistry.Element
-      Chemistry.Formula
+      Chemistry.Core
+    , Chemistry.Element
+    , Chemistry.Formula
   build-depends:
       base >= 4.7 && < 5
     , dimensional >=1.3
