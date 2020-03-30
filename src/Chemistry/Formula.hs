@@ -37,13 +37,13 @@ instance IsList Formula where
     fromList [] = error "A formula contains at least one element"
     fromList (x:xs) = go xs x
         where go [] = FormulaPart
-              go (x:xs) = (`Combine` (go xs x))
+              go (x:xs) = (`Combine` go xs x)
     toList (FormulaPart p) = [p]
     toList (Combine p f) = p : toList f
 
 instance Semigroup Formula where
     (<>) (FormulaPart p) = Combine p
-    (<>) (Combine f p) = Combine f . ((<>) p)
+    (<>) (Combine f p) = Combine f . (p <>)
 
 _listElements :: Formula -> [(Element, Int)]
 _listElements = go 1 []
