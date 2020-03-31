@@ -66,7 +66,7 @@ toMolecular = fromList . map (uncurry ((:*) . FormulaPart . Element)) . HM.toLis
 
 instance FormulaElement FormulaPart where
     toFormula (Element e) = toFormula e
-    toFormula ((FormulaPart (Element e)) :* n) = toFormula e <> pack (show n)
+    toFormula (FormulaPart (Element e) :* n) = toFormula e <> pack (show n)
     toFormula (f :* n) = "(" <> toFormula f <> ")" <> pack (show n)
     weight (f :* n) = ((fromIntegral n *~ one) D.*) <$> weight f
     weight (Element e) = weight e
