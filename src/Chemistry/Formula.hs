@@ -11,6 +11,7 @@ import Data.Char.Small(asSub)
 import Data.HashMap.Strict(HashMap, fromListWith)
 import qualified Data.HashMap.Strict as HM
 import Data.List.NonEmpty(NonEmpty((:|)))
+import Data.Text(cons, snoc)
 
 import GHC.Exts(IsList(Item, fromList, toList))
 
@@ -77,7 +78,7 @@ instance FormulaElement FormulaPart where
     toFormula (Element e) = toFormula e
     toFormula (f :* n) = go f <> asSub n
         where go (FormulaPart (Element e)) = toFormula e
-              go fp = "(" <> toFormula fp <> ")"
+              go fp = cons '(' (snoc (toFormula fp) ')')
     weight (f :* n) = ((fromIntegral n *~ one) D.*) <$> weight f
     weight (Element e) = weight e
 
