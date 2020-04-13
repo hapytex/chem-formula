@@ -7,11 +7,10 @@ import Chemistry.Element(Element)
 
 import Control.Applicative(liftA2)
 
-import Data.Char(chr)
+import Data.Char.Small(asSub)
 import Data.HashMap.Strict(HashMap, fromListWith)
 import qualified Data.HashMap.Strict as HM
 import Data.List.NonEmpty(NonEmpty((:|)))
-import Data.Text(Text, cons, pack, singleton)
 
 import GHC.Exts(IsList(Item, fromList, toList))
 
@@ -21,13 +20,6 @@ import Numeric.Units.Dimensional.NonSI(dalton)
 
 import Test.QuickCheck(Gen, oneof)
 import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary))
-
-_toSubScript :: Int -> Text
-_toSubScript n
-    | n <= 9 = singleton (dig n)
-    | otherwise = cons (dig r) (_toSubScript q)
-    where dig = chr . (8320+)
-          (q,r) = quotRem n 10
 
 infix 8 :*
 infixr 7 :-
@@ -52,7 +44,7 @@ formulaToParts (p :- f) = p :| toList f
 instance IsList Formula where
     type Item Formula = FormulaPart
     fromList [] = error "A formula contains at least one element"
-    fromList (x:xs) = go xs x
+    fromList (fp:fps) = go fps fp
         where go [] = FormulaPart
               go (x:xs) = (:- go xs x)
     toList (FormulaPart p) = [p]
@@ -83,8 +75,9 @@ toMolecular = fromList . map (uncurry ((:*) . FormulaPart . Element)) . HM.toLis
 
 instance FormulaElement FormulaPart where
     toFormula (Element e) = toFormula e
-    toFormula (FormulaPart (Element e) :* n) = toFormula e <> _toSubScript n
-    toFormula (f :* n) = "(" <> toFormula f <> ")" <> _toSubScript n
+    toFormula (f :* n) = go f <> asSub n
+        where go (FormulaPart (Element e)) = toFormula e
+              go fp = "(" <> toFormula fp <> ")"
     weight (f :* n) = ((fromIntegral n *~ one) D.*) <$> weight f
     weight (Element e) = weight e
 
