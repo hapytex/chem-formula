@@ -436,8 +436,8 @@ instance Hashable Element where
 
 instance Ix Element where
     range (ea, eb) = [ea .. eb]
-    index t@(ea, eb) e | inRange t e = fromEnum e - fromEnum eb
-                       | otherwise = error "Out of bounds."
+    index t@(ea, _) e | inRange t e = fromEnum e - fromEnum ea
+                      | otherwise = error "Out of bounds."
     inRange (ea, eb) e = ea <= e && e <= eb
     rangeSize (ea, eb) = fromEnum eb - fromEnum ea + 1
 
