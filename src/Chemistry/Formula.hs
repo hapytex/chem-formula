@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, TypeFamilies #-}
+{-# LANGUAGE DeriveFoldable, DeriveFunctor, DeriveTraversable, OverloadedStrings, TypeFamilies #-}
 
 module Chemistry.Formula where
 
@@ -26,14 +26,14 @@ infix 8 :*
 infixr 7 :-
 
 data FormulaPart a
-    = Element a
-    | (Formula a) :* Int
-    deriving (Eq, Ord, Read, Show)
+  = Element a
+  | (Formula a) :* Int
+  deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
 
 data Formula a
-    = FormulaPart (FormulaPart a)
-    | (FormulaPart a) :- (Formula a)
-    deriving (Eq, Ord, Read, Show)
+  = FormulaPart (FormulaPart a)
+  | (FormulaPart a) :- (Formula a)
+  deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
 
 (.*) :: FormulaPart a -> Int -> FormulaPart a
 (.*) = (:*) . FormulaPart
