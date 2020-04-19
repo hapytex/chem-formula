@@ -2,7 +2,7 @@
 
 module Chemistry.Formula where
 
-import Chemistry.Core(FormulaElement(toFormula, weight))
+import Chemistry.Core(FormulaElement(toFormulaPrec, weight), showParen')
 
 import Control.Applicative(liftA2)
 
@@ -11,7 +11,6 @@ import Data.Hashable(Hashable)
 import Data.HashMap.Strict(HashMap, fromListWith)
 import qualified Data.HashMap.Strict as HM
 import Data.List.NonEmpty(NonEmpty((:|)))
-import Data.Text(cons, snoc)
 
 import GHC.Exts(IsList(Item, fromList, toList))
 
@@ -75,16 +74,14 @@ toMolecular = fromList . map (uncurry ((:*) . FormulaPart . Element)) . HM.toLis
 -- toEmpirical :: Formula -> Formula
 
 instance FormulaElement a => FormulaElement (FormulaPart a) where
-    toFormula (Element e) = toFormula e
-    toFormula (f :* n) = go f <> asSub n
-        where go (FormulaPart (Element e)) = toFormula e
-              go fp = cons '(' (snoc (toFormula fp) ')')
+    toFormulaPrec p (Element e) = showParen' (p >= 7) (toFormulaPrec 7 e)
+    toFormulaPrec p (f :* n) = showParen' (p >= 8) (toFormulaPrec 8 f . (asSub n <>))
     weight (f :* n) = ((fromIntegral n *~ one) D.*) <$> weight f
     weight (Element e) = weight e
 
 instance FormulaElement a => FormulaElement (Formula a) where
-    toFormula (FormulaPart p) = toFormula p
-    toFormula (p :- f) = toFormula p <> toFormula f
+    toFormulaPrec p' (FormulaPart p) = toFormulaPrec p' p
+    toFormulaPrec p' (p :- f) = showParen' (p' >= 7) (toFormulaPrec 6 p . toFormulaPrec 6 f)
     weight = molecularMass
 
 _positiveGen :: Gen Int

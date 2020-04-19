@@ -210,7 +210,7 @@ pattern Uuo = Og
 -- | Obtain the atomic number of the given 'Element'.
 atomNumber :: Element -- ^ The element for which we want to calculate the atomic number.
     -> Int -- ^ The atomic number of the given element.
-atomNumber = (1+) . fromEnum
+atomNumber = succ . fromEnum
 
 -- | Obtain the symbol of the given 'Element'.
 symbol :: Element -- ^ The given element for which we want to obtain the symbol.
