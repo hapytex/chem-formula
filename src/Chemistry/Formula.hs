@@ -2,7 +2,7 @@
 
 module Chemistry.Formula where
 
-import Chemistry.Core(FormulaElement(toFormulaPrec, weight), showParen')
+import Chemistry.Core(FormulaElement(toFormulaPrec), Weight(weight), showParen')
 
 import Control.Applicative(liftA2)
 
@@ -66,7 +66,7 @@ _listElements = go 1 []
 _listElements' :: (Eq a, Hashable a) => Formula a -> HashMap a Int
 _listElements' = fromListWith (+) . _listElements
 
-molecularMass :: (Floating a, FormulaElement b) => Formula b -> Maybe (Quantity DMass a)
+molecularMass :: (Floating a, Weight b) => Formula b -> Maybe (Quantity DMass a)
 molecularMass = foldr (liftA2 (D.+) . (\(e, n) -> ((fromIntegral n *~ one) D.*) <$> weight e)) (Just (0 *~ dalton)) . _listElements
 
 toMolecular :: (Eq a, Hashable a) => Formula a -> Formula a
@@ -76,12 +76,16 @@ toMolecular = fromList . map (uncurry ((:*) . FormulaPart . Element)) . HM.toLis
 instance FormulaElement a => FormulaElement (FormulaPart a) where
     toFormulaPrec p (Element e) = toFormulaPrec p e
     toFormulaPrec p (f :* n) = showParen' (p >= 5) (toFormulaPrec 5 f . (asSub n <>))
+
+instance Weight a => Weight (FormulaPart a) where
     weight (f :* n) = ((fromIntegral n *~ one) D.*) <$> weight f
     weight (Element e) = weight e
 
 instance FormulaElement a => FormulaElement (Formula a) where
     toFormulaPrec p' (FormulaPart p) = toFormulaPrec p' p
     toFormulaPrec p' (p :- f) = showParen' (p' >= 4) (toFormulaPrec 3 p . toFormulaPrec 3 f)
+
+instance Weight a => Weight (Formula a) where
     weight = molecularMass
 
 _positiveGen :: Gen Int

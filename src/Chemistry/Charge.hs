@@ -2,7 +2,7 @@
 
 module Chemistry.Charge where
 
-import Chemistry.Core(FormulaElement(toFormulaPrec, weight), showParen')
+import Chemistry.Core(FormulaElement(toFormulaPrec), Weight(weight), showParen')
 
 import Data.Text(Text, cons)
 import Data.Char.Small(asSup)
@@ -24,6 +24,8 @@ _charge n | n < 0 = asSup n
 
 instance FormulaElement a => FormulaElement (Charged a) where
     toFormulaPrec p (Charged x n) = showParen' (p >= 6) (toFormulaPrec 5 x . (_charge n <>))
+
+instance Weight a => Weight (Charged a) where
     weight (Charged a _) = weight a
 
 instance Arbitrary a => Arbitrary (Charged a) where

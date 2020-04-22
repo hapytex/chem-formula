@@ -13,5 +13,9 @@ class FormulaElement a where
     toFormula = flip (toFormulaPrec 0) empty
     toFormulaPrec :: Int -> a -> Text -> Text
     toFormulaPrec _ = (<>) . toFormula
+    {-# MINIMAL toFormulaPrec | toFormula #-}
+
+class Weight a where
     weight :: Floating b => a -> Maybe (Quantity DMass b)
-    {-# MINIMAL (toFormulaPrec | toFormula), weight #-}
+    weight = const Nothing
+    {-# MINIMAL weight #-}

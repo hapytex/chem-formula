@@ -2,7 +2,7 @@
 
 module Chemistry.Element where
 
-import Chemistry.Core(FormulaElement(toFormula, toFormulaPrec, weight))
+import Chemistry.Core(FormulaElement(toFormula, toFormulaPrec), Weight(weight))
 
 import Data.Hashable(Hashable(hashWithSalt))
 import Data.Ix(Ix(range, index, inRange, rangeSize))
@@ -446,7 +446,9 @@ instance Arbitrary Element where
 
 instance FormulaElement Element where
     toFormula = pack . symbol
-    toFormulaPrec p' = (<>) . toFormula
+    toFormulaPrec _ = (<>) . toFormula
+
+instance Weight Element where
     weight = atomicWeight
 
 instance IsString Element where
