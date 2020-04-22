@@ -74,14 +74,14 @@ toMolecular = fromList . map (uncurry ((:*) . FormulaPart . Element)) . HM.toLis
 -- toEmpirical :: Formula -> Formula
 
 instance FormulaElement a => FormulaElement (FormulaPart a) where
-    toFormulaPrec p (Element e) = showParen' (p >= 7) (toFormulaPrec 7 e)
-    toFormulaPrec p (f :* n) = showParen' (p >= 8) (toFormulaPrec 8 f . (asSub n <>))
+    toFormulaPrec p (Element e) = toFormulaPrec p e
+    toFormulaPrec p (f :* n) = showParen' (p >= 5) (toFormulaPrec 5 f . (asSub n <>))
     weight (f :* n) = ((fromIntegral n *~ one) D.*) <$> weight f
     weight (Element e) = weight e
 
 instance FormulaElement a => FormulaElement (Formula a) where
     toFormulaPrec p' (FormulaPart p) = toFormulaPrec p' p
-    toFormulaPrec p' (p :- f) = showParen' (p' >= 7) (toFormulaPrec 6 p . toFormulaPrec 6 f)
+    toFormulaPrec p' (p :- f) = showParen' (p' >= 4) (toFormulaPrec 3 p . toFormulaPrec 3 f)
     weight = molecularMass
 
 _positiveGen :: Gen Int

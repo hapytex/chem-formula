@@ -23,7 +23,7 @@ _charge n | n < 0 = asSup n
           | otherwise = cons '\x207a' (asSup n)
 
 instance FormulaElement a => FormulaElement (Charged a) where
-    toFormulaPrec p (Charged x n) = showParen' (p >= 10) (toFormulaPrec 9 x . (_charge n <>))
+    toFormulaPrec p (Charged x n) = showParen' (p >= 6) (toFormulaPrec 5 x . (_charge n <>))
     weight (Charged a _) = weight a
 
 instance Arbitrary a => Arbitrary (Charged a) where
