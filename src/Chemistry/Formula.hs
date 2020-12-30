@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFoldable, DeriveFunctor, DeriveTraversable, OverloadedStrings, TypeFamilies #-}
+{-# LANGUAGE DeriveTraversable, OverloadedStrings, TypeFamilies #-}
 
 module Chemistry.Formula where
 

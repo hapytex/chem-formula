@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFoldable, DeriveFunctor, DeriveTraversable, FlexibleInstances, OverloadedStrings #-}
+{-# LANGUAGE DeriveTraversable, FlexibleInstances, OverloadedStrings #-}
 
 module Chemistry.Isotope where
 

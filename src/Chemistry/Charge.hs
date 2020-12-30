@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFoldable, DeriveFunctor, DeriveTraversable, OverloadedStrings #-}
+{-# LANGUAGE DeriveTraversable, OverloadedStrings #-}
 
 module Chemistry.Charge where
 
