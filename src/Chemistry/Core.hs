@@ -19,3 +19,7 @@ class Weight a where
     weight :: Floating b => a -> Maybe (Quantity DMass b)
     weight = const Nothing
     {-# MINIMAL weight #-}
+
+class HillCompare a where
+    hillCompare :: a -> a -> Ordering
+    {-# MINIMAL hillCompare #-}

@@ -2,7 +2,7 @@
 
 module Chemistry.Element where
 
-import Chemistry.Core(FormulaElement(toFormula, toFormulaPrec), Weight(weight))
+import Chemistry.Core(FormulaElement(toFormula, toFormulaPrec), HillCompare(hillCompare), Weight(weight))
 
 import Data.Hashable(Hashable(hashWithSalt))
 import Data.Ix(Ix(range, index, inRange, rangeSize))
@@ -211,6 +211,14 @@ pattern Uuo = Og
 atomNumber :: Element -- ^ The element for which we want to calculate the atomic number.
     -> Int -- ^ The atomic number of the given element.
 atomNumber = succ . fromEnum
+
+instance HillCompare Element where
+    hillCompare C C = EQ
+    hillCompare C _ = LT
+    hillCompare H C = GT
+    hillCompare H H = EQ
+    hillCompare H _ = LT
+    hillCompare x y = compare (show x) (show y)
 
 -- | Obtain the symbol of the given 'Element'.
 symbol :: Element -- ^ The given element for which we want to obtain the symbol.

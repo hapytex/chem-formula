@@ -2,11 +2,12 @@
 
 module Chemistry.Isotope where
 
-import Chemistry.Core(FormulaElement(toFormulaPrec), Weight(weight), showParen')
+import Chemistry.Core(FormulaElement(toFormulaPrec), HillCompare(hillCompare), Weight(weight), showParen')
 import Chemistry.Element(Element(..))
 
-import Data.Text(Text, cons)
 import Data.Char.Small(asSup)
+import Data.Function(on)
+import Data.Text(Text, cons)
 
 import Numeric.Units.Dimensional(DMass, Quantity, (*~))
 import Numeric.Units.Dimensional.NonSI (dalton)
@@ -16,6 +17,9 @@ import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), Arbitrary1(liftArbitrary)
 data Isotope a
   = Isotope { isoElement :: a,  massNumber :: Int }
   deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
+
+instance HillCompare a => HillCompare (Isotope a) where
+    hillCompare = hillCompare `on` isoElement
 
 _charge :: Int -> Text
 _charge 0 = ""

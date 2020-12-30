@@ -2,14 +2,16 @@
 
 module Chemistry.Formula where
 
-import Chemistry.Core(FormulaElement(toFormulaPrec), Weight(weight), showParen')
+import Chemistry.Core(FormulaElement(toFormulaPrec), HillCompare(hillCompare), Weight(weight), showParen')
 
 import Control.Applicative(liftA2)
 
 import Data.Char.Small(asSub)
+import Data.Function(on)
 import Data.Hashable(Hashable)
 import Data.HashMap.Strict(HashMap, fromListWith)
 import qualified Data.HashMap.Strict as HM
+import Data.List(sortBy)
 import Data.List.NonEmpty(NonEmpty((:|)))
 
 import GHC.Exts(IsList(Item, fromList, toList))
@@ -69,9 +71,14 @@ _listElements' = fromListWith (+) . _listElements
 molecularMass :: (Floating a, Weight b) => Formula b -> Maybe (Quantity DMass a)
 molecularMass = foldr (liftA2 (D.+) . (\(e, n) -> ((fromIntegral n *~ one) D.*) <$> weight e)) (Just (0 *~ dalton)) . _listElements
 
+_processFormula :: (Eq a, Hashable a) => ([(a, Int)] -> [(a, Int)]) -> Formula a -> Formula a
+_processFormula f = fromList . map (uncurry ((:*) . FormulaPart . Element)) . f . HM.toList . _listElements'
+
 toMolecular :: (Eq a, Hashable a) => Formula a -> Formula a
-toMolecular = fromList . map (uncurry ((:*) . FormulaPart . Element)) . HM.toList . _listElements'
--- toEmpirical :: Formula -> Formula
+toMolecular = _processFormula id
+
+toHillSystem :: (Eq a, Hashable a, HillCompare a) => Formula a -> Formula a
+toHillSystem = _processFormula (sortBy (hillCompare `on` fst))
 
 instance FormulaElement a => FormulaElement (FormulaPart a) where
     toFormulaPrec p (Element e) = toFormulaPrec p e
