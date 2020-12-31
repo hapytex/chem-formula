@@ -3,7 +3,7 @@
 module Chemistry.Parser where
 
 import Chemistry.Element(Element)
-import Chemistry.Formula(Formula, fromElementList)
+import Chemistry.Formula(Formula(FormulaPart, (:-)), FormulaPart(Element, (:*)), fromElementList)
 
 import Control.Applicative((<|>))
 import Control.Arrow(first)
@@ -11,7 +11,7 @@ import Control.Arrow(first)
 import Data.Char(digitToInt)
 import Data.List(foldl', sortOn)
 
-import Text.Parsec(ParsecT, Stream, many1, option, parserReturn, parserZero)
+import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero, try)
 import Text.Parsec.Char(digit, char)
 
 _grouping :: Eq b => (a -> b) -> [a] -> [(b, [a])]
@@ -43,11 +43,22 @@ elementParser :: Stream s m Char => ParsecT s u m Element
 elementParser = parseTrie (map ((,) =<< show) [minBound ..])
 
 quantity :: Stream s m Char => ParsecT s u m Int
-quantity = foldl' ((. digitToInt) . (+) . (10 *)) 0 <$> many1 digit
+quantity = option 1 (foldl' ((. digitToInt) . (+) . (10 *)) 0 <$> many1 digit)
 
 elementQuantityParser :: Stream s m Char => ParsecT s u m (Element, Int)
-elementQuantityParser = (,) <$> elementParser <*> option 1 quantity
+elementQuantityParser = (,) <$> elementParser <*> quantity
 
--- TODO: parsing brackets, etc.
 formulaParser :: Stream s m Char => ParsecT s u m (Formula Element)
-formulaParser = fromElementList <$> many1 elementQuantityParser
+formulaParser = formulaParser' elementParser
+
+quantity' :: Int -> a -> FormulaPart a
+quantity' 1 = Element
+quantity' n = (:* n) . FormulaPart . Element
+
+formulaPartParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (FormulaPart a)
+formulaPartParser' el = (flip quantity') <$> el <*> quantity <|> ((:*) <$> (char '(' *> formulaParser' el <* char ')') <*> quantity)
+
+formulaParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formula a)
+formulaParser' el = go <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
+    where go fp Nothing = FormulaPart fp
+          go fp (Just t) = fp :- t
