@@ -2,8 +2,12 @@
 
 module Chemistry.Element where
 
+import Chemistry.Core(FormulaElement(toFormula, toFormulaPrec), HillCompare(hillCompare), Weight(weight))
+
 import Data.Hashable(Hashable(hashWithSalt))
 import Data.Ix(Ix(range, index, inRange, rangeSize))
+import Data.String(IsString(fromString))
+import Data.Text(pack)
 
 import Numeric.Units.Dimensional(DMass, Quantity, (*~))
 import Numeric.Units.Dimensional.NonSI (dalton)
@@ -206,7 +210,15 @@ pattern Uuo = Og
 -- | Obtain the atomic number of the given 'Element'.
 atomNumber :: Element -- ^ The element for which we want to calculate the atomic number.
     -> Int -- ^ The atomic number of the given element.
-atomNumber = (1+) . fromEnum
+atomNumber = succ . fromEnum
+
+instance HillCompare Element where
+    hillCompare C C = EQ
+    hillCompare C _ = LT
+    hillCompare H C = GT
+    hillCompare H H = EQ
+    hillCompare H _ = LT
+    hillCompare x y = compare (show x) (show y)
 
 -- | Obtain the symbol of the given 'Element'.
 symbol :: Element -- ^ The given element for which we want to obtain the symbol.
@@ -432,10 +444,20 @@ instance Hashable Element where
 
 instance Ix Element where
     range (ea, eb) = [ea .. eb]
-    index t@(ea, eb) e | inRange t e = fromEnum e - fromEnum eb
-                       | otherwise = error "Out of bounds."
+    index t@(ea, _) e | inRange t e = fromEnum e - fromEnum ea
+                      | otherwise = error "Out of bounds."
     inRange (ea, eb) e = ea <= e && e <= eb
     rangeSize (ea, eb) = fromEnum eb - fromEnum ea + 1
 
 instance Arbitrary Element where
     arbitrary = arbitraryBoundedEnum
+
+instance FormulaElement Element where
+    toFormula = pack . symbol
+    toFormulaPrec _ = (<>) . toFormula
+
+instance Weight Element where
+    weight = atomicWeight
+
+instance IsString Element where
+    fromString = read

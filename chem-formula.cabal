@@ -16,14 +16,18 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:
-      Chemistry.Element
-      Chemistry.Formula
+      Chemistry.Charge
+    , Chemistry.Core
+    , Chemistry.Element
+    , Chemistry.Formula
+    , Chemistry.Isotope
   build-depends:
       base >= 4.7 && < 5
     , dimensional >=1.3
     , hashable >=1.2
     , QuickCheck >=2.13 && <2.14
     , text >=1.1 && <1.3
+    , unicode-tricks >=0.6.1.0
     , unordered-containers >=0.2
   default-language:    Haskell2010
 

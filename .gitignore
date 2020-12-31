@@ -1,5 +1,8 @@
 *.lock
 *.tmp
+**.tmp
+*.temp
+**.temp
 *.zip
 dist
 dist-*
@@ -33,3 +36,6 @@ samples
 samples/
 samples/*
 samples/**
+
+*.pdf
+**.pdf
