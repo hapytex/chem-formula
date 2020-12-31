@@ -3,7 +3,7 @@
 module Chemistry.Parser where
 
 import Chemistry.Element(Element)
-import Chemistry.Formula(Formula(FormulaPart, (:-)), FormulaPart(Element, (:*)), fromElementList)
+import Chemistry.Formula(Formula(FormulaPart, (:-)), FormulaPart(Element, (:*)))
 
 import Control.Applicative((<|>))
 import Control.Arrow(first)
@@ -11,7 +11,7 @@ import Control.Arrow(first)
 import Data.Char(digitToInt)
 import Data.List(foldl', sortOn)
 
-import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero, try)
+import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero)
 import Text.Parsec.Char(digit, char)
 
 _grouping :: Eq b => (a -> b) -> [a] -> [(b, [a])]
@@ -37,7 +37,7 @@ _parseTrieLeg :: Stream s m Char => Char -> [(String, a)] -> ParsecT s u m a
 _parseTrieLeg c is = char c *> _parseTrie (map (first _chomp) is)
 
 _parseTrieRem :: Stream s m Char => [(String, a)] -> ParsecT s u m a
-_parseTrieRem = foldr (<|>) parserZero . map (uncurry _parseTrieLeg) . _grouping (head . fst)
+_parseTrieRem = foldr ((<|>) . uncurry _parseTrieLeg) parserZero . _grouping (head . fst)
 
 elementParser :: Stream s m Char => ParsecT s u m Element
 elementParser = parseTrie (map ((,) =<< show) [minBound ..])
@@ -56,7 +56,7 @@ quantity' 1 = Element
 quantity' n = (:* n) . FormulaPart . Element
 
 formulaPartParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (FormulaPart a)
-formulaPartParser' el = (flip quantity') <$> el <*> quantity <|> ((:*) <$> (char '(' *> formulaParser' el <* char ')') <*> quantity)
+formulaPartParser' el = flip quantity' <$> el <*> quantity <|> ((:*) <$> (char '(' *> formulaParser' el <* char ')') <*> quantity)
 
 formulaParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formula a)
 formulaParser' el = go <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
