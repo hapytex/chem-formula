@@ -68,20 +68,24 @@ _listElements = go 1 []
 _listElements' :: (Eq a, Hashable a) => Formula a -> HashMap a Int
 _listElements' = fromListWith (+) . _listElements
 
+fromElementList :: [(a, Int)] -> Formula a
+fromElementList = fromList . map (uncurry ((:*) . FormulaPart . Element))
+
 molecularMass :: (Floating a, Weight b) => Formula b -> Maybe (Quantity DMass a)
 molecularMass = foldr (liftA2 (D.+) . (\(e, n) -> ((fromIntegral n *~ one) D.*) <$> weight e)) (Just (0 *~ dalton)) . _listElements
 
 _processFormula :: (Eq a, Hashable a) => ([(a, Int)] -> [(a, Int)]) -> Formula a -> Formula a
-_processFormula f = fromList . map (uncurry ((:*) . FormulaPart . Element)) . f . HM.toList . _listElements'
+_processFormula f = fromElementList . f . HM.toList . _listElements'
 
 toMolecular :: (Eq a, Hashable a) => Formula a -> Formula a
 toMolecular = _processFormula id
 
-toHillSystem :: (Eq a, Hashable a, HillCompare a) => Formula a -> Formula a
-toHillSystem = _processFormula (sortBy (hillCompare `on` fst))
+toHillFormula :: (Eq a, Hashable a, HillCompare a) => Formula a -> Formula a
+toHillFormula = _processFormula (sortBy (hillCompare `on` fst))
 
 instance FormulaElement a => FormulaElement (FormulaPart a) where
     toFormulaPrec p (Element e) = toFormulaPrec p e
+    toFormulaPrec p (f :* 1) = showParen' (p >= 5) (toFormulaPrec 5 f)
     toFormulaPrec p (f :* n) = showParen' (p >= 5) (toFormulaPrec 5 f . (asSub n <>))
 
 instance Weight a => Weight (FormulaPart a) where
