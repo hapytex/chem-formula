@@ -1,12 +1,16 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module Chemistry.Parser where
+module Chemistry.Parser (
+    elementParser, elementQuantityParser
+  , chargedParser, chargedParser'
+  , formulaParser, chargedFormulaParser, formulaParser'
+  ) where
 
 import Chemistry.Charge(Charged(Charged))
 import Chemistry.Element(Element)
 import Chemistry.Formula(Formula(FormulaPart, (:-)), FormulaPart(Element, (:*)))
 
-import Control.Applicative((<|>))
+import Control.Applicative((<|>), liftA2)
 import Control.Arrow(first)
 
 import Data.Char(digitToInt)
@@ -76,6 +80,4 @@ formulaPartParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formu
 formulaPartParser' el = flip quantity' <$> el <*> quantity <|> ((:*) <$> (char '(' *> formulaParser' el <* char ')') <*> quantity)
 
 formulaParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formula a)
-formulaParser' el = go <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
-    where go fp Nothing = FormulaPart fp
-          go fp (Just t) = fp :- t
+formulaParser' el = liftA2 maybe FormulaPart (:-) <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
