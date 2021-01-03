@@ -2,6 +2,7 @@
 
 module Chemistry.Parser where
 
+import Chemistry.Charge(Charged(Charged))
 import Chemistry.Element(Element)
 import Chemistry.Formula(Formula(FormulaPart, (:-)), FormulaPart(Element, (:*)))
 
@@ -9,6 +10,7 @@ import Control.Applicative((<|>))
 import Control.Arrow(first)
 
 import Data.Char(digitToInt)
+import Data.Function((&))
 import Data.List(foldl', sortOn)
 
 import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero)
@@ -41,6 +43,15 @@ _parseTrieRem = foldr ((<|>) . uncurry _parseTrieLeg) parserZero . _grouping (he
 
 elementParser :: Stream s m Char => ParsecT s u m Element
 elementParser = parseTrie (map ((,) =<< show) [minBound ..])
+
+chargedParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Charged a)
+chargedParser' el = Charged <$> el <*> charge
+
+sign :: (Num a, Stream s m Char) => ParsecT s u m (a -> a)
+sign = (id <$ char '+') <|> (negate <$ char '-')
+
+charge :: Stream s m Char => ParsecT s u m Int
+charge = option 0 ((&) <$> quantity <*> sign)
 
 quantity :: Stream s m Char => ParsecT s u m Int
 quantity = option 1 (foldl' ((. digitToInt) . (+) . (10 *)) 0 <$> many1 digit)
