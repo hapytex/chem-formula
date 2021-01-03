@@ -4,6 +4,7 @@ module Chemistry.Parser (
     elementParser, elementQuantityParser
   , chargedParser, chargedParser'
   , formulaParser, chargedFormulaParser, formulaParser'
+  , form, chform
   ) where
 
 import Chemistry.Charge(Charged(Charged))
@@ -16,6 +17,8 @@ import Control.Arrow(first)
 import Data.Char(digitToInt)
 import Data.Function((&))
 import Data.List(foldl', sortOn)
+
+import Language.Haskell.TH.Quote(QuasiQuoter(QuasiQuoter, quoteExp, quotePat, quoteType, quoteDec))
 
 import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero)
 import Text.Parsec.Char(digit, char)
@@ -81,3 +84,19 @@ formulaPartParser' el = flip quantity' <$> el <*> quantity <|> ((:*) <$> (char '
 
 formulaParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formula a)
 formulaParser' el = liftA2 maybe FormulaPart (:-) <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
+
+form :: QuasiQuoter
+form = QuasiQuoter {
+    quoteExp = undefined
+  , quotePat = undefined
+  , quoteType = undefined
+  , quoteDec = undefined
+  }
+
+chform :: QuasiQuoter
+chform = QuasiQuoter {
+    quoteExp = undefined
+  , quotePat = undefined
+  , quoteType = undefined
+  , quoteDec = undefined
+  }
