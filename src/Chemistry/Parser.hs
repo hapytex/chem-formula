@@ -47,6 +47,9 @@ elementParser = parseTrie (map ((,) =<< show) [minBound ..])
 chargedParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Charged a)
 chargedParser' el = Charged <$> el <*> charge
 
+chargedParser :: Stream s m Char => ParsecT s u m (Charged Element)
+chargedParser = chargedParser' elementParser
+
 sign :: (Num a, Stream s m Char) => ParsecT s u m (a -> a)
 sign = (id <$ char '+') <|> (negate <$ char '-')
 
@@ -61,6 +64,9 @@ elementQuantityParser = (,) <$> elementParser <*> quantity
 
 formulaParser :: Stream s m Char => ParsecT s u m (Formula Element)
 formulaParser = formulaParser' elementParser
+
+chargedFormulaParser :: Stream s m Char => ParsecT s u m (Formula (Charged Element))
+chargedFormulaParser = formulaParser' chargedParser
 
 quantity' :: Int -> a -> FormulaPart a
 quantity' 1 = Element
