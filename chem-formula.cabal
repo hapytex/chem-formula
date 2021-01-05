@@ -16,7 +16,8 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:
-      Chemistry.Charge
+      Chemistry.Bond
+    , Chemistry.Charge
     , Chemistry.Core
     , Chemistry.Element
     , Chemistry.Formula
