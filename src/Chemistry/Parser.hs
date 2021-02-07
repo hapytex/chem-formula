@@ -74,7 +74,7 @@ linearChainParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Linea
 linearChainParser' = linearChainParser'' bondParser
 
 bondParser :: Stream s m Char => ParsecT s u m Bond
-bondParser = foldr (<|>) parserZero (map (uncurry (($>) . char)) bondChars)
+bondParser = foldr ((<|>) . uncurry (($>) . char)) parserZero bondChars
 
 chargedFormulaParser :: Stream s m Char => ParsecT s u m (Formula (Charged Element))
 chargedFormulaParser = formulaParser' chargedParser
