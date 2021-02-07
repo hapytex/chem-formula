@@ -1,7 +1,8 @@
-{-# LANGUAGE DeriveTraversable, OverloadedStrings, TypeFamilies #-}
+{-# LANGUAGE DeriveTraversable, FlexibleInstances, OverloadedStrings, TypeFamilies #-}
 
 module Chemistry.Formula where
 
+import Chemistry.Bond(Bond, bondToUnicode)
 import Chemistry.Core(FormulaElement(toFormulaPrec), HillCompare(hillCompare), Weight(weight), showParen')
 
 import Control.Applicative(liftA2)
@@ -13,6 +14,7 @@ import Data.HashMap.Strict(HashMap, fromListWith)
 import qualified Data.HashMap.Strict as HM
 import Data.List(sortBy)
 import Data.List.NonEmpty(NonEmpty((:|)))
+import Data.Text(cons)
 
 import GHC.Exts(IsList(Item, fromList, toList))
 
@@ -21,7 +23,7 @@ import qualified Numeric.Units.Dimensional as D
 import Numeric.Units.Dimensional.NonSI(dalton)
 
 import Test.QuickCheck(Gen, oneof)
-import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), Arbitrary1(liftArbitrary), arbitrary1)
+import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), Arbitrary1(liftArbitrary), Arbitrary2(liftArbitrary2), arbitrary1, arbitrary2)
 
 infix 8 :*
 infixr 7 :-
@@ -35,6 +37,11 @@ data Formula a
   = FormulaPart (FormulaPart a)
   | (FormulaPart a) :- (Formula a)
   deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
+
+data LinearChain bond element
+  = ChainItem element
+  | Chain element bond (LinearChain bond element)
+  deriving (Eq, Foldable, Functor, Ord, Read, Show)
 
 (.*) :: FormulaPart a -> Int -> FormulaPart a
 (.*) = (:*) . FormulaPart
@@ -52,6 +59,16 @@ instance IsList (Formula a) where
     toList (FormulaPart p) = [p]
     toList (p :- f) = p : toList f
 
+instance Monoid bond => IsList (LinearChain bond element) where
+    type Item (LinearChain bond element) = element
+    fromList [] = error "A linear chain contains at least one element"
+    fromList (e:es) = go es e
+        where go [] = ChainItem
+              go (c:cs) = (`h` (go cs c))
+              h = (`Chain` mempty)
+    toList (ChainItem e) = [e]
+    toList (Chain e _ es) = e : toList es
+
 instance Semigroup (Formula a) where
     (<>) (FormulaPart p) = (p :-)
     (<>) (f :- p) = (f :-) . (p <>)
@@ -63,7 +80,7 @@ _listElements = go 1 []
                     go' tl (FormulaPart p) = go'' tl p
                     go'' tl (Element e) = (e, n) : tl
                     go'' tl (f :* n') = go (n*n') tl f
-                    
+
 
 _listElements' :: (Eq a, Hashable a) => Formula a -> HashMap a Int
 _listElements' = fromListWith (+) . _listElements
@@ -96,6 +113,10 @@ instance FormulaElement a => FormulaElement (Formula a) where
     toFormulaPrec p' (FormulaPart p) = toFormulaPrec p' p
     toFormulaPrec p' (p :- f) = showParen' (p' >= 4) (toFormulaPrec 3 p . toFormulaPrec 3 f)
 
+instance FormulaElement a => FormulaElement (LinearChain Bond a) where
+  toFormulaPrec p' (ChainItem i) = toFormulaPrec p' i
+  toFormulaPrec p' (Chain i b is) = toFormulaPrec p' i . cons (bondToUnicode b) . toFormulaPrec p' is
+
 instance Weight a => Weight (Formula a) where
     weight = molecularMass
 
@@ -103,10 +124,10 @@ _positiveGen :: Gen Int
 _positiveGen = (1+) . abs <$> arbitrary
 
 instance Arbitrary a => Arbitrary (FormulaPart a) where
-    arbitrary = arbitrary1 -- oneof [ Element <$> arbitrary, (:*) <$> arbitrary <*> _positiveGen ]
+    arbitrary = arbitrary1
 
 instance Arbitrary a => Arbitrary (Formula a) where
-    arbitrary = arbitrary1 -- oneof [ (:-) <$> arbitrary <*> arbitrary, FormulaPart <$> arbitrary ]
+    arbitrary = arbitrary1
 
 instance Arbitrary1 FormulaPart where
     liftArbitrary arb = oneof [Element <$> arb, (:*) <$> liftArbitrary arb <*> _positiveGen]
@@ -115,3 +136,13 @@ instance Arbitrary1 Formula where
     liftArbitrary arb = go
         where go = oneof [(:-) <$> arb' <*> go, FormulaPart <$> arb']
               arb' = liftArbitrary arb
+
+instance Arbitrary2 LinearChain where
+  liftArbitrary2 gb ga = go
+      where go = oneof [ChainItem <$> ga, Chain <$> ga <*> gb <*> go]
+
+instance Arbitrary bond => Arbitrary1 (LinearChain bond) where
+  liftArbitrary = liftArbitrary2 arbitrary
+
+instance (Arbitrary element, Arbitrary bond) => Arbitrary (LinearChain bond element) where
+  arbitrary = arbitrary2

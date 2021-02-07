@@ -4,13 +4,15 @@ module Chemistry.Parser where
 
 import Chemistry.Charge(Charged(Charged))
 import Chemistry.Element(Element)
-import Chemistry.Formula(Formula(FormulaPart, (:-)), FormulaPart(Element, (:*)))
+import Chemistry.Formula(Formula(FormulaPart, (:-)), FormulaPart(Element, (:*)), LinearChain(ChainItem, Chain))
+import Chemistry.Bond(Bond, bondChars)
 
 import Control.Applicative((<|>))
 import Control.Arrow(first)
 
 import Data.Char(digitToInt)
 import Data.Function((&))
+import Data.Functor(($>))
 import Data.List(foldl', sortOn)
 
 import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero)
@@ -65,6 +67,15 @@ elementQuantityParser = (,) <$> elementParser <*> quantity
 formulaParser :: Stream s m Char => ParsecT s u m (Formula Element)
 formulaParser = formulaParser' elementParser
 
+linearChainParser :: Stream s m Char => ParsecT s u m (LinearChain Bond (Formula Element))
+linearChainParser = linearChainParser' formulaParser
+
+linearChainParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (LinearChain Bond a)
+linearChainParser' = linearChainParser'' bondParser
+
+bondParser :: Stream s m Char => ParsecT s u m Bond
+bondParser = foldr (<|>) parserZero (map (uncurry (($>) . char)) bondChars)
+
 chargedFormulaParser :: Stream s m Char => ParsecT s u m (Formula (Charged Element))
 chargedFormulaParser = formulaParser' chargedParser
 
@@ -76,6 +87,15 @@ formulaPartParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formu
 formulaPartParser' el = flip quantity' <$> el <*> quantity <|> ((:*) <$> (char '(' *> formulaParser' el <* char ')') <*> quantity)
 
 formulaParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formula a)
-formulaParser' el = go <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
-    where go fp Nothing = FormulaPart fp
-          go fp (Just t) = fp :- t
+formulaParser' el = go'
+    where go' = go <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
+          go fp Nothing = FormulaPart fp
+          go fp ~(Just t) = fp :- t
+
+linearChainParser'' :: Stream s m t => ParsecT s u m bond -> ParsecT s u m element -> ParsecT s u m (LinearChain bond element)
+linearChainParser'' bo el = go'
+    where go' = go <$> el <*> optionMaybe ((,) <$> bo <*> go')
+          go fp Nothing = ChainItem fp
+          go fp ~(Just be) = uncurry (Chain fp) be
+
+
