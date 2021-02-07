@@ -2,7 +2,7 @@
 
 module Chemistry.Formula where
 
-import Chemistry.Bond(Bond, bondToUnicode)
+import Chemistry.Bond(Bond(BSingle, BDouble, BTriple, BQuadruple), bondToUnicode)
 import Chemistry.Core(FormulaElement(toFormulaPrec), HillCompare(hillCompare), Weight(weight), showParen')
 
 import Control.Applicative(liftA2)
@@ -26,7 +26,12 @@ import Test.QuickCheck(Gen, oneof)
 import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), Arbitrary1(liftArbitrary), Arbitrary2(liftArbitrary2), arbitrary1, arbitrary2)
 
 infix 8 :*
+infixr 8 .*
 infixr 7 :-
+infixr 6 .-
+infixr 6 .=
+infixr 6 .#
+infixr 6 .$
 
 data FormulaPart a
   = Element a
@@ -41,10 +46,22 @@ data Formula a
 data LinearChain bond element
   = ChainItem element
   | Chain element bond (LinearChain bond element)
-  deriving (Eq, Foldable, Functor, Ord, Read, Show)
+  deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
 
 (.*) :: FormulaPart a -> Int -> FormulaPart a
 (.*) = (:*) . FormulaPart
+
+(.-) :: element -> LinearChain Bond element -> LinearChain Bond element
+(.-) = (`Chain` BSingle)
+
+(.=) :: element -> LinearChain Bond element -> LinearChain Bond element
+(.=) = (`Chain` BDouble)
+
+(.#) :: element -> LinearChain Bond element -> LinearChain Bond element
+(.#) = (`Chain` BTriple)
+
+(.$) :: element -> LinearChain Bond element -> LinearChain Bond element
+(.$) = (`Chain` BQuadruple)
 
 formulaToParts :: Formula a -> NonEmpty (FormulaPart a)
 formulaToParts (FormulaPart p) = p :| []
