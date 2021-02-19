@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, TemplateHaskellQuotes #-}
 
 module Chemistry.Parser where
 
@@ -10,10 +10,15 @@ import Control.Applicative((<|>))
 import Control.Arrow(first)
 
 import Data.Char(digitToInt)
+import Data.Data(Data)
 import Data.Function((&))
+import Data.Functor.Identity(Identity)
 import Data.List(foldl', sortOn)
 
-import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero)
+import Language.Haskell.TH.Quote(QuasiQuoter(QuasiQuoter, quoteExp, quotePat, quoteType, quoteDec))
+import Language.Haskell.TH.Syntax(Exp, Lift, Pat, Type(ConT), Q, dataToPatQ, lift, reportError, reportWarning)
+
+import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero, runP)
 import Text.Parsec.Char(digit, char)
 
 _grouping :: Eq b => (a -> b) -> [a] -> [(b, [a])]
@@ -79,3 +84,20 @@ formulaParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formula a
 formulaParser' el = go <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
     where go fp Nothing = FormulaPart fp
           go fp (Just t) = fp :- t
+
+_parsing :: Stream String Identity t => (a -> Q b) -> ParsecT String () Identity a -> String -> Q b
+_parsing f p s = either (fail . show) f (runP p () s s)
+
+_baseQQ :: (Data a, Lift a) => ParsecT String () Identity a -> Type -> QuasiQuoter
+_baseQQ f typ = QuasiQuoter {
+    quoteExp=_parsing lift f
+  , quotePat=_parsing (dataToPatQ (const Nothing)) f
+  , quoteType=const (reportWarning ("The type of the quasiquoter will always use the " <> show typ <> " type.") >> pure typ)
+  , quoteDec=const (reportWarning "The use of this quasiquoter will not make any declarations." >> pure [])
+  }
+
+elqq :: QuasiQuoter
+elqq = _baseQQ elementParser (ConT ''Element)
+
+chelqq :: QuasiQuoter
+chelqq = _baseQQ chargedParser (ConT ''Element)
