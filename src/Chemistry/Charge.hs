@@ -1,17 +1,20 @@
-{-# LANGUAGE DeriveTraversable, OverloadedStrings #-}
+{-# LANGUAGE DeriveDataTypeable, DeriveLift, DeriveTraversable, OverloadedStrings #-}
 
 module Chemistry.Charge where
 
 import Chemistry.Core(FormulaElement(toFormulaPrec), Weight(weight), showParen')
 
+import Data.Data(Data)
 import Data.Text(Text, cons)
 import Data.Char.Small(asSup)
+
+import Language.Haskell.TH.Syntax(Lift)
 
 import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), Arbitrary1(liftArbitrary), arbitrary1)
 
 data Charged a
   = Charged a Int
-  deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
+  deriving (Data, Eq, Foldable, Functor, Lift, Ord, Read, Show, Traversable)
 
 charged' :: a -> Charged a
 charged' = (`Charged` 0)

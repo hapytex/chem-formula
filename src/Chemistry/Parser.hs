@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, TemplateHaskellQuotes #-}
 
 module Chemistry.Parser where
 
@@ -11,11 +11,17 @@ import Control.Applicative((<|>))
 import Control.Arrow(first)
 
 import Data.Char(digitToInt)
+import Data.Data(Data)
 import Data.Function((&))
 import Data.Functor(($>))
+import Data.Functor.Identity(Identity)
 import Data.List(foldl', sortOn)
 
-import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero)
+import Language.Haskell.TH(pprint)
+import Language.Haskell.TH.Quote(QuasiQuoter(QuasiQuoter, quoteExp, quotePat, quoteType, quoteDec))
+import Language.Haskell.TH.Syntax(Lift, Type(AppT, ConT), Q, dataToPatQ, lift, reportWarning)
+
+import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero, runP)
 import Text.Parsec.Char(digit, char)
 
 _grouping :: Eq b => (a -> b) -> [a] -> [(b, [a])]
@@ -87,6 +93,7 @@ formulaPartParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formu
 formulaPartParser' el = flip quantity' <$> el <*> quantity <|> ((:*) <$> (char '(' *> formulaParser' el <* char ')') <*> quantity)
 
 formulaParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formula a)
+
 formulaParser' el = go'
     where go' = go <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
           go fp Nothing = FormulaPart fp
@@ -98,4 +105,19 @@ linearChainParser'' bo el = go'
           go fp Nothing = ChainItem fp
           go fp ~(Just be) = uncurry (Chain fp) be
 
+_parsing :: Stream String Identity t => (a -> Q b) -> ParsecT String () Identity a -> String -> Q b
+_parsing f p s = either (fail . show) f (runP p () s s)
 
+_baseQQ :: (Data a, Lift a) => ParsecT String () Identity a -> Type -> QuasiQuoter
+_baseQQ f typ = QuasiQuoter {
+    quoteExp=_parsing lift f
+  , quotePat=_parsing (dataToPatQ (const Nothing)) f
+  , quoteType=const (reportWarning ("The type of the quasiquoter will always use the " <> pprint typ <> " type.") >> pure typ)
+  , quoteDec=const (reportWarning "The use of this quasiquoter will not make any declarations." >> pure [])
+  }
+
+elqq :: QuasiQuoter
+elqq = _baseQQ elementParser (ConT ''Element)
+
+chelqq :: QuasiQuoter
+chelqq = _baseQQ chargedParser (AppT (ConT ''Charged) (ConT ''Element))

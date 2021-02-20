@@ -1,13 +1,16 @@
-{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE DeriveDataTypeable, DeriveLift, PatternSynonyms #-}
 
 module Chemistry.Element where
 
 import Chemistry.Core(FormulaElement(toFormula, toFormulaPrec), HillCompare(hillCompare), Weight(weight))
 
+import Data.Data(Data)
 import Data.Hashable(Hashable(hashWithSalt))
 import Data.Ix(Ix(range, index, inRange, rangeSize))
 import Data.String(IsString(fromString))
 import Data.Text(pack)
+
+import Language.Haskell.TH.Syntax(Lift)
 
 import Numeric.Units.Dimensional(DMass, Quantity, (*~))
 import Numeric.Units.Dimensional.NonSI (dalton)
@@ -133,7 +136,7 @@ data Element
   | Lv -- ^ The /livermorium/ element.
   | Ts -- ^ The /tennessine/ element.
   | Og -- ^ The /oganesson/ element.
-  deriving (Bounded, Enum, Eq, Ord, Read, Show)
+  deriving (Bounded, Data, Enum, Eq, Lift, Ord, Read, Show)
 
 -- | A pattern synonym for /unnilunium/, which is the systematic element name of /mendelevium/.
 pattern Unu :: Element
