@@ -1,12 +1,12 @@
 module Chemistry.Core where
 
+import Data.Bool(bool)
 import Data.Text(Text, cons, empty)
 
 import Numeric.Units.Dimensional(DMass, Quantity)
 
 showParen' :: Bool -> (Text -> Text) -> Text -> Text
-showParen' True f  = cons '(' . f . cons ')'
-showParen' False f = f
+showParen' = bool id ((cons '(' .) . (. cons ')'))
 
 class FormulaElement a where
     toFormula :: a -> Text
