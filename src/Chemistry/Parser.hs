@@ -15,8 +15,9 @@ import Data.Function((&))
 import Data.Functor.Identity(Identity)
 import Data.List(foldl', sortOn)
 
+import Language.Haskell.TH(pprint)
 import Language.Haskell.TH.Quote(QuasiQuoter(QuasiQuoter, quoteExp, quotePat, quoteType, quoteDec))
-import Language.Haskell.TH.Syntax(Exp, Lift, Pat, Type(ConT), Q, dataToPatQ, lift, reportError, reportWarning)
+import Language.Haskell.TH.Syntax(Exp, Lift, Pat, Type(AppT, ConT), Q, dataToPatQ, lift, reportError, reportWarning)
 
 import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero, runP)
 import Text.Parsec.Char(digit, char)
@@ -92,7 +93,7 @@ _baseQQ :: (Data a, Lift a) => ParsecT String () Identity a -> Type -> QuasiQuot
 _baseQQ f typ = QuasiQuoter {
     quoteExp=_parsing lift f
   , quotePat=_parsing (dataToPatQ (const Nothing)) f
-  , quoteType=const (reportWarning ("The type of the quasiquoter will always use the " <> show typ <> " type.") >> pure typ)
+  , quoteType=const (reportWarning ("The type of the quasiquoter will always use the " <> pprint typ <> " type.") >> pure typ)
   , quoteDec=const (reportWarning "The use of this quasiquoter will not make any declarations." >> pure [])
   }
 
@@ -100,4 +101,4 @@ elqq :: QuasiQuoter
 elqq = _baseQQ elementParser (ConT ''Element)
 
 chelqq :: QuasiQuoter
-chelqq = _baseQQ chargedParser (ConT ''Element)
+chelqq = _baseQQ chargedParser (AppT (ConT ''Charged) (ConT ''Element))
