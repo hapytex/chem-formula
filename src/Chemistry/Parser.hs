@@ -17,7 +17,7 @@ import Data.List(foldl', sortOn)
 
 import Language.Haskell.TH(pprint)
 import Language.Haskell.TH.Quote(QuasiQuoter(QuasiQuoter, quoteExp, quotePat, quoteType, quoteDec))
-import Language.Haskell.TH.Syntax(Exp, Lift, Pat, Type(AppT, ConT), Q, dataToPatQ, lift, reportError, reportWarning)
+import Language.Haskell.TH.Syntax(Lift, Type(AppT, ConT), Q, dataToPatQ, lift, reportWarning)
 
 import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero, runP)
 import Text.Parsec.Char(digit, char)
