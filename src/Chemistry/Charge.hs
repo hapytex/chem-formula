@@ -19,6 +19,9 @@ data Charged a
 charged' :: a -> Charged a
 charged' = (`Charged` 0)
 
+neutral :: a -> Charged a
+neutral = (`Charged` 0)
+
 _charge :: Int -> Text
 _charge 0 = ""
 _charge (-1) = "\x207a"
