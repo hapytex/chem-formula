@@ -39,7 +39,7 @@ class QuantifiedElements f where
     listElements = foldQuantified (pure . (,1)) (<>) (map . second . (*))
     listElementsCounter :: (Eq a, Hashable a) => f a -> HashMap a Int
     listElementsCounter = fromListWith (+) . listElements
-    {- # MINIMAL foldQuantified #-}
+    {-# MINIMAL foldQuantified #-}
 
 class HillCompare a where
     hillCompare :: a -> a -> Ordering

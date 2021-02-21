@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable, DeriveLift, PatternSynonyms, TupleSections #-}
+{-# LANGUAGE DeriveDataTypeable, DeriveLift, PatternSynonyms #-}
 
 module Chemistry.Element where
 
