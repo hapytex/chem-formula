@@ -13,6 +13,8 @@ import Data.Text(Text, cons, empty)
 import Numeric.Units.Dimensional(DMass, Quantity, (*~), one)
 import qualified Numeric.Units.Dimensional as D
 
+import Text.Blaze(Markup, text)
+
 showParen' :: Bool -> (Text -> Text) -> Text -> Text
 showParen' = bool id ((cons '(' .) . (. cons ')'))
 
@@ -21,6 +23,10 @@ class FormulaElement a where
     toFormula = flip (toFormulaPrec 0) empty
     toFormulaPrec :: Int -> a -> Text -> Text
     toFormulaPrec _ = (<>) . toFormula
+    toFormulaMarkup :: a -> Markup
+    toFormulaMarkup = text . toFormula
+    toFormulaMarkupPrec :: Int -> a -> Markup -> Markup
+    toFormulaMarkupPrec _ = (<>) . toFormulaMarkup
     {-# MINIMAL toFormulaPrec | toFormula #-}
 
 class Weight a where
