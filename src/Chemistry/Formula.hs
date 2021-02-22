@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveTraversable, FlexibleInstances, OverloadedStrings, TypeFamilies #-}
+{-# LANGUAGE DeriveDataTypeable, DeriveLift, DeriveTraversable, FlexibleInstances, OverloadedStrings, TypeFamilies #-}
 
 module Chemistry.Formula where
 
@@ -6,6 +6,7 @@ import Chemistry.Bond(Bond(BSingle, BDouble, BTriple, BQuadruple), bondToUnicode
 import Chemistry.Core(FormulaElement(toFormulaPrec), HillCompare(hillCompare), QuantifiedElements(listElementsCounter, foldQuantified), showParen')
 
 import Data.Char.Small(asSub)
+import Data.Data(Data)
 import Data.Default(Default(def))
 import Data.Hashable(Hashable)
 import qualified Data.HashMap.Strict as HM
@@ -15,6 +16,8 @@ import Data.List.NonEmpty(NonEmpty((:|)))
 import Data.Text(cons)
 
 import GHC.Exts(IsList(Item, fromList, toList))
+
+import Language.Haskell.TH.Syntax(Lift)
 
 import Test.QuickCheck(Gen, oneof)
 import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), Arbitrary1(liftArbitrary), Arbitrary2(liftArbitrary2), arbitrary1, arbitrary2)
@@ -30,17 +33,17 @@ infixr 6 .$
 data FormulaPart a
   = Element a
   | (Formula a) :* Int
-  deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
+  deriving (Data, Eq, Foldable, Functor, Lift, Ord, Read, Show, Traversable)
 
 data Formula a
   = FormulaPart (FormulaPart a)
   | (FormulaPart a) :- (Formula a)
-  deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
+  deriving (Data, Eq, Foldable, Functor, Lift, Ord, Read, Show, Traversable)
 
 data LinearChain bond element
   = ChainItem element
   | Chain element bond (LinearChain bond element)
-  deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
+  deriving (Data, Eq, Foldable, Functor, Lift, Ord, Read, Show, Traversable)
 
 (.*) :: FormulaPart a -> Int -> FormulaPart a
 (.*) = (:*) . FormulaPart

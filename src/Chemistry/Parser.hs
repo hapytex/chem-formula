@@ -19,7 +19,7 @@ import Data.List(foldl', sortOn)
 
 import Language.Haskell.TH(pprint)
 import Language.Haskell.TH.Quote(QuasiQuoter(QuasiQuoter, quoteExp, quotePat, quoteType, quoteDec))
-import Language.Haskell.TH.Syntax(Lift, Type(AppT, ConT), Q, dataToPatQ, lift, reportWarning)
+import Language.Haskell.TH.Syntax(Lift, Type(AppT, ConT, TupleT), Q, dataToPatQ, lift, reportWarning)
 
 import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero, runP)
 import Text.Parsec.Char(digit, char)
@@ -61,6 +61,9 @@ chargedParser = chargedParser' elementParser
 sign :: (Num a, Stream s m Char) => ParsecT s u m (a -> a)
 sign = (id <$ char '+') <|> (negate <$ char '-')
 
+-- chargeSeq :: Stream s m Char => ParsecT s u m Int
+-- chargeSeq = sdfsadf
+
 charge :: Stream s m Char => ParsecT s u m Int
 charge = option 0 ((&) <$> quantity <*> sign)
 
@@ -84,6 +87,10 @@ bondParser = foldr ((<|>) . uncurry (($>) . char)) parserZero bondChars
 
 chargedFormulaParser :: Stream s m Char => ParsecT s u m (Formula (Charged Element))
 chargedFormulaParser = formulaParser' chargedParser
+
+chargedLinearChainParser :: Stream s m Char => ParsecT s u m (LinearChain Bond (Formula (Charged Element)))
+chargedLinearChainParser = linearChainParser' chargedFormulaParser
+
 
 quantity' :: Int -> a -> FormulaPart a
 quantity' 1 = Element
@@ -119,5 +126,14 @@ _baseQQ f typ = QuasiQuoter {
 elqq :: QuasiQuoter
 elqq = _baseQQ elementParser (ConT ''Element)
 
+elqqq :: QuasiQuoter
+elqqq = _baseQQ elementQuantityParser (AppT (AppT (TupleT 2) (ConT ''Element)) (ConT ''Int))
+
 chelqq :: QuasiQuoter
 chelqq = _baseQQ chargedParser (AppT (ConT ''Charged) (ConT ''Element))
+
+formulaqq :: QuasiQuoter
+formulaqq = _baseQQ formulaParser (AppT (ConT ''Formula) (ConT ''Element))
+
+chainqq :: QuasiQuoter
+chainqq = _baseQQ linearChainParser (AppT (AppT (ConT ''LinearChain) (ConT ''Bond)) (AppT (ConT ''Formula) (ConT ''Element)))
