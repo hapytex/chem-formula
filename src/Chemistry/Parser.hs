@@ -61,9 +61,6 @@ chargedParser = chargedParser' elementParser
 sign :: (Num a, Stream s m Char) => ParsecT s u m (a -> a)
 sign = (id <$ char '+') <|> (negate <$ char '-')
 
--- chargeSeq :: Stream s m Char => ParsecT s u m Int
--- chargeSeq = sdfsadf
-
 charge :: Stream s m Char => ParsecT s u m Int
 charge = option 0 ((&) <$> quantity <*> sign)
 
@@ -91,7 +88,6 @@ chargedFormulaParser = formulaParser' chargedParser
 chargedLinearChainParser :: Stream s m Char => ParsecT s u m (LinearChain Bond (Formula (Charged Element)))
 chargedLinearChainParser = linearChainParser' chargedFormulaParser
 
-
 quantity' :: Int -> a -> FormulaPart a
 quantity' 1 = Element
 quantity' n = (:* n) . FormulaPart . Element
@@ -100,7 +96,6 @@ formulaPartParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formu
 formulaPartParser' el = flip quantity' <$> el <*> quantity <|> ((:*) <$> (char '(' *> formulaParser' el <* char ')') <*> quantity)
 
 formulaParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formula a)
-
 formulaParser' el = go'
     where go' = go <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
           go fp Nothing = FormulaPart fp
@@ -137,3 +132,6 @@ formulaqq = _baseQQ formulaParser (AppT (ConT ''Formula) (ConT ''Element))
 
 chainqq :: QuasiQuoter
 chainqq = _baseQQ linearChainParser (AppT (AppT (ConT ''LinearChain) (ConT ''Bond)) (AppT (ConT ''Formula) (ConT ''Element)))
+
+chchainqq :: QuasiQuoter
+chchainqq = _baseQQ chargedLinearChainParser (AppT (AppT (ConT ''LinearChain) (ConT ''Bond)) (AppT (ConT ''Formula) (AppT (ConT ''Charged) (ConT ''Element))))
