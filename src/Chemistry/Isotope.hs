@@ -2,7 +2,7 @@
 
 module Chemistry.Isotope where
 
-import Chemistry.Core(FormulaElement(toFormulaPrec), HillCompare(hillCompare), Weight(weight), showParen')
+import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), Weight(weight), showParen')
 import Chemistry.Element(Element(..))
 
 import Data.Char.Small(asSup)
@@ -11,6 +11,9 @@ import Data.Text(Text, cons)
 
 import Numeric.Units.Dimensional(DMass, Quantity, (*~))
 import Numeric.Units.Dimensional.NonSI (dalton)
+
+import Text.Blaze(string)
+import Text.Blaze.Html4.Strict(sup)
 
 import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), Arbitrary1(liftArbitrary), arbitrary1)
 
@@ -386,6 +389,8 @@ isotopeWeight _ _ = Nothing
 
 instance FormulaElement a => FormulaElement (Isotope a) where
     toFormulaPrec p (Isotope x n) = showParen' (p >= 6) ((asSup n <>) . toFormulaPrec 5 x)
+    toFormulaMarkupPrec _ (Isotope x n) = (sup (string (show n)) <>) . toFormulaMarkupPrec 5 x
+
 
 instance Weight (Isotope Element) where
     weight (Isotope e n) = isotopeWeight e n
