@@ -3,7 +3,7 @@
 module Chemistry.Formula where
 
 import Chemistry.Bond(Bond(BSingle, BDouble, BTriple, BQuadruple), bondToUnicode)
-import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), QuantifiedElements(listElementsCounter, foldQuantified), showParen')
+import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), QuantifiedElements(listElementsCounter, foldQuantified), showParen', showParenMarkup')
 
 import Data.Char.Small(asSub)
 import Data.Data(Data)
@@ -108,8 +108,8 @@ instance FormulaElement a => FormulaElement (FormulaPart a) where
     toFormulaPrec p (f :* 1) = showParen' (p >= 5) (toFormulaPrec 5 f)
     toFormulaPrec p (f :* n) = showParen' (p >= 5) (toFormulaPrec 5 f . (asSub n <>))
     toFormulaMarkupPrec p (Element e) = toFormulaMarkupPrec p e
-    toFormulaMarkupPrec p (f :* 1) = toFormulaMarkupPrec p f  -- TODO paren
-    toFormulaMarkupPrec p (f :* n) = toFormulaMarkupPrec p f . (sub (string (show n)) <>)  -- TODO: paren
+    toFormulaMarkupPrec p (f :* 1) = showParenMarkup' (p >= 5) (toFormulaMarkupPrec p f)
+    toFormulaMarkupPrec p (f :* n) = showParenMarkup' (p >= 5) (toFormulaMarkupPrec p f . (sub (string (show n)) <>))
 
 instance QuantifiedElements FormulaPart where
     foldQuantified f g h = go
@@ -125,21 +125,17 @@ instance QuantifiedElements Formula where
               go' (FormulaPart a) = go a
               go' (fp :- frm) = g (go fp) (go' frm)
 
--- instance Weight a => Weight (FormulaPart a) where
---    weight (f :* n) = ((fromIntegral n *~ one) D.*) <$> weight f
---    weight (Element e) = weight e
-
 instance FormulaElement a => FormulaElement (Formula a) where
     toFormulaPrec p' (FormulaPart p) = toFormulaPrec p' p
     toFormulaPrec p' (p :- f) = showParen' (p' >= 4) (toFormulaPrec 3 p . toFormulaPrec 3 f)
     toFormulaMarkupPrec p' (FormulaPart p) = toFormulaMarkupPrec p' p
-    toFormulaMarkupPrec _ (p :- f) = toFormulaMarkupPrec 3 p . toFormulaMarkupPrec 3 f  -- TODO paren
+    toFormulaMarkupPrec p' (p :- f) = showParenMarkup' (p' >= 4) (toFormulaMarkupPrec 3 p . toFormulaMarkupPrec 3 f)
 
 instance FormulaElement a => FormulaElement (LinearChain Bond a) where
   toFormulaPrec p' (ChainItem i) = toFormulaPrec p' i
   toFormulaPrec p' (Chain i b is) = toFormulaPrec p' i . cons (bondToUnicode b) . toFormulaPrec p' is
   toFormulaMarkupPrec p' (ChainItem i) = toFormulaMarkupPrec p' i
-  toFormulaMarkupPrec p' (Chain i b is) = toFormulaMarkupPrec p' i . (text (singleton (bondToUnicode b)) <>) . toFormulaMarkupPrec p' is  -- TODO: paren
+  toFormulaMarkupPrec p' (Chain i b is) = toFormulaMarkupPrec p' i . (text (singleton (bondToUnicode b)) <>) . toFormulaMarkupPrec p' is
 
 -- instance Weight a => Weight (Formula a) where
 --    weight = foldr (liftA2 (D.+) . (\(e, n) -> ((fromIntegral n *~ one) D.*) <$> weight e)) (Just (0 *~ dalton)) . listElements

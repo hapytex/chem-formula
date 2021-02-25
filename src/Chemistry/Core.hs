@@ -13,10 +13,13 @@ import Data.Text(Text, cons, empty)
 import Numeric.Units.Dimensional(DMass, Quantity, (*~), one)
 import qualified Numeric.Units.Dimensional as D
 
-import Text.Blaze(Markup, text)
+import Text.Blaze(Markup, string, text)
 
 showParen' :: Bool -> (Text -> Text) -> Text -> Text
 showParen' = bool id ((cons '(' .) . (. cons ')'))
+
+showParenMarkup' :: Bool -> (Markup -> Markup) -> Markup -> Markup
+showParenMarkup' = bool id (((string "(" <>) .) . (. (<> string ")")))
 
 class FormulaElement a where
     toFormula :: a -> Text
