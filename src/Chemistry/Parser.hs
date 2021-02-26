@@ -19,7 +19,7 @@ import Data.List(foldl', sortOn)
 
 import Language.Haskell.TH(pprint)
 import Language.Haskell.TH.Quote(QuasiQuoter(QuasiQuoter, quoteExp, quotePat, quoteType, quoteDec))
-import Language.Haskell.TH.Syntax(Lift, Type(AppT, ConT), Q, dataToPatQ, lift, reportWarning)
+import Language.Haskell.TH.Syntax(Lift, Type(AppT, ConT, TupleT), Q, dataToPatQ, lift, reportWarning)
 
 import Text.Parsec(ParsecT, Stream, many1, option, optionMaybe, parserReturn, parserZero, runP)
 import Text.Parsec.Char(digit, char)
@@ -85,6 +85,9 @@ bondParser = foldr ((<|>) . uncurry (($>) . char)) parserZero bondChars
 chargedFormulaParser :: Stream s m Char => ParsecT s u m (Formula (Charged Element))
 chargedFormulaParser = formulaParser' chargedParser
 
+chargedLinearChainParser :: Stream s m Char => ParsecT s u m (LinearChain Bond (Formula (Charged Element)))
+chargedLinearChainParser = linearChainParser' chargedFormulaParser
+
 quantity' :: Int -> a -> FormulaPart a
 quantity' 1 = Element
 quantity' n = (:* n) . FormulaPart . Element
@@ -93,7 +96,6 @@ formulaPartParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formu
 formulaPartParser' el = flip quantity' <$> el <*> quantity <|> ((:*) <$> (char '(' *> formulaParser' el <* char ')') <*> quantity)
 
 formulaParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formula a)
-
 formulaParser' el = go'
     where go' = go <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
           go fp Nothing = FormulaPart fp
@@ -119,5 +121,17 @@ _baseQQ f typ = QuasiQuoter {
 elqq :: QuasiQuoter
 elqq = _baseQQ elementParser (ConT ''Element)
 
+elqqq :: QuasiQuoter
+elqqq = _baseQQ elementQuantityParser (AppT (AppT (TupleT 2) (ConT ''Element)) (ConT ''Int))
+
 chelqq :: QuasiQuoter
 chelqq = _baseQQ chargedParser (AppT (ConT ''Charged) (ConT ''Element))
+
+formulaqq :: QuasiQuoter
+formulaqq = _baseQQ formulaParser (AppT (ConT ''Formula) (ConT ''Element))
+
+chainqq :: QuasiQuoter
+chainqq = _baseQQ linearChainParser (AppT (AppT (ConT ''LinearChain) (ConT ''Bond)) (AppT (ConT ''Formula) (ConT ''Element)))
+
+chchainqq :: QuasiQuoter
+chchainqq = _baseQQ chargedLinearChainParser (AppT (AppT (ConT ''LinearChain) (ConT ''Bond)) (AppT (ConT ''Formula) (AppT (ConT ''Charged) (ConT ''Element))))

@@ -1,26 +1,26 @@
-{-# LANGUAGE DeriveTraversable, FlexibleInstances, OverloadedStrings, TypeFamilies #-}
+{-# LANGUAGE DeriveDataTypeable, DeriveLift, DeriveTraversable, FlexibleInstances, OverloadedStrings, TypeFamilies #-}
 
 module Chemistry.Formula where
 
 import Chemistry.Bond(Bond(BSingle, BDouble, BTriple, BQuadruple), bondToUnicode)
-import Chemistry.Core(FormulaElement(toFormulaPrec), HillCompare(hillCompare), Weight(weight), showParen')
-
-import Control.Applicative(liftA2)
+import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), QuantifiedElements(listElementsCounter, foldQuantified), showParen', showParenMarkup')
 
 import Data.Char.Small(asSub)
-import Data.Function(on)
+import Data.Data(Data)
+import Data.Default(Default(def))
 import Data.Hashable(Hashable)
-import Data.HashMap.Strict(HashMap, fromListWith)
 import qualified Data.HashMap.Strict as HM
+import Data.Function(on)
 import Data.List(sortBy)
 import Data.List.NonEmpty(NonEmpty((:|)))
-import Data.Text(cons)
+import Data.Text(cons, singleton)
 
 import GHC.Exts(IsList(Item, fromList, toList))
 
-import Numeric.Units.Dimensional(DMass, Quantity, (*~), one)
-import qualified Numeric.Units.Dimensional as D
-import Numeric.Units.Dimensional.NonSI(dalton)
+import Language.Haskell.TH.Syntax(Lift)
+
+import Text.Blaze(string, text)
+import Text.Blaze.Html4.Strict(sub)
 
 import Test.QuickCheck(Gen, oneof)
 import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), Arbitrary1(liftArbitrary), Arbitrary2(liftArbitrary2), arbitrary1, arbitrary2)
@@ -36,17 +36,17 @@ infixr 6 .$
 data FormulaPart a
   = Element a
   | (Formula a) :* Int
-  deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
+  deriving (Data, Eq, Foldable, Functor, Lift, Ord, Read, Show, Traversable)
 
 data Formula a
   = FormulaPart (FormulaPart a)
   | (FormulaPart a) :- (Formula a)
-  deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
+  deriving (Data, Eq, Foldable, Functor, Lift, Ord, Read, Show, Traversable)
 
 data LinearChain bond element
   = ChainItem element
   | Chain element bond (LinearChain bond element)
-  deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
+  deriving (Data, Eq, Foldable, Functor, Lift, Ord, Read, Show, Traversable)
 
 (.*) :: FormulaPart a -> Int -> FormulaPart a
 (.*) = (:*) . FormulaPart
@@ -76,13 +76,13 @@ instance IsList (Formula a) where
     toList (FormulaPart p) = [p]
     toList (p :- f) = p : toList f
 
-instance Monoid bond => IsList (LinearChain bond element) where
+instance Default bond => IsList (LinearChain bond element) where
     type Item (LinearChain bond element) = element
     fromList [] = error "A linear chain contains at least one element"
     fromList (e:es) = go es e
         where go [] = ChainItem
               go (c:cs) = (`h` go cs c)
-              h = (`Chain` mempty)
+              h = (`Chain` def)
     toList (ChainItem e) = [e]
     toList (Chain e _ es) = e : toList es
 
@@ -90,26 +90,12 @@ instance Semigroup (Formula a) where
     (<>) (FormulaPart p) = (p :-)
     (<>) (f :- p) = (f :-) . (p <>)
 
-_listElements :: Formula a -> [(a, Int)]
-_listElements = go 1 []
-    where go n = go'
-              where go' tl (p :- f) = go'' (go' tl f) p
-                    go' tl (FormulaPart p) = go'' tl p
-                    go'' tl (Element e) = (e, n) : tl
-                    go'' tl (f :* n') = go (n*n') tl f
-
-
-_listElements' :: (Eq a, Hashable a) => Formula a -> HashMap a Int
-_listElements' = fromListWith (+) . _listElements
 
 fromElementList :: [(a, Int)] -> Formula a
 fromElementList = fromList . map (uncurry ((:*) . FormulaPart . Element))
 
-molecularMass :: (Floating a, Weight b) => Formula b -> Maybe (Quantity DMass a)
-molecularMass = foldr (liftA2 (D.+) . (\(e, n) -> ((fromIntegral n *~ one) D.*) <$> weight e)) (Just (0 *~ dalton)) . _listElements
-
 _processFormula :: (Eq a, Hashable a) => ([(a, Int)] -> [(a, Int)]) -> Formula a -> Formula a
-_processFormula f = fromElementList . f . HM.toList . _listElements'
+_processFormula f = fromElementList . f . HM.toList . listElementsCounter
 
 toMolecular :: (Eq a, Hashable a) => Formula a -> Formula a
 toMolecular = _processFormula id
@@ -121,21 +107,41 @@ instance FormulaElement a => FormulaElement (FormulaPart a) where
     toFormulaPrec p (Element e) = toFormulaPrec p e
     toFormulaPrec p (f :* 1) = showParen' (p >= 5) (toFormulaPrec 5 f)
     toFormulaPrec p (f :* n) = showParen' (p >= 5) (toFormulaPrec 5 f . (asSub n <>))
+    toFormulaMarkupPrec p (Element e) = toFormulaMarkupPrec p e
+    toFormulaMarkupPrec p (f :* 1) = showParenMarkup' (p >= 5) (toFormulaMarkupPrec p f)
+    toFormulaMarkupPrec p (f :* n) = showParenMarkup' (p >= 5) (toFormulaMarkupPrec p f . (sub (string (show n)) <>))
 
-instance Weight a => Weight (FormulaPart a) where
-    weight (f :* n) = ((fromIntegral n *~ one) D.*) <$> weight f
-    weight (Element e) = weight e
+instance QuantifiedElements FormulaPart where
+    foldQuantified f g h = go
+        where go (Element a) = f a
+              go (fp :* n) = h n (go' fp)
+              go' (FormulaPart a) = go a
+              go' (fp :- frm) = g (go fp) (go' frm)
+
+instance QuantifiedElements Formula where
+    foldQuantified f g h = go'
+        where go (Element a) = f a
+              go (fp :* n) = h n (go' fp)
+              go' (FormulaPart a) = go a
+              go' (fp :- frm) = g (go fp) (go' frm)
 
 instance FormulaElement a => FormulaElement (Formula a) where
     toFormulaPrec p' (FormulaPart p) = toFormulaPrec p' p
     toFormulaPrec p' (p :- f) = showParen' (p' >= 4) (toFormulaPrec 3 p . toFormulaPrec 3 f)
+    toFormulaMarkupPrec p' (FormulaPart p) = toFormulaMarkupPrec p' p
+    toFormulaMarkupPrec p' (p :- f) = showParenMarkup' (p' >= 4) (toFormulaMarkupPrec 3 p . toFormulaMarkupPrec 3 f)
 
 instance FormulaElement a => FormulaElement (LinearChain Bond a) where
   toFormulaPrec p' (ChainItem i) = toFormulaPrec p' i
   toFormulaPrec p' (Chain i b is) = toFormulaPrec p' i . cons (bondToUnicode b) . toFormulaPrec p' is
+  toFormulaMarkupPrec p' (ChainItem i) = toFormulaMarkupPrec p' i
+  toFormulaMarkupPrec p' (Chain i b is) = toFormulaMarkupPrec p' i . (text (singleton (bondToUnicode b)) <>) . toFormulaMarkupPrec p' is
 
-instance Weight a => Weight (Formula a) where
-    weight = molecularMass
+-- instance Weight a => Weight (Formula a) where
+--    weight = foldr (liftA2 (D.+) . (\(e, n) -> ((fromIntegral n *~ one) D.*) <$> weight e)) (Just (0 *~ dalton)) . listElements
+
+--instance Weight b => Weight (LinearChain a b) where
+--    weight = foldr (liftA2 (D.+) . weight) (Just (0 *~ dalton))
 
 _positiveGen :: Gen Int
 _positiveGen = (1+) . abs <$> arbitrary

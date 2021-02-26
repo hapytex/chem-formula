@@ -2,13 +2,16 @@
 
 module Chemistry.Charge where
 
-import Chemistry.Core(FormulaElement(toFormulaPrec), Weight(weight), showParen')
+import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), Weight(weight), showParen', showParenMarkup')
 
 import Data.Data(Data)
 import Data.Text(Text, cons)
 import Data.Char.Small(asSup)
 
 import Language.Haskell.TH.Syntax(Lift)
+
+import Text.Blaze(Markup, string)
+import Text.Blaze.Html4.Strict(sup)
 
 import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), Arbitrary1(liftArbitrary), arbitrary1)
 
@@ -19,6 +22,15 @@ data Charged a
 charged' :: a -> Charged a
 charged' = (`Charged` 0)
 
+neutral :: a -> Charged a
+neutral = (`Charged` 0)
+
+_signify :: Int -> Markup -> Markup
+_signify n
+  | n < 0 = (sup (string (show n)) <>)
+  | n > 0 = (sup (string ('+' : show n)) <>)
+  | otherwise = id
+
 _charge :: Int -> Text
 _charge 0 = ""
 _charge (-1) = "\x207a"
@@ -27,6 +39,7 @@ _charge n | n < 0 = asSup n
 
 instance FormulaElement a => FormulaElement (Charged a) where
     toFormulaPrec p (Charged x n) = showParen' (p >= 6) (toFormulaPrec 5 x . (_charge n <>))
+    toFormulaMarkupPrec p (Charged x n) = showParenMarkup' (p >= 6) (toFormulaMarkupPrec 5 x . _signify n)
 
 instance Weight a => Weight (Charged a) where
     weight (Charged a _) = weight a

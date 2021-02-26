@@ -15,6 +15,7 @@ import Language.Haskell.TH.Syntax(Lift)
 import Numeric.Units.Dimensional(DMass, Quantity, (*~))
 import Numeric.Units.Dimensional.NonSI (dalton)
 
+import Text.Blaze(ToMarkup(toMarkup), preEscapedString)
 import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), arbitraryBoundedEnum)
 
 data Element
@@ -137,6 +138,9 @@ data Element
   | Ts -- ^ The /tennessine/ element.
   | Og -- ^ The /oganesson/ element.
   deriving (Bounded, Data, Enum, Eq, Lift, Ord, Read, Show)
+
+instance ToMarkup Element where
+  toMarkup = preEscapedString . show
 
 -- | A pattern synonym for /unnilunium/, which is the systematic element name of /mendelevium/.
 pattern Unu :: Element

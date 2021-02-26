@@ -1,17 +1,26 @@
+{-# LANGUAGE DeriveDataTypeable, DeriveLift #-}
+
 module Chemistry.Bond where
+
+import Data.Data(Data)
+import Data.Default(Default(def))
+import Language.Haskell.TH.Syntax(Lift)
 
 data Bond
   = BSingle
   | BDouble
   | BTriple
   | BQuadruple
-  deriving (Bounded, Enum, Eq, Ord, Read, Show)
+  deriving (Data, Bounded, Enum, Eq, Lift, Ord, Read, Show)
 
 instance Semigroup Bond where
   (<>) = max
 
 instance Monoid Bond where
   mempty = BSingle
+
+instance Default Bond where
+  def = BSingle
 
 bondToUnicode :: Bond -> Char
 bondToUnicode BSingle = '-'
