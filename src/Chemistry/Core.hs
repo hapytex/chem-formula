@@ -37,8 +37,9 @@ class Weight a where
     weight = const Nothing
     {-# MINIMAL weight #-}
 
-instance (QuantifiedElements f, Weight a) => Weight (f a) where
-    weight = foldQuantified weight (liftA2 (D.+)) (fmap . (D.*) . (*~ one) . fromIntegral)
+
+quantifiedWeight :: (QuantifiedElements f, Weight a, Floating b) => f a -> Maybe (Quantity DMass b)
+quantifiedWeight = foldQuantified weight (liftA2 (D.+)) (fmap . (D.*) . (*~ one) . fromIntegral)
 
 class QuantifiedElements f where
     foldQuantified :: (a -> b) -> (b -> b -> b) -> (Int -> b -> b) -> f a -> b

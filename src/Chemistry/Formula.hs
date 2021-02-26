@@ -3,7 +3,9 @@
 module Chemistry.Formula where
 
 import Chemistry.Bond(Bond(BSingle, BDouble, BTriple, BQuadruple), bondToUnicode)
-import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), QuantifiedElements(listElementsCounter, foldQuantified), showParen', showParenMarkup')
+import Chemistry.Core(
+    FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), QuantifiedElements(listElementsCounter, foldQuantified)
+  , Weight(weight), quantifiedWeight, showParen', showParenMarkup')
 
 import Data.Char.Small(asSub)
 import Data.Data(Data)
@@ -118,6 +120,9 @@ instance QuantifiedElements FormulaPart where
               go' (FormulaPart a) = go a
               go' (fp :- frm) = g (go fp) (go' frm)
 
+instance Weight a => Weight (FormulaPart a) where
+    weight = quantifiedWeight
+
 instance QuantifiedElements Formula where
     foldQuantified f g h = go'
         where go (Element a) = f a
@@ -131,17 +136,14 @@ instance FormulaElement a => FormulaElement (Formula a) where
     toFormulaMarkupPrec p' (FormulaPart p) = toFormulaMarkupPrec p' p
     toFormulaMarkupPrec p' (p :- f) = showParenMarkup' (p' >= 4) (toFormulaMarkupPrec 3 p . toFormulaMarkupPrec 3 f)
 
+instance Weight a => Weight (Formula a) where
+    weight = quantifiedWeight
+
 instance FormulaElement a => FormulaElement (LinearChain Bond a) where
   toFormulaPrec p' (ChainItem i) = toFormulaPrec p' i
   toFormulaPrec p' (Chain i b is) = toFormulaPrec p' i . cons (bondToUnicode b) . toFormulaPrec p' is
   toFormulaMarkupPrec p' (ChainItem i) = toFormulaMarkupPrec p' i
   toFormulaMarkupPrec p' (Chain i b is) = toFormulaMarkupPrec p' i . (text (singleton (bondToUnicode b)) <>) . toFormulaMarkupPrec p' is
-
--- instance Weight a => Weight (Formula a) where
---    weight = foldr (liftA2 (D.+) . (\(e, n) -> ((fromIntegral n *~ one) D.*) <$> weight e)) (Just (0 *~ dalton)) . listElements
-
---instance Weight b => Weight (LinearChain a b) where
---    weight = foldr (liftA2 (D.+) . weight) (Just (0 *~ dalton))
 
 _positiveGen :: Gen Int
 _positiveGen = (1+) . abs <$> arbitrary
