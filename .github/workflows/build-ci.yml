@@ -29,7 +29,7 @@ jobs:
       run: sudo apt-get install cabal-install-3.0 haskell-stack
     - name: checkout code
       uses: actions/checkout@v2.3.1
-    - name: build the Haskell software
+    - name: build the Haddock documentation
       run: "! stack haddock --force-dirty 2>&1 | grep -P '^\\s*[0-9]{1,2}%'"
 
   linux3:
@@ -64,3 +64,23 @@ jobs:
       uses: actions/checkout@v2.3.1
     - name: run the tests of the package
       run: stack --no-terminal --skip-ghc-check test
+
+  linux6:
+    name: Run the tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: add ppa
+      run: sudo add-apt-repository -y ppa:hvr/ghc
+    - name: update package database
+      run: sudo apt-get update
+    - name: install required packages
+      run: sudo apt-get install cabal-install-3.0 haskell-stack
+    - name: checkout code
+      uses: actions/checkout@v2.3.1
+    - name: create the haddock documentation
+      run: stack haddock --force-dirty
+    - name: deploy the documentation on the GitHub pages
+      uses: JamesIves/github-pages-deploy-action@4.0.0
+      with:
+        branch: gh-pages
+        folder: "$(stack path --local-doc-root)"
