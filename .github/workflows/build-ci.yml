@@ -40,3 +40,12 @@ jobs:
       uses: actions/checkout@v2.3.1
     - name: look for todos
       run: "! grep -i -P 'TODO|[?]{3,}' $(find src -iname '*.hs')"
+
+  linux4:
+    name: Check for hlint suggestions
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v2.3.1
+    - name: build the Haskell software
+      run: "curl -sSL https://raw.github.com/ndmitchell/hlint/master/misc/run.sh | sh -s ."
