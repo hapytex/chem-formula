@@ -47,5 +47,20 @@ jobs:
     steps:
     - name: checkout code
       uses: actions/checkout@v2.3.1
-    - name: build the Haskell software
-      run: "curl -sSL https://raw.github.com/ndmitchell/hlint/master/misc/run.sh | sh -s ."
+    - name: look for hlint suggestions
+      run: curl -sSL https://raw.github.com/ndmitchell/hlint/master/misc/run.sh | sh -s .
+
+  linux5:
+    name: Run the tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: add ppa
+      run: sudo add-apt-repository -y ppa:hvr/ghc
+    - name: update package database
+      run: sudo apt-get update
+    - name: install required packages
+      run: sudo apt-get install cabal-install-3.0 haskell-stack
+    - name: checkout code
+      uses: actions/checkout@v2.3.1
+    - name: run the tests of the package
+      run: stack --no-terminal --skip-ghc-check test
