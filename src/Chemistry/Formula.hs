@@ -5,7 +5,8 @@ module Chemistry.Formula where
 import Chemistry.Bond(Bond(BSingle, BDouble, BTriple, BQuadruple), bondToUnicode)
 import Chemistry.Core(
     FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), QuantifiedElements(listElementsCounter, foldQuantified)
-  , Weight(weight), quantifiedWeight, showParen', showParenMarkup')
+  , Weight(weight), quantifiedWeight, showParen', showParenMarkup'
+  )
 
 import Data.Char.Small(asSub)
 import Data.Data(Data)
