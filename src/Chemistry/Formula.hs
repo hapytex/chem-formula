@@ -1,5 +1,15 @@
 {-# LANGUAGE DeriveDataTypeable, DeriveLift, DeriveTraversable, FlexibleInstances, OverloadedStrings, TypeFamilies #-}
 
+{-|
+Module      : Chemistry.Formula
+Description : A module that defines datastructures to present formulas and linear chains.
+Maintainer  : hapytexeu+gh@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+A module that defines datastructure to present formulas and linear chains.
+-}
+
 module Chemistry.Formula where
 
 import Chemistry.Bond(Bond(BSingle, BDouble, BTriple, BQuadruple), bondToUnicode)

@@ -1,4 +1,13 @@
 {-# LANGUAGE FlexibleContexts, TemplateHaskellQuotes #-}
+{-|
+Module      : Chemistry.Parser
+Description : A module that defines parsers to parse elements, formulas, bonds, etc.
+Maintainer  : hapytexeu+gh@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+A module that defines parsers to parse elements, formulas, bonds, etc.
+-}
 
 module Chemistry.Parser where
 

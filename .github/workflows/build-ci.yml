@@ -6,6 +6,7 @@ jobs:
     name: Build the Haskell software
     runs-on: ubuntu-latest
     steps:
+    - uses: hapytex/github-actions/setup-haskell@7749e85
     - name: add ppa
       run: sudo add-apt-repository -y ppa:hvr/ghc
     - name: update package database

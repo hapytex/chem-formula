@@ -1,5 +1,15 @@
 {-# LANGUAGE FlexibleInstances, TupleSections #-}
 
+{-|
+Module      : Chemistry.Core
+Description : A module that defines the main typeclasses and functions for parsing, presenting and rendering molecules.
+Maintainer  : hapytexeu+gh@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+A module that defines the main typeclasses and functions for parsing, presenting and rendering molecules.
+-}
+
 module Chemistry.Core where
 
 import Control.Applicative(liftA2)

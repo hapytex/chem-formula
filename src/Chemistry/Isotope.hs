@@ -1,5 +1,14 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, OverloadedStrings #-}
 
+{-|
+Module      : Chemistry.Isotope
+Description : A module that defines datatypes to specify the isotope of an atom.
+Maintainer  : hapytexeu+gh@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+A module that defines datatypes to specify the isotope of an atoms.
+-}
 module Chemistry.Isotope where
 
 import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), Weight(weight), showParen', showParenMarkup')

@@ -1,5 +1,14 @@
 {-# LANGUAGE DeriveDataTypeable, DeriveLift, DeriveTraversable, OverloadedStrings #-}
 
+{-|
+Module      : Chemistry.Charge
+Description : A module that defines datatypes to specify the charge of an atom.
+Maintainer  : hapytexeu+gh@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+A module that defines datatypes to specify the charge of an atoms.
+-}
 module Chemistry.Charge where
 
 import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), Weight(weight), showParen', showParenMarkup')
