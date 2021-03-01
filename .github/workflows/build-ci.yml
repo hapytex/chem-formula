@@ -45,8 +45,8 @@ jobs:
     steps:
     - name: checkout code
       uses: actions/checkout@v2.3.1
-    - name: look for hlint suggestions
-      run: curl -sSL https://raw.github.com/ndmitchell/hlint/master/misc/run.sh | sh -s .
+    - name: look for todos
+      uses: hapytex/github-actions/hlint@master
 
   linux5:
     name: Run the tests
