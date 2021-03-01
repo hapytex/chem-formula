@@ -21,8 +21,11 @@ jobs:
       uses: hapytex/github-actions/setup-haskell@master
     - name: checkout code
       uses: actions/checkout@v2.3.1
-    - name: build the Haddock documentation
-      run: "! stack haddock --force-dirty 2>&1 | grep -P '^\\s*[0-9]{1,2}%'"
+    - name: make Haddock documentation
+      uses: hapytex/github-actions/run-haddock@master
+      id: haddock
+    - name: echo path
+      run: "echo '${{ steps.haddock.outputs.haddock-path }}'"
 
   linux3:
     name: Look for todos
@@ -64,12 +67,11 @@ jobs:
     - uses: hapytex/github-actions/setup-haskell@master
     - name: checkout code
       uses: actions/checkout@v2.3.1
-    - name: create the haddock documentation
-      run: stack haddock --force-dirty
-    - name: retrieve path to the documentation
-      run: echo "haddock_path=$(stack path --local-doc-root)" >> $GITHUB_ENV
+    - name: make Haddock documentation
+      uses: hapytex/github-actions/run-haddock@master
+      id: haddock
     - name: deploy the documentation on the GitHub pages
       uses: JamesIves/github-pages-deploy-action@4.0.0
       with:
         branch: gh-pages
-        folder: "${{ env.haddock_path }}"
+        folder: "${{ steps.haddock.outputs.haddock-path }}"
