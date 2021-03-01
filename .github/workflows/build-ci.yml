@@ -6,7 +6,7 @@ jobs:
     name: Build the Haskell software
     runs-on: ubuntu-latest
     steps:
-    - uses: hapytex/github-actions/setup-haskell@75e26f2794025ea7f5a9ad9bafe94676bc52d078
+    - uses: hapytex/github-actions/setup-haskell@master
     - name: add ppa
       run: sudo add-apt-repository -y ppa:hvr/ghc
     - name: update package database
@@ -40,7 +40,10 @@ jobs:
     - name: checkout code
       uses: actions/checkout@v2.3.1
     - name: look for todos
-      run: "! grep -i -P 'TODO|[?]{3,}' $(find src -iname '*.hs')"
+      uses: hapytex/github-actions/look-for-todos@master
+      with:
+        directory: src
+
 
   linux4:
     name: Check for hlint suggestions
@@ -55,7 +58,7 @@ jobs:
     name: Run the tests
     runs-on: ubuntu-latest
     steps:
-    - uses: hapytex/github-actions/setup-haskell@75e26f2794025ea7f5a9ad9bafe94676bc52d078
+    - uses: hapytex/github-actions/setup-haskell@master
     - name: checkout code
       uses: actions/checkout@v2.3.1
     - name: run the tests of the package
@@ -66,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-    - uses: hapytex/github-actions/setup-haskell@75e26f2794025ea7f5a9ad9bafe94676bc52d078
+    - uses: hapytex/github-actions/setup-haskell@master
     - name: checkout code
       uses: actions/checkout@v2.3.1
     - name: create the haddock documentation
