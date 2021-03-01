@@ -21,8 +21,8 @@ module Chemistry.Element (
   -- * Pattern synonyms for elements
                , pattern Unu, pattern Unb, pattern Unt, pattern Unq, pattern Unp, pattern Unh, pattern Uns, pattern Uno, pattern Une
   , pattern Uun, pattern Uuu, pattern Uub, pattern Uut, pattern Uuq, pattern Uup, pattern Uuh, pattern Uus, pattern Uuo
-  -- * Weight of an element
-  , atomicWeight
+  -- * Atom number and weight of an element
+  , atomNumber, atomicWeight
   -- * Names of the elements
   , elementName
   ) where
