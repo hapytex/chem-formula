@@ -9,7 +9,12 @@ Portability : POSIX
 
 A module that defines datatypes to specify the isotope of an atoms.
 -}
-module Chemistry.Isotope where
+module Chemistry.Isotope (
+    -- * Representing an isotope
+    Isotope(Isotope, isoElement, massNumber)
+    -- * Weight of isotopes
+  , isotopeWeight
+  ) where
 
 import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), Weight(weight), showParenText, showParenMarkup)
 import Chemistry.Element(Element(..))
@@ -26,20 +31,24 @@ import Text.Blaze.Html4.Strict(sup)
 
 import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), Arbitrary1(liftArbitrary), arbitrary1)
 
+-- | A datatype that specifies that an item has a specific isotope.
 data Isotope a
-  = Isotope { isoElement :: a,  massNumber :: Int }
+  -- | A dataconstructor that contains the item together with its mass number.
+  = Isotope {
+      isoElement :: a  -- ^ The chemical item for which we work with an isotope.
+    , massNumber :: Int  -- ^ The mass number of that chemical element.
+    }
   deriving (Eq, Foldable, Functor, Ord, Read, Show, Traversable)
 
 instance HillCompare a => HillCompare (Isotope a) where
     hillCompare = hillCompare `on` isoElement
 
-_charge :: Int -> Text
-_charge 0 = ""
-_charge (-1) = "\x207a"
-_charge n | n < 0 = asSup n
-          | otherwise = cons '\x207a' (asSup n)
-
-isotopeWeight :: Floating a => Element -> Int -> Maybe (Quantity DMass a)
+-- | Obtain the weight of the given isotope. For isotopes that are impossible or unknown,
+-- 'Nothing' is returned.
+isotopeWeight :: Floating a
+  => Element  -- ^ The given element for which we determine the weight.
+  -> Int  -- ^ The given mass number of the element for which we determine the weight.
+  -> Maybe (Quantity DMass a)  -- ^ The corresponding weight of the given 'Element' with the given mass number.
 isotopeWeight H 1 = Just (1.007 *~ dalton)
 isotopeWeight H 2 = Just (2.014 *~ dalton)
 isotopeWeight H 3 = Just (3.016 *~ dalton)
