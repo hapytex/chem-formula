@@ -9,14 +9,29 @@ Portability : POSIX
 A module that defines parsers to parse elements, formulas, bonds, etc.
 -}
 
-module Chemistry.Parser where
+module Chemistry.Parser (
+    -- * Parsing elements
+    elementParser
+    -- * Parsing bonds
+  , bondParser
+    -- * Parsing charged items
+  , chargedParser, chargedParser'
+    -- * Parsing elements with quantities
+  , quantityParser, elementQuantityParser
+    -- * Parsing formulas
+  , formulaParser, formulaParser', chargedFormulaParser
+    -- * Parsing linear chains
+  , linearChainParser, linearChainParser', linearChainParser'', chargedLinearChainParser
+    -- * Quasiquoters
+  , elqq, elqqq, chelqq, formulaqq, chainqq, chchainqq
+  ) where
 
 import Chemistry.Charge(Charged(Charged))
 import Chemistry.Element(Element)
-import Chemistry.Formula(Formula(FormulaPart, (:-)), FormulaPart(Element, (:*)), LinearChain(ChainItem, Chain))
+import Chemistry.Formula(Formula(FormulaPart, (:-)), FormulaPart(FormulaItem, (:*)), LinearChain(ChainItem, Chain))
 import Chemistry.Bond(Bond, bondChars)
 
-import Control.Applicative((<|>))
+import Control.Applicative((<|>), liftA2)
 import Control.Arrow(first)
 
 import Data.Char(digitToInt)
@@ -58,13 +73,25 @@ _parseTrieLeg c is = char c *> _parseTrie (map (first _chomp) is)
 _parseTrieRem :: Stream s m Char => [(String, a)] -> ParsecT s u m a
 _parseTrieRem = foldr ((<|>) . uncurry _parseTrieLeg) parserZero . _grouping (head . fst)
 
-elementParser :: Stream s m Char => ParsecT s u m Element
+-- | A parser that aims to convert text into an 'Element'.
+elementParser :: Stream s m Char
+  => ParsecT s u m Element  -- ^ The parser that reads to an 'Element'.
 elementParser = parseTrie (map ((,) =<< show) [minBound ..])
 
-chargedParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Charged a)
+-- | A parser that uses a parser, and reads that parser together with the charge.
+-- The charge can be represented with a plus or minus followed by a number, or a sequence
+-- of plusses and minusses where the number of characters determine the magnitude of
+-- the charge.
+chargedParser' :: Stream s m Char
+  => ParsecT s u m a  -- ^ The given parser for the chemical item.
+  -> ParsecT s u m (Charged a)  -- ^ A parser that will parse the chemical item followed by the charge.
 chargedParser' el = Charged <$> el <*> charge
 
-chargedParser :: Stream s m Char => ParsecT s u m (Charged Element)
+-- | A parser that parses charged items. The charge can be represented with a plus
+-- or minus followed by a number, or a sequence of plusses and minusses where the
+-- number of characters determine the magnitude of the charge.
+chargedParser :: Stream s m Char
+  => ParsecT s u m (Charged Element)  -- ^ The parser that parses charged 'Element's.
 chargedParser = chargedParser' elementParser
 
 sign :: (Num a, Stream s m Char) => ParsecT s u m (a -> a)
@@ -76,41 +103,75 @@ charge = option 0 ((&) <$> quantity <*> sign)
 quantity :: Stream s m Char => ParsecT s u m Int
 quantity = option 1 (foldl' ((. digitToInt) . (+) . (10 *)) 0 <$> many1 digit)
 
-elementQuantityParser :: Stream s m Char => ParsecT s u m (Element, Int)
-elementQuantityParser = (,) <$> elementParser <*> quantity
+-- | A function that is given a parser to parse an item and produces a parser
+-- that parses the element with its quantity. If no quantity is given, one is used.
+quantityParser :: Stream s m Char
+  => ParsecT s u m a  -- ^ The element parser that is used.
+  -> ParsecT s u m (a, Int)  -- ^ A parser that will parse the element together with an optional quantity.
+quantityParser = flip (liftA2 (,)) quantity
 
-formulaParser :: Stream s m Char => ParsecT s u m (Formula Element)
+-- | A parser that parses an 'Element' together with an optional quantity.
+-- if no quantity is passed, one is used.
+elementQuantityParser :: Stream s m Char
+  => ParsecT s u m (Element, Int)  -- ^ The parser that parses a combination of an element and a quantity.
+elementQuantityParser = quantityParser elementParser
+
+-- | A parser that parses 'Formula's with 'Element's as items.
+formulaParser :: Stream s m Char
+  => ParsecT s u m (Formula Element) -- ^ A parser that parses 'Formula's with 'Element's as items.
 formulaParser = formulaParser' elementParser
 
-linearChainParser :: Stream s m Char => ParsecT s u m (LinearChain Bond (Formula Element))
+-- | A parser that parses a 'LinearChain' of 'Bond's and 'Formula's of 'Element's. This makes
+-- use of the 'linearChainParser''', and uses other parsers to parse the bond and formula.
+linearChainParser :: Stream s m Char
+  => ParsecT s u m (LinearChain Bond (Formula Element)) -- ^ A parser that parses a 'LinearChain' of 'Bond's and 'Formula's of 'Element's
 linearChainParser = linearChainParser' formulaParser
 
-linearChainParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (LinearChain Bond a)
+-- | A function that produces a parser that parses a 'LinearChain' that parses 'Bond's and makes use
+-- of a given parser to parse the items in the linear chain.
+linearChainParser' :: Stream s m Char
+  => ParsecT s u m a  -- ^ The parser for the items that will be used.
+  -> ParsecT s u m (LinearChain Bond a)  -- ^ A parser that parses 'LinearChain's with the given parser for the items.
 linearChainParser' = linearChainParser'' bondParser
 
-bondParser :: Stream s m Char => ParsecT s u m Bond
+-- | A parser that parses the different types of bonds as defined by the 'bondChars'.
+bondParser :: Stream s m Char
+  => ParsecT s u m Bond  -- ^ A parser to parse the different types of bonds.
 bondParser = foldr ((<|>) . uncurry (($>) . char)) parserZero bondChars
 
-chargedFormulaParser :: Stream s m Char => ParsecT s u m (Formula (Charged Element))
+-- | A parser that parses 'Formula's with 'Element's that can contain a charge.
+chargedFormulaParser :: Stream s m Char
+  => ParsecT s u m (Formula (Charged Element))  -- ^ A parser that parses 'Formula's with 'Element's that can contain a charge.
 chargedFormulaParser = formulaParser' chargedParser
 
-chargedLinearChainParser :: Stream s m Char => ParsecT s u m (LinearChain Bond (Formula (Charged Element)))
+-- | A parser that parses a 'LinearChain' of 'Bond's and 'Formula's of /charged/ 'Element's. This makes
+-- use of the 'linearChainParser''', and uses other parsers to parse the bond and formula of charged elements.
+chargedLinearChainParser :: Stream s m Char
+  => ParsecT s u m (LinearChain Bond (Formula (Charged Element))) -- ^ A parser that parses a 'LinearChain' of 'Bond's and /charged/ 'Formula's of 'Element's
 chargedLinearChainParser = linearChainParser' chargedFormulaParser
 
 quantity' :: Int -> a -> FormulaPart a
-quantity' 1 = Element
-quantity' n = (:* n) . FormulaPart . Element
+quantity' 1 = FormulaItem
+quantity' n = (:* n) . FormulaPart . FormulaItem
 
 formulaPartParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (FormulaPart a)
 formulaPartParser' el = flip quantity' <$> el <*> quantity <|> ((:*) <$> (char '(' *> formulaParser' el <* char ')') <*> quantity)
 
-formulaParser' :: Stream s m Char => ParsecT s u m a -> ParsecT s u m (Formula a)
+-- | A parser that will for a given element parser parse a formula which is a combination of concatenations and multiplications.
+formulaParser' :: Stream s m Char
+  => ParsecT s u m a  -- ^ The given parser that parses an element.
+  -> ParsecT s u m (Formula a)  -- ^ The resulting parser that parses formulas with elements parsed by the given element parser.
 formulaParser' el = go'
     where go' = go <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
           go fp Nothing = FormulaPart fp
           go fp ~(Just t) = fp :- t
 
-linearChainParser'' :: Stream s m t => ParsecT s u m bond -> ParsecT s u m element -> ParsecT s u m (LinearChain bond element)
+-- | A function that produces a parser that parses a 'LinearChain' that makes
+-- use of given parsers to parse the bonds and the items in the linear chain.
+linearChainParser'' :: Stream s m t
+  => ParsecT s u m bond  -- ^ The given parser to parse the bonds.
+  -> ParsecT s u m element  -- ^ The given parser to parse the items.
+  -> ParsecT s u m (LinearChain bond element) -- ^ A parser that parses 'LinearChain's for the given bond and item parsers.
 linearChainParser'' bo el = go'
     where go' = go <$> el <*> optionMaybe ((,) <$> bo <*> go')
           go fp Nothing = ChainItem fp
@@ -127,20 +188,34 @@ _baseQQ f typ = QuasiQuoter {
   , quoteDec=const (reportWarning "The use of this quasiquoter will not make any declarations." >> pure [])
   }
 
-elqq :: QuasiQuoter
+-- | A quasiquoter that can parse chemical 'Element's. The quasiquoter can be used for expressions and patterns.
+-- If it is used as a type signature, it will be replaced with the 'Element' type.
+elqq :: QuasiQuoter  -- ^ A quasiquoter to parse 'Element's.
 elqq = _baseQQ elementParser (ConT ''Element)
 
-elqqq :: QuasiQuoter
+-- | A quasiquoter that can parse chemical 'Element's with an optional quantity. The quasiquoter can be used for expressions and patterns.
+-- If it is used as a type signature, it will be replaced with a 2-tuple type with an 'Element' and an 'Int'.
+elqqq :: QuasiQuoter -- ^ A quasiquoter to parse a combination of an 'Element' and its quantity.
 elqqq = _baseQQ elementQuantityParser (AppT (AppT (TupleT 2) (ConT ''Element)) (ConT ''Int))
 
-chelqq :: QuasiQuoter
+-- | A quasiquoter that can parse 'Charged' chemical 'Element's with an optional quantity. The quasiquoter can be used for expressions and patterns.
+-- If it is used as a type signature, it will be replaced with a 'Charged' 'Element'.
+chelqq :: QuasiQuoter  -- ^ A quasiquoter that parses /charged/ 'Element's.
 chelqq = _baseQQ chargedParser (AppT (ConT ''Charged) (ConT ''Element))
 
-formulaqq :: QuasiQuoter
+-- | A quasiquoter that can parse 'Formula's of 'Element's. The quasiquoter can be used for expressions and patterns.
+-- If it is used as a type signature, it will be replaced with a 'Formula' 'Element'.
+formulaqq :: QuasiQuoter  -- ^ A quasiquoter that parses 'Formula's of 'Element's.
 formulaqq = _baseQQ formulaParser (AppT (ConT ''Formula) (ConT ''Element))
 
-chainqq :: QuasiQuoter
+-- | A quasiquoter that can parse a 'LinearChain' of 'Bond's and 'Element's.
+-- The quasiquoter can be used for expressions and patterns. If it is used
+-- as a type signature, it will be replaced with a 'LinearChain' of 'Bond's and 'Element's.
+chainqq :: QuasiQuoter  -- ^ A quasiquoter that parses 'LinearChain's of 'Bond's and 'Formula's of 'Element's.
 chainqq = _baseQQ linearChainParser (AppT (AppT (ConT ''LinearChain) (ConT ''Bond)) (AppT (ConT ''Formula) (ConT ''Element)))
 
-chchainqq :: QuasiQuoter
+-- | A quasiquoter that can parse a 'LinearChain' of 'Bond's and 'Charged' 'Element's.
+-- The quasiquoter can be used for expressions and patterns. If it is used
+-- as a type signature, it will be replaced with a 'LinearChain' of 'Bond's and 'Charged' 'Element's.
+chchainqq :: QuasiQuoter -- A quasiquoter that parses 'LinearChain's of 'Bond's and 'Formula's of /charged/ 'Element's.
 chchainqq = _baseQQ chargedLinearChainParser (AppT (AppT (ConT ''LinearChain) (ConT ''Bond)) (AppT (ConT ''Formula) (AppT (ConT ''Charged) (ConT ''Element))))

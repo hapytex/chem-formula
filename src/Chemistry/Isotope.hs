@@ -21,7 +21,6 @@ import Chemistry.Element(Element(..))
 
 import Data.Char.Small(asSup)
 import Data.Function(on)
-import Data.Text(Text, cons)
 
 import Numeric.Units.Dimensional(DMass, Quantity, (*~))
 import Numeric.Units.Dimensional.NonSI (dalton)

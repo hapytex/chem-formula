@@ -47,7 +47,7 @@ infixr 6 .#
 infixr 6 .$
 
 data FormulaPart a
-  = Element a
+  = FormulaItem a
   | (Formula a) :* Int
   deriving (Data, Eq, Foldable, Functor, Lift, Ord, Read, Show, Traversable)
 
@@ -105,7 +105,7 @@ instance Semigroup (Formula a) where
 
 
 fromElementList :: [(a, Int)] -> Formula a
-fromElementList = fromList . map (uncurry ((:*) . FormulaPart . Element))
+fromElementList = fromList . map (uncurry ((:*) . FormulaPart . FormulaItem))
 
 _processFormula :: (Eq a, Hashable a) => ([(a, Int)] -> [(a, Int)]) -> Formula a -> Formula a
 _processFormula f = fromElementList . f . HM.toList . listElementsCounter
@@ -117,16 +117,16 @@ toHillFormula :: (Eq a, Hashable a, HillCompare a) => Formula a -> Formula a
 toHillFormula = _processFormula (sortBy (hillCompare `on` fst))
 
 instance FormulaElement a => FormulaElement (FormulaPart a) where
-    toFormulaPrec p (Element e) = toFormulaPrec p e
+    toFormulaPrec p (FormulaItem e) = toFormulaPrec p e
     toFormulaPrec p (f :* 1) = showParenText (p >= 5) (toFormulaPrec 5 f)
     toFormulaPrec p (f :* n) = showParenText (p >= 5) (toFormulaPrec 5 f . (asSub n <>))
-    toFormulaMarkupPrec p (Element e) = toFormulaMarkupPrec p e
+    toFormulaMarkupPrec p (FormulaItem e) = toFormulaMarkupPrec p e
     toFormulaMarkupPrec p (f :* 1) = showParenMarkup (p >= 5) (toFormulaMarkupPrec p f)
     toFormulaMarkupPrec p (f :* n) = showParenMarkup (p >= 5) (toFormulaMarkupPrec p f . (sub (string (show n)) <>))
 
 instance QuantifiedElements FormulaPart where
     foldQuantified f g h = go
-        where go (Element a) = f a
+        where go (FormulaItem a) = f a
               go (fp :* n) = h n (go' fp)
               go' (FormulaPart a) = go a
               go' (fp :- frm) = g (go fp) (go' frm)
@@ -136,7 +136,7 @@ instance Weight a => Weight (FormulaPart a) where
 
 instance QuantifiedElements Formula where
     foldQuantified f g h = go'
-        where go (Element a) = f a
+        where go (FormulaItem a) = f a
               go (fp :* n) = h n (go' fp)
               go' (FormulaPart a) = go a
               go' (fp :- frm) = g (go fp) (go' frm)
@@ -166,7 +166,7 @@ instance Arbitrary a => Arbitrary (Formula a) where
     arbitrary = arbitrary1
 
 instance Arbitrary1 FormulaPart where
-    liftArbitrary arb = oneof [Element <$> arb, (:*) <$> liftArbitrary arb <*> _positiveGen]
+    liftArbitrary arb = oneof [FormulaItem <$> arb, (:*) <$> liftArbitrary arb <*> _positiveGen]
 
 instance Arbitrary1 Formula where
     liftArbitrary arb = go
