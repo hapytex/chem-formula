@@ -1,6 +1,31 @@
 {-# LANGUAGE DeriveDataTypeable, DeriveLift, PatternSynonyms #-}
 
-module Chemistry.Element where
+{-|
+Module      : Chemistry.Element
+Description : A module that defines the different chemical elements and their weight.
+Maintainer  : hapytexeu+gh@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+A module that defines the different types of chemical elements and their weight.
+-}
+
+module Chemistry.Element (
+    Element(
+        H,  He, Li, Be, B,  C,  N,  O,  F,  Ne, Na, Mg, Al, Si, P,  S,  Cl, Ar, K,  Ca, Sc, Ti,  V, Cr, Mn, Fe, Co
+      , Ni, Cu, Zn, Ga, Ge, As, Se, Br, Kr, Rb, Sr, Y,  Zr, Nb, Mo, Tc, Ru, Rh, Pd, Ag, Cd, In, Sn, Sb, Te, I,  Xe
+      , Cs, Ba, La, Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb, Lu, Hf, Ta, W,  Re, Os, Ir, Pt, Au, Hg, Tl
+      , Pb, Bi, Po, At, Rn, Fr, Ra, Ac, Th, Pa, U,  Np, Pu, Am, Cm, Bk, Cf, Es, Fm, Md, No, Lr, Rf, Db, Sg, Bh, Hs
+      , Mt, Ds, Rg, Cn, Nh, Fl, Mc, Lv, Ts, Og
+    )
+  -- * Pattern synonyms for elements
+               , pattern Unu, pattern Unb, pattern Unt, pattern Unq, pattern Unp, pattern Unh, pattern Uns, pattern Uno, pattern Une
+  , pattern Uun, pattern Uuu, pattern Uub, pattern Uut, pattern Uuq, pattern Uup, pattern Uuh, pattern Uus, pattern Uuo
+  -- * Atom number and weight of an element
+  , atomNumber, atomicWeight
+  -- * Names of the elements
+  , elementName
+  ) where
 
 import Chemistry.Core(FormulaElement(toFormula, toFormulaPrec), HillCompare(hillCompare), Weight(weight))
 
@@ -18,6 +43,7 @@ import Numeric.Units.Dimensional.NonSI (dalton)
 import Text.Blaze(ToMarkup(toMarkup), preEscapedString)
 import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), arbitraryBoundedEnum)
 
+-- | A data type that defines the different chemical elements.
 data Element
   = H -- ^ The /hydrogen/ element.
   | He -- ^ The /helium/ element.
