@@ -15,7 +15,7 @@ module Chemistry.Formula where
 import Chemistry.Bond(Bond(BSingle, BDouble, BTriple, BQuadruple), bondToUnicode)
 import Chemistry.Core(
     FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), QuantifiedElements(listElementsCounter, foldQuantified)
-  , Weight(weight), quantifiedWeight, showParen', showParenMarkup'
+  , Weight(weight), quantifiedWeight, showParenText, showParenMarkup
   )
 
 import Data.Char.Small(asSub)
@@ -118,11 +118,11 @@ toHillFormula = _processFormula (sortBy (hillCompare `on` fst))
 
 instance FormulaElement a => FormulaElement (FormulaPart a) where
     toFormulaPrec p (Element e) = toFormulaPrec p e
-    toFormulaPrec p (f :* 1) = showParen' (p >= 5) (toFormulaPrec 5 f)
-    toFormulaPrec p (f :* n) = showParen' (p >= 5) (toFormulaPrec 5 f . (asSub n <>))
+    toFormulaPrec p (f :* 1) = showParenText (p >= 5) (toFormulaPrec 5 f)
+    toFormulaPrec p (f :* n) = showParenText (p >= 5) (toFormulaPrec 5 f . (asSub n <>))
     toFormulaMarkupPrec p (Element e) = toFormulaMarkupPrec p e
-    toFormulaMarkupPrec p (f :* 1) = showParenMarkup' (p >= 5) (toFormulaMarkupPrec p f)
-    toFormulaMarkupPrec p (f :* n) = showParenMarkup' (p >= 5) (toFormulaMarkupPrec p f . (sub (string (show n)) <>))
+    toFormulaMarkupPrec p (f :* 1) = showParenMarkup (p >= 5) (toFormulaMarkupPrec p f)
+    toFormulaMarkupPrec p (f :* n) = showParenMarkup (p >= 5) (toFormulaMarkupPrec p f . (sub (string (show n)) <>))
 
 instance QuantifiedElements FormulaPart where
     foldQuantified f g h = go
@@ -143,9 +143,9 @@ instance QuantifiedElements Formula where
 
 instance FormulaElement a => FormulaElement (Formula a) where
     toFormulaPrec p' (FormulaPart p) = toFormulaPrec p' p
-    toFormulaPrec p' (p :- f) = showParen' (p' >= 4) (toFormulaPrec 3 p . toFormulaPrec 3 f)
+    toFormulaPrec p' (p :- f) = showParenText (p' >= 4) (toFormulaPrec 3 p . toFormulaPrec 3 f)
     toFormulaMarkupPrec p' (FormulaPart p) = toFormulaMarkupPrec p' p
-    toFormulaMarkupPrec p' (p :- f) = showParenMarkup' (p' >= 4) (toFormulaMarkupPrec 3 p . toFormulaMarkupPrec 3 f)
+    toFormulaMarkupPrec p' (p :- f) = showParenMarkup (p' >= 4) (toFormulaMarkupPrec 3 p . toFormulaMarkupPrec 3 f)
 
 instance Weight a => Weight (Formula a) where
     weight = quantifiedWeight

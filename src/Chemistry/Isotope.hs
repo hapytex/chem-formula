@@ -11,7 +11,7 @@ A module that defines datatypes to specify the isotope of an atoms.
 -}
 module Chemistry.Isotope where
 
-import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), Weight(weight), showParen', showParenMarkup')
+import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), Weight(weight), showParenText, showParenMarkup)
 import Chemistry.Element(Element(..))
 
 import Data.Char.Small(asSup)
@@ -397,8 +397,8 @@ isotopeWeight Og 294 = Just (294.213 *~ dalton)
 isotopeWeight _ _ = Nothing
 
 instance FormulaElement a => FormulaElement (Isotope a) where
-    toFormulaPrec p (Isotope x n) = showParen' (p >= 6) ((asSup n <>) . toFormulaPrec 5 x)
-    toFormulaMarkupPrec p (Isotope x n) = showParenMarkup' (p >= 6) ((sup (string (show n)) <>) . toFormulaMarkupPrec 5 x)
+    toFormulaPrec p (Isotope x n) = showParenText (p >= 6) ((asSup n <>) . toFormulaPrec 5 x)
+    toFormulaMarkupPrec p (Isotope x n) = showParenMarkup (p >= 6) ((sup (string (show n)) <>) . toFormulaMarkupPrec 5 x)
 
 
 instance Weight (Isotope Element) where

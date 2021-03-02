@@ -11,7 +11,7 @@ A module that defines datatypes to specify the charge of an atoms.
 -}
 module Chemistry.Charge where
 
-import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), Weight(weight), showParen', showParenMarkup')
+import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), Weight(weight), showParenText, showParenMarkup)
 
 import Data.Data(Data)
 import Data.Text(Text, cons)
@@ -47,8 +47,8 @@ _charge n | n < 0 = asSup n
           | otherwise = cons '\x207a' (asSup n)
 
 instance FormulaElement a => FormulaElement (Charged a) where
-    toFormulaPrec p (Charged x n) = showParen' (p >= 6) (toFormulaPrec 5 x . (_charge n <>))
-    toFormulaMarkupPrec p (Charged x n) = showParenMarkup' (p >= 6) (toFormulaMarkupPrec 5 x . _signify n)
+    toFormulaPrec p (Charged x n) = showParenText (p >= 6) (toFormulaPrec 5 x . (_charge n <>))
+    toFormulaMarkupPrec p (Charged x n) = showParenMarkup (p >= 6) (toFormulaMarkupPrec 5 x . _signify n)
 
 instance Weight a => Weight (Charged a) where
     weight (Charged a _) = weight a
