@@ -1,4 +1,4 @@
-name: Standard checks and deployment
+name: CI/CD
 on: push
 
 jobs:
