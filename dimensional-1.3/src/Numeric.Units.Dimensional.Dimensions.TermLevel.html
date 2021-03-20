@@ -1,0 +1,965 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_GXM0SWECyzz2DiAwYQs7FN"></span><span class="hs-pragma">{-# OPTIONS_HADDOCK not-home, show-extensions #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE BangPatterns #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE DefaultSignatures #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-comment">{- |
+   Copyright  : Copyright (C) 2006-2018 Bjorn Buckwalter
+   License    : BSD3
+
+   Maintainer : bjorn@buckwalter.se
+   Stability  : Stable
+   Portability: GHC only
+
+This module defines physical dimensions expressed in terms of
+the SI base dimensions, including arithmetic.
+
+-}</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Numeric.Units.Dimensional.Dimensions.TermLevel</span><span>
+</span><span id="line-21"></span><span class="hs-special">(</span><span>
+</span><span id="line-22"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Type</span></span><span>
+</span><span id="line-23"></span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier">Dimension'</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-24"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Access to Dimension of Dimensional Values</span></span><span>
+</span><span id="line-25"></span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#HasDimension"><span class="hs-identifier">HasDimension</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#HasDynamicDimension"><span class="hs-identifier">HasDynamicDimension</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#DynamicDimension"><span class="hs-identifier">DynamicDimension</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Dimension Arithmetic</span></span><span>
+</span><span id="line-27"></span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%2A"><span class="hs-operator">(*)</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%2F"><span class="hs-operator">(/)</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%5E"><span class="hs-operator">(^)</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#recip"><span class="hs-identifier">recip</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#nroot"><span class="hs-identifier">nroot</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#sqrt"><span class="hs-identifier">sqrt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#cbrt"><span class="hs-identifier">cbrt</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Synonyms for Base Dimensions</span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dOne"><span class="hs-identifier">dOne</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-30"></span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dLength"><span class="hs-identifier">dLength</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dMass"><span class="hs-identifier">dMass</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dTime"><span class="hs-identifier">dTime</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dElectricCurrent"><span class="hs-identifier">dElectricCurrent</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dThermodynamicTemperature"><span class="hs-identifier">dThermodynamicTemperature</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dAmountOfSubstance"><span class="hs-identifier">dAmountOfSubstance</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dLuminousIntensity"><span class="hs-identifier">dLuminousIntensity</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-31"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Deconstruction</span></span><span>
+</span><span id="line-32"></span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#asList"><span class="hs-identifier">asList</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-33"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Examining Dynamic Dimensions</span></span><span>
+</span><span id="line-34"></span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#matchDimensions"><span class="hs-identifier">matchDimensions</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#isCompatibleWith"><span class="hs-identifier">isCompatibleWith</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#hasSomeDimension"><span class="hs-identifier">hasSomeDimension</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Semigroup</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Monoid</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">id</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">all</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">fst</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">snd</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">fmap</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">otherwise</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">divMod</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-operator">($)</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-operator">(+)</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-operator">(.)</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-operator">(&amp;&amp;)</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Show</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Eq</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Ord</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Maybe</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Bool</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- &gt;&gt;&gt; import Prelude (negate)</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- &gt;&gt;&gt; import Control.Applicative</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- &gt;&gt;&gt; import Test.QuickCheck.Arbitrary</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- &gt;&gt;&gt; instance Arbitrary Dimension' where arbitrary = Dim' &lt;$&gt; arbitrary &lt;*&gt; arbitrary &lt;*&gt; arbitrary &lt;*&gt; arbitrary &lt;*&gt; arbitrary &lt;*&gt; arbitrary &lt;*&gt; arbitrary</span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- | A physical dimension, encoded as 7 integers, representing a factorization of the dimension into the</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- 7 SI base dimensions. By convention they are stored in the same order as</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- in the 'Numeric.Units.Dimensional.Dimensions.TypeLevel.Dimension' data kind.</span><span>
+</span><span id="line-55"></span><span id="local-6989586621679109289"><span id="local-6989586621679109290"></span></span><span class="hs-keyword">data</span><span> </span><span id="Dimension%27"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-var">Dimension'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Dim%27"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109282"><span id="local-6989586621679109284"><span id="local-6989586621679109286"><span class="annot"><span class="annottext">Int -&gt; Dimension' -&gt; ShowS
+[Dimension'] -&gt; ShowS
+Dimension' -&gt; String
+(Int -&gt; Dimension' -&gt; ShowS)
+-&gt; (Dimension' -&gt; String)
+-&gt; ([Dimension'] -&gt; ShowS)
+-&gt; Show Dimension'
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [Dimension'] -&gt; ShowS
+$cshowList :: [Dimension'] -&gt; ShowS
+show :: Dimension' -&gt; String
+$cshow :: Dimension' -&gt; String
+showsPrec :: Int -&gt; Dimension' -&gt; ShowS
+$cshowsPrec :: Int -&gt; Dimension' -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109277"><span id="local-6989586621679109279"><span class="annot"><span class="annottext">Dimension' -&gt; Dimension' -&gt; Bool
+(Dimension' -&gt; Dimension' -&gt; Bool)
+-&gt; (Dimension' -&gt; Dimension' -&gt; Bool) -&gt; Eq Dimension'
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Dimension' -&gt; Dimension' -&gt; Bool
+$c/= :: Dimension' -&gt; Dimension' -&gt; Bool
+== :: Dimension' -&gt; Dimension' -&gt; Bool
+$c== :: Dimension' -&gt; Dimension' -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109261"><span id="local-6989586621679109263"><span id="local-6989586621679109265"><span id="local-6989586621679109267"><span id="local-6989586621679109269"><span id="local-6989586621679109271"><span id="local-6989586621679109273"><span class="annot"><span class="annottext">Eq Dimension'
+Eq Dimension' =&gt;
+(Dimension' -&gt; Dimension' -&gt; Ordering)
+-&gt; (Dimension' -&gt; Dimension' -&gt; Bool)
+-&gt; (Dimension' -&gt; Dimension' -&gt; Bool)
+-&gt; (Dimension' -&gt; Dimension' -&gt; Bool)
+-&gt; (Dimension' -&gt; Dimension' -&gt; Bool)
+-&gt; (Dimension' -&gt; Dimension' -&gt; Dimension')
+-&gt; (Dimension' -&gt; Dimension' -&gt; Dimension')
+-&gt; Ord Dimension'
+Dimension' -&gt; Dimension' -&gt; Bool
+Dimension' -&gt; Dimension' -&gt; Ordering
+Dimension' -&gt; Dimension' -&gt; Dimension'
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: Dimension' -&gt; Dimension' -&gt; Dimension'
+$cmin :: Dimension' -&gt; Dimension' -&gt; Dimension'
+max :: Dimension' -&gt; Dimension' -&gt; Dimension'
+$cmax :: Dimension' -&gt; Dimension' -&gt; Dimension'
+&gt;= :: Dimension' -&gt; Dimension' -&gt; Bool
+$c&gt;= :: Dimension' -&gt; Dimension' -&gt; Bool
+&gt; :: Dimension' -&gt; Dimension' -&gt; Bool
+$c&gt; :: Dimension' -&gt; Dimension' -&gt; Bool
+&lt;= :: Dimension' -&gt; Dimension' -&gt; Bool
+$c&lt;= :: Dimension' -&gt; Dimension' -&gt; Bool
+&lt; :: Dimension' -&gt; Dimension' -&gt; Bool
+$c&lt; :: Dimension' -&gt; Dimension' -&gt; Bool
+compare :: Dimension' -&gt; Dimension' -&gt; Ordering
+$ccompare :: Dimension' -&gt; Dimension' -&gt; Ordering
+$cp1Ord :: Eq Dimension'
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="%24cDim%27"><span id="%24tDimension%27"><span id="local-6989586621679109231"><span id="local-6989586621679109233"><span id="local-6989586621679109235"><span id="local-6989586621679109237"><span id="local-6989586621679109239"><span id="local-6989586621679109241"><span id="local-6989586621679109243"><span id="local-6989586621679109245"><span id="local-6989586621679109247"><span id="local-6989586621679109249"><span id="local-6989586621679109251"><span id="local-6989586621679109253"><span id="local-6989586621679109255"><span id="local-6989586621679109257"><span class="annot"><span class="annottext">Typeable Dimension'
+DataType
+Constr
+Typeable Dimension' =&gt;
+(forall (c :: Type -&gt; Type).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; Dimension' -&gt; c Dimension')
+-&gt; (forall (c :: Type -&gt; Type).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c Dimension')
+-&gt; (Dimension' -&gt; Constr)
+-&gt; (Dimension' -&gt; DataType)
+-&gt; (forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c Dimension'))
+-&gt; (forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c Dimension'))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; Dimension' -&gt; Dimension')
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Dimension' -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Dimension' -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; Dimension' -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Dimension' -&gt; u)
+-&gt; (forall (m :: Type -&gt; Type).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; Dimension' -&gt; m Dimension')
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; Dimension' -&gt; m Dimension')
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; Dimension' -&gt; m Dimension')
+-&gt; Data Dimension'
+Dimension' -&gt; DataType
+Dimension' -&gt; Constr
+(forall b. Data b =&gt; b -&gt; b) -&gt; Dimension' -&gt; Dimension'
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Dimension' -&gt; c Dimension'
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c Dimension'
+forall a.
+Typeable a =&gt;
+(forall (c :: Type -&gt; Type).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: Type -&gt; Type).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: Type -&gt; Type).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Dimension' -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; Dimension' -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Dimension' -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Dimension' -&gt; r
+forall (m :: Type -&gt; Type).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Dimension' -&gt; m Dimension'
+forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Dimension' -&gt; m Dimension'
+forall (c :: Type -&gt; Type).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c Dimension'
+forall (c :: Type -&gt; Type).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Dimension' -&gt; c Dimension'
+forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c Dimension')
+forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c Dimension')
+$cDim' :: Constr
+$tDimension' :: DataType
+gmapMo :: (forall d. Data d =&gt; d -&gt; m d) -&gt; Dimension' -&gt; m Dimension'
+$cgmapMo :: forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Dimension' -&gt; m Dimension'
+gmapMp :: (forall d. Data d =&gt; d -&gt; m d) -&gt; Dimension' -&gt; m Dimension'
+$cgmapMp :: forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Dimension' -&gt; m Dimension'
+gmapM :: (forall d. Data d =&gt; d -&gt; m d) -&gt; Dimension' -&gt; m Dimension'
+$cgmapM :: forall (m :: Type -&gt; Type).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Dimension' -&gt; m Dimension'
+gmapQi :: Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Dimension' -&gt; u
+$cgmapQi :: forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Dimension' -&gt; u
+gmapQ :: (forall d. Data d =&gt; d -&gt; u) -&gt; Dimension' -&gt; [u]
+$cgmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; Dimension' -&gt; [u]
+gmapQr :: (r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Dimension' -&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Dimension' -&gt; r
+gmapQl :: (r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Dimension' -&gt; r
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Dimension' -&gt; r
+gmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; Dimension' -&gt; Dimension'
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; Dimension' -&gt; Dimension'
+dataCast2 :: (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c Dimension')
+$cdataCast2 :: forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c Dimension')
+dataCast1 :: (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c Dimension')
+$cdataCast1 :: forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c Dimension')
+dataTypeOf :: Dimension' -&gt; DataType
+$cdataTypeOf :: Dimension' -&gt; DataType
+toConstr :: Dimension' -&gt; Constr
+$ctoConstr :: Dimension' -&gt; Constr
+gunfold :: (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c Dimension'
+$cgunfold :: forall (c :: Type -&gt; Type).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c Dimension'
+gfoldl :: (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Dimension' -&gt; c Dimension'
+$cgfoldl :: forall (c :: Type -&gt; Type).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Dimension' -&gt; c Dimension'
+$cp1Data :: Typeable Dimension'
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(forall x. Dimension' -&gt; Rep Dimension' x)
+-&gt; (forall x. Rep Dimension' x -&gt; Dimension') -&gt; Generic Dimension'
+forall x. Rep Dimension' x -&gt; Dimension'
+forall x. Dimension' -&gt; Rep Dimension' x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cto :: forall x. Rep Dimension' x -&gt; Dimension'
+$cfrom :: forall x. Dimension' -&gt; Rep Dimension' x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-59"></span><span>  </span><span id="local-6989586621679109222"><span class="annot"><span class="annottext">rnf :: Dimension' -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">rnf</span></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="annottext">Dimension'
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- The Dimension' constructor is already fully strict.</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679109216"><span id="local-6989586621679109218"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679109214"><span class="annot"><span class="annottext">&lt;&gt; :: Dimension' -&gt; Dimension' -&gt; Dimension'
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dimension' -&gt; Dimension' -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%2A"><span class="hs-operator hs-var">(*)</span></a></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- | The monoid of dimensions under multiplication.</span><span>
+</span><span id="line-65"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679109209"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621679109207"><span class="annot"><span class="annottext">mempty :: Dimension'
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dOne"><span class="hs-identifier hs-var">dOne</span></a></span><span>
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621679109206"><span class="annot"><span class="annottext">mappend :: Dimension' -&gt; Dimension' -&gt; Dimension'
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dimension' -&gt; Dimension' -&gt; Dimension'
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Semigroup.&lt;&gt;)</span></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- | The dimension of a dynamic value, which may not have any dimension at all.</span><span>
+</span><span id="line-70"></span><span id="local-6989586621679109204"><span id="local-6989586621679109205"></span></span><span class="hs-keyword">data</span><span> </span><span id="DynamicDimension"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#DynamicDimension"><span class="hs-identifier hs-var">DynamicDimension</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NoDimension"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#NoDimension"><span class="hs-identifier hs-var">NoDimension</span></a></span></span><span> </span><span class="hs-comment">-- ^ The value has no valid dimension.</span><span>
+</span><span id="line-71"></span><span>                      </span><span class="hs-glyph">|</span><span> </span><span id="SomeDimension"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#SomeDimension"><span class="hs-identifier hs-var">SomeDimension</span></a></span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-comment">-- ^ The value has the given dimension.</span><span>
+</span><span id="line-72"></span><span>                      </span><span class="hs-glyph">|</span><span> </span><span id="AnyDimension"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#AnyDimension"><span class="hs-identifier hs-var">AnyDimension</span></a></span></span><span> </span><span class="hs-comment">-- ^ The value may be interpreted as having any dimension.</span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109197"><span id="local-6989586621679109199"><span class="annot"><span class="annottext">DynamicDimension -&gt; DynamicDimension -&gt; Bool
+(DynamicDimension -&gt; DynamicDimension -&gt; Bool)
+-&gt; (DynamicDimension -&gt; DynamicDimension -&gt; Bool)
+-&gt; Eq DynamicDimension
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: DynamicDimension -&gt; DynamicDimension -&gt; Bool
+$c/= :: DynamicDimension -&gt; DynamicDimension -&gt; Bool
+== :: DynamicDimension -&gt; DynamicDimension -&gt; Bool
+$c== :: DynamicDimension -&gt; DynamicDimension -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109182"><span id="local-6989586621679109184"><span id="local-6989586621679109186"><span id="local-6989586621679109188"><span id="local-6989586621679109190"><span id="local-6989586621679109192"><span id="local-6989586621679109194"><span class="annot"><span class="annottext">Eq DynamicDimension
+Eq DynamicDimension =&gt;
+(DynamicDimension -&gt; DynamicDimension -&gt; Ordering)
+-&gt; (DynamicDimension -&gt; DynamicDimension -&gt; Bool)
+-&gt; (DynamicDimension -&gt; DynamicDimension -&gt; Bool)
+-&gt; (DynamicDimension -&gt; DynamicDimension -&gt; Bool)
+-&gt; (DynamicDimension -&gt; DynamicDimension -&gt; Bool)
+-&gt; (DynamicDimension -&gt; DynamicDimension -&gt; DynamicDimension)
+-&gt; (DynamicDimension -&gt; DynamicDimension -&gt; DynamicDimension)
+-&gt; Ord DynamicDimension
+DynamicDimension -&gt; DynamicDimension -&gt; Bool
+DynamicDimension -&gt; DynamicDimension -&gt; Ordering
+DynamicDimension -&gt; DynamicDimension -&gt; DynamicDimension
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: DynamicDimension -&gt; DynamicDimension -&gt; DynamicDimension
+$cmin :: DynamicDimension -&gt; DynamicDimension -&gt; DynamicDimension
+max :: DynamicDimension -&gt; DynamicDimension -&gt; DynamicDimension
+$cmax :: DynamicDimension -&gt; DynamicDimension -&gt; DynamicDimension
+&gt;= :: DynamicDimension -&gt; DynamicDimension -&gt; Bool
+$c&gt;= :: DynamicDimension -&gt; DynamicDimension -&gt; Bool
+&gt; :: DynamicDimension -&gt; DynamicDimension -&gt; Bool
+$c&gt; :: DynamicDimension -&gt; DynamicDimension -&gt; Bool
+&lt;= :: DynamicDimension -&gt; DynamicDimension -&gt; Bool
+$c&lt;= :: DynamicDimension -&gt; DynamicDimension -&gt; Bool
+&lt; :: DynamicDimension -&gt; DynamicDimension -&gt; Bool
+$c&lt; :: DynamicDimension -&gt; DynamicDimension -&gt; Bool
+compare :: DynamicDimension -&gt; DynamicDimension -&gt; Ordering
+$ccompare :: DynamicDimension -&gt; DynamicDimension -&gt; Ordering
+$cp1Ord :: Eq DynamicDimension
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109176"><span id="local-6989586621679109178"><span id="local-6989586621679109180"><span class="annot"><span class="annottext">Int -&gt; DynamicDimension -&gt; ShowS
+[DynamicDimension] -&gt; ShowS
+DynamicDimension -&gt; String
+(Int -&gt; DynamicDimension -&gt; ShowS)
+-&gt; (DynamicDimension -&gt; String)
+-&gt; ([DynamicDimension] -&gt; ShowS)
+-&gt; Show DynamicDimension
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [DynamicDimension] -&gt; ShowS
+$cshowList :: [DynamicDimension] -&gt; ShowS
+show :: DynamicDimension -&gt; String
+$cshow :: DynamicDimension -&gt; String
+showsPrec :: Int -&gt; DynamicDimension -&gt; ShowS
+$cshowsPrec :: Int -&gt; DynamicDimension -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="%24cAnyDimension"><span id="%24cSomeDimension"><span id="%24cNoDimension"><span id="%24tDynamicDimension"><span id="local-6989586621679109147"><span id="local-6989586621679109149"><span id="local-6989586621679109151"><span id="local-6989586621679109153"><span id="local-6989586621679109155"><span id="local-6989586621679109157"><span id="local-6989586621679109159"><span id="local-6989586621679109161"><span id="local-6989586621679109163"><span id="local-6989586621679109165"><span id="local-6989586621679109167"><span id="local-6989586621679109169"><span id="local-6989586621679109171"><span id="local-6989586621679109173"><span class="annot"><span class="annottext">Typeable DynamicDimension
+DataType
+Constr
+Typeable DynamicDimension =&gt;
+(forall (c :: Type -&gt; Type).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; DynamicDimension -&gt; c DynamicDimension)
+-&gt; (forall (c :: Type -&gt; Type).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c DynamicDimension)
+-&gt; (DynamicDimension -&gt; Constr)
+-&gt; (DynamicDimension -&gt; DataType)
+-&gt; (forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c DynamicDimension))
+-&gt; (forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c DynamicDimension))
+-&gt; ((forall b. Data b =&gt; b -&gt; b)
+    -&gt; DynamicDimension -&gt; DynamicDimension)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; DynamicDimension -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; DynamicDimension -&gt; r)
+-&gt; (forall u.
+    (forall d. Data d =&gt; d -&gt; u) -&gt; DynamicDimension -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; DynamicDimension -&gt; u)
+-&gt; (forall (m :: Type -&gt; Type).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; DynamicDimension -&gt; m DynamicDimension)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; DynamicDimension -&gt; m DynamicDimension)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; DynamicDimension -&gt; m DynamicDimension)
+-&gt; Data DynamicDimension
+DynamicDimension -&gt; DataType
+DynamicDimension -&gt; Constr
+(forall b. Data b =&gt; b -&gt; b)
+-&gt; DynamicDimension -&gt; DynamicDimension
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; DynamicDimension -&gt; c DynamicDimension
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c DynamicDimension
+forall a.
+Typeable a =&gt;
+(forall (c :: Type -&gt; Type).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: Type -&gt; Type).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: Type -&gt; Type).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; DynamicDimension -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; DynamicDimension -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; DynamicDimension -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; DynamicDimension -&gt; r
+forall (m :: Type -&gt; Type).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; DynamicDimension -&gt; m DynamicDimension
+forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; DynamicDimension -&gt; m DynamicDimension
+forall (c :: Type -&gt; Type).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c DynamicDimension
+forall (c :: Type -&gt; Type).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; DynamicDimension -&gt; c DynamicDimension
+forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c DynamicDimension)
+forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c DynamicDimension)
+$cAnyDimension :: Constr
+$cSomeDimension :: Constr
+$cNoDimension :: Constr
+$tDynamicDimension :: DataType
+gmapMo :: (forall d. Data d =&gt; d -&gt; m d)
+-&gt; DynamicDimension -&gt; m DynamicDimension
+$cgmapMo :: forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; DynamicDimension -&gt; m DynamicDimension
+gmapMp :: (forall d. Data d =&gt; d -&gt; m d)
+-&gt; DynamicDimension -&gt; m DynamicDimension
+$cgmapMp :: forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; DynamicDimension -&gt; m DynamicDimension
+gmapM :: (forall d. Data d =&gt; d -&gt; m d)
+-&gt; DynamicDimension -&gt; m DynamicDimension
+$cgmapM :: forall (m :: Type -&gt; Type).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; DynamicDimension -&gt; m DynamicDimension
+gmapQi :: Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; DynamicDimension -&gt; u
+$cgmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; DynamicDimension -&gt; u
+gmapQ :: (forall d. Data d =&gt; d -&gt; u) -&gt; DynamicDimension -&gt; [u]
+$cgmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; DynamicDimension -&gt; [u]
+gmapQr :: (r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; DynamicDimension -&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; DynamicDimension -&gt; r
+gmapQl :: (r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; DynamicDimension -&gt; r
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; DynamicDimension -&gt; r
+gmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; DynamicDimension -&gt; DynamicDimension
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; DynamicDimension -&gt; DynamicDimension
+dataCast2 :: (forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c DynamicDimension)
+$cdataCast2 :: forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c DynamicDimension)
+dataCast1 :: (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c DynamicDimension)
+$cdataCast1 :: forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c DynamicDimension)
+dataTypeOf :: DynamicDimension -&gt; DataType
+$cdataTypeOf :: DynamicDimension -&gt; DataType
+toConstr :: DynamicDimension -&gt; Constr
+$ctoConstr :: DynamicDimension -&gt; Constr
+gunfold :: (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c DynamicDimension
+$cgunfold :: forall (c :: Type -&gt; Type).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c DynamicDimension
+gfoldl :: (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; DynamicDimension -&gt; c DynamicDimension
+$cgfoldl :: forall (c :: Type -&gt; Type).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; DynamicDimension -&gt; c DynamicDimension
+$cp1Data :: Typeable DynamicDimension
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(forall x. DynamicDimension -&gt; Rep DynamicDimension x)
+-&gt; (forall x. Rep DynamicDimension x -&gt; DynamicDimension)
+-&gt; Generic DynamicDimension
+forall x. Rep DynamicDimension x -&gt; DynamicDimension
+forall x. DynamicDimension -&gt; Rep DynamicDimension x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cto :: forall x. Rep DynamicDimension x -&gt; DynamicDimension
+$cfrom :: forall x. DynamicDimension -&gt; Rep DynamicDimension x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679109139"><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#DynamicDimension"><span class="hs-identifier hs-type">DynamicDimension</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- | Dimensional values, or those that are only possibly dimensional, inhabit this class,</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- which allows access to a term-level representation of their dimension.</span><span>
+</span><span id="line-79"></span><span class="hs-keyword">class</span><span> </span><span id="HasDynamicDimension"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#HasDynamicDimension"><span class="hs-identifier hs-var">HasDynamicDimension</span></a></span></span><span> </span><span id="local-6989586621679109341"><span class="annot"><a href="#local-6989586621679109341"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-comment">-- | Gets the 'DynamicDimension of a dynamic dimensional value, which may be 'NoDimension' if it does not represent</span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-comment">-- a dimensional value of any 'Dimension'.</span><span>
+</span><span id="line-82"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-comment">-- A default implementation is available for types that are also in the `HasDimension` typeclass.</span><span>
+</span><span id="line-84"></span><span>  </span><span id="dynamicDimension"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dynamicDimension"><span class="hs-identifier hs-type">dynamicDimension</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679109341"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#DynamicDimension"><span class="hs-identifier hs-type">DynamicDimension</span></a></span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-keyword">default</span><span> </span><span id="dynamicDimension"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dynamicDimension"><span class="hs-identifier hs-type">dynamicDimension</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#HasDimension"><span class="hs-identifier hs-type">HasDimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109341"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679109341"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#DynamicDimension"><span class="hs-identifier hs-type">DynamicDimension</span></a></span><span>
+</span><span id="line-86"></span><span>  </span><span id="local-6989586621679109137"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dynamicDimension"><span class="hs-identifier hs-var hs-var">dynamicDimension</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dimension' -&gt; DynamicDimension
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#SomeDimension"><span class="hs-identifier hs-var">SomeDimension</span></a></span><span> </span><span class="annot"><span class="annottext">(Dimension' -&gt; DynamicDimension)
+-&gt; (a -&gt; Dimension') -&gt; a -&gt; DynamicDimension
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Dimension'
+forall a. HasDimension a =&gt; a -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dimension"><span class="hs-identifier hs-var">dimension</span></a></span></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- | Dimensional values inhabit this class, which allows access to a term-level representation of their dimension.</span><span>
+</span><span id="line-89"></span><span class="hs-keyword">class</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#HasDynamicDimension"><span class="hs-identifier hs-type">HasDynamicDimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109337"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span id="HasDimension"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#HasDimension"><span class="hs-identifier hs-var">HasDimension</span></a></span></span><span> </span><span id="local-6989586621679109337"><span class="annot"><a href="#local-6989586621679109337"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-90"></span><span>  </span><span class="hs-comment">-- | Obtains a term-level representation of a value's dimension.</span><span>
+</span><span id="line-91"></span><span>  </span><span id="dimension"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dimension"><span class="hs-identifier hs-type">dimension</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679109337"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#HasDynamicDimension"><span class="hs-identifier hs-type">HasDynamicDimension</span></a></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#DynamicDimension"><span class="hs-identifier hs-type">DynamicDimension</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-94"></span><span>  </span><span id="local-6989586621679109133"><span class="annot"><span class="annottext">dynamicDimension :: DynamicDimension -&gt; DynamicDimension
+</span><a href="#local-6989586621679109133"><span class="hs-identifier hs-var hs-var hs-var hs-var">dynamicDimension</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DynamicDimension -&gt; DynamicDimension
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679109131"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#HasDynamicDimension"><span class="hs-identifier hs-type">HasDynamicDimension</span></a></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#HasDimension"><span class="hs-identifier hs-type">HasDimension</span></a></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-99"></span><span>  </span><span id="local-6989586621679109127"><span class="annot"><span class="annottext">dimension :: Dimension' -&gt; Dimension'
+</span><a href="#local-6989586621679109127"><span class="hs-identifier hs-var hs-var hs-var hs-var">dimension</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dimension' -&gt; Dimension'
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- | Combines two 'DynamicDimension's, determining the 'DynamicDimension' of a quantity that must</span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- match both inputs.</span><span>
+</span><span id="line-103"></span><span class="hs-comment">--</span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- This is the lattice meet operation for 'DynamicDimension'.</span><span>
+</span><span id="line-105"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#matchDimensions"><span class="hs-identifier hs-type">matchDimensions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#DynamicDimension"><span class="hs-identifier hs-type">DynamicDimension</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#DynamicDimension"><span class="hs-identifier hs-type">DynamicDimension</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#DynamicDimension"><span class="hs-identifier hs-type">DynamicDimension</span></a></span><span>
+</span><span id="line-106"></span><span id="matchDimensions"><span class="annot"><span class="annottext">matchDimensions :: DynamicDimension -&gt; DynamicDimension -&gt; DynamicDimension
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#matchDimensions"><span class="hs-identifier hs-var hs-var">matchDimensions</span></a></span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#AnyDimension"><span class="hs-identifier hs-type">AnyDimension</span></a></span><span>        </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#AnyDimension"><span class="hs-identifier hs-type">AnyDimension</span></a></span><span>                   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DynamicDimension
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#AnyDimension"><span class="hs-identifier hs-var">AnyDimension</span></a></span><span>
+</span><span id="line-107"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#matchDimensions"><span class="hs-identifier hs-var">matchDimensions</span></a></span><span> </span><span id="local-6989586621679109126"><span class="annot"><span class="annottext">d :: DynamicDimension
+</span><a href="#local-6989586621679109126"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#SomeDimension"><span class="hs-identifier hs-type">SomeDimension</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#AnyDimension"><span class="hs-identifier hs-type">AnyDimension</span></a></span><span>                   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DynamicDimension
+</span><a href="#local-6989586621679109126"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-108"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#matchDimensions"><span class="hs-identifier hs-var">matchDimensions</span></a></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#AnyDimension"><span class="hs-identifier hs-type">AnyDimension</span></a></span><span>        </span><span id="local-6989586621679109125"><span class="annot"><span class="annottext">d :: DynamicDimension
+</span><a href="#local-6989586621679109125"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#SomeDimension"><span class="hs-identifier hs-type">SomeDimension</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DynamicDimension
+</span><a href="#local-6989586621679109125"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-109"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#matchDimensions"><span class="hs-identifier hs-var">matchDimensions</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#SomeDimension"><span class="hs-identifier hs-type">SomeDimension</span></a></span><span> </span><span id="local-6989586621679109124"><span class="annot"><span class="annottext">d1 :: Dimension'
+</span><a href="#local-6989586621679109124"><span class="hs-identifier hs-var">d1</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#SomeDimension"><span class="hs-identifier hs-type">SomeDimension</span></a></span><span> </span><span id="local-6989586621679109123"><span class="annot"><span class="annottext">d2 :: Dimension'
+</span><a href="#local-6989586621679109123"><span class="hs-identifier hs-var">d2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Dimension'
+</span><a href="#local-6989586621679109124"><span class="hs-identifier hs-var">d1</span></a></span><span> </span><span class="annot"><span class="annottext">Dimension' -&gt; Dimension' -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Dimension'
+</span><a href="#local-6989586621679109123"><span class="hs-identifier hs-var">d2</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dimension' -&gt; DynamicDimension
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#SomeDimension"><span class="hs-identifier hs-var">SomeDimension</span></a></span><span> </span><span class="annot"><span class="annottext">Dimension'
+</span><a href="#local-6989586621679109124"><span class="hs-identifier hs-var">d1</span></a></span><span>
+</span><span id="line-110"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#matchDimensions"><span class="hs-identifier hs-var">matchDimensions</span></a></span><span> </span><span class="hs-identifier">_</span><span>                   </span><span class="hs-identifier">_</span><span>                              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DynamicDimension
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#NoDimension"><span class="hs-identifier hs-var">NoDimension</span></a></span><span>
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- | Determines if a value that has a 'DynamicDimension' is compatible with a specified 'Dimension''.</span><span>
+</span><span id="line-113"></span><span id="local-6989586621679109122"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#isCompatibleWith"><span class="hs-identifier hs-type">isCompatibleWith</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#HasDynamicDimension"><span class="hs-identifier hs-type">HasDynamicDimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109122"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679109122"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-114"></span><span id="isCompatibleWith"><span class="annot"><span class="annottext">isCompatibleWith :: a -&gt; Dimension' -&gt; Bool
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#isCompatibleWith"><span class="hs-identifier hs-var hs-var">isCompatibleWith</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DynamicDimension -&gt; Dimension' -&gt; Bool
+</span><a href="#local-6989586621679109121"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(DynamicDimension -&gt; Dimension' -&gt; Bool)
+-&gt; (a -&gt; DynamicDimension) -&gt; a -&gt; Dimension' -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; DynamicDimension
+forall a. HasDynamicDimension a =&gt; a -&gt; DynamicDimension
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dynamicDimension"><span class="hs-identifier hs-var">dynamicDimension</span></a></span><span>
+</span><span id="line-115"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-116"></span><span>    </span><span id="local-6989586621679109121"><span class="annot"><span class="annottext">f :: DynamicDimension -&gt; Dimension' -&gt; Bool
+</span><a href="#local-6989586621679109121"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#AnyDimension"><span class="hs-identifier hs-type">AnyDimension</span></a></span><span>       </span><span class="hs-identifier">_</span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-117"></span><span>    </span><span class="annot"><a href="#local-6989586621679109121"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#SomeDimension"><span class="hs-identifier hs-type">SomeDimension</span></a></span><span> </span><span id="local-6989586621679109120"><span class="annot"><span class="annottext">d1 :: Dimension'
+</span><a href="#local-6989586621679109120"><span class="hs-identifier hs-var">d1</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679109119"><span class="annot"><span class="annottext">d2 :: Dimension'
+</span><a href="#local-6989586621679109119"><span class="hs-identifier hs-var">d2</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Dimension'
+</span><a href="#local-6989586621679109120"><span class="hs-identifier hs-var">d1</span></a></span><span> </span><span class="annot"><span class="annottext">Dimension' -&gt; Dimension' -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Dimension'
+</span><a href="#local-6989586621679109119"><span class="hs-identifier hs-var">d2</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-118"></span><span>    </span><span class="annot"><a href="#local-6989586621679109121"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-identifier">_</span><span>                  </span><span class="hs-identifier">_</span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- | Determines if a value that has a 'DynamicDimension' in fact has any valid dimension at all.</span><span>
+</span><span id="line-121"></span><span id="local-6989586621679109118"><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#hasSomeDimension"><span class="hs-identifier hs-type">hasSomeDimension</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#HasDynamicDimension"><span class="hs-identifier hs-type">HasDynamicDimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109118"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679109118"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-122"></span><span id="hasSomeDimension"><span class="annot"><span class="annottext">hasSomeDimension :: a -&gt; Bool
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#hasSomeDimension"><span class="hs-identifier hs-var hs-var">hasSomeDimension</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DynamicDimension -&gt; DynamicDimension -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">DynamicDimension
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#NoDimension"><span class="hs-identifier hs-var">NoDimension</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(DynamicDimension -&gt; Bool) -&gt; (a -&gt; DynamicDimension) -&gt; a -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; DynamicDimension
+forall a. HasDynamicDimension a =&gt; a -&gt; DynamicDimension
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dynamicDimension"><span class="hs-identifier hs-var">dynamicDimension</span></a></span><span>
+</span><span id="line-123"></span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- | The dimension of dimensionless values.</span><span>
+</span><span id="line-125"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dOne"><span class="hs-identifier hs-type">dOne</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span>
+</span><span id="line-126"></span><span id="dOne"><span class="annot"><span class="annottext">dOne :: Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dOne"><span class="hs-identifier hs-var hs-var">dOne</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dLength"><span class="hs-identifier hs-type">dLength</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dMass"><span class="hs-identifier hs-type">dMass</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dTime"><span class="hs-identifier hs-type">dTime</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dElectricCurrent"><span class="hs-identifier hs-type">dElectricCurrent</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dThermodynamicTemperature"><span class="hs-identifier hs-type">dThermodynamicTemperature</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dAmountOfSubstance"><span class="hs-identifier hs-type">dAmountOfSubstance</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dLuminousIntensity"><span class="hs-identifier hs-type">dLuminousIntensity</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span>
+</span><span id="line-129"></span><span id="dLength"><span class="annot"><span class="annottext">dLength :: Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dLength"><span class="hs-identifier hs-var hs-var">dLength</span></a></span></span><span>                   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-130"></span><span id="dMass"><span class="annot"><span class="annottext">dMass :: Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dMass"><span class="hs-identifier hs-var hs-var">dMass</span></a></span></span><span>                     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-131"></span><span id="dTime"><span class="annot"><span class="annottext">dTime :: Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dTime"><span class="hs-identifier hs-var hs-var">dTime</span></a></span></span><span>                     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-132"></span><span id="dElectricCurrent"><span class="annot"><span class="annottext">dElectricCurrent :: Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dElectricCurrent"><span class="hs-identifier hs-var hs-var">dElectricCurrent</span></a></span></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-133"></span><span id="dThermodynamicTemperature"><span class="annot"><span class="annottext">dThermodynamicTemperature :: Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dThermodynamicTemperature"><span class="hs-identifier hs-var hs-var">dThermodynamicTemperature</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-134"></span><span id="dAmountOfSubstance"><span class="annot"><span class="annottext">dAmountOfSubstance :: Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dAmountOfSubstance"><span class="hs-identifier hs-var hs-var">dAmountOfSubstance</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-135"></span><span id="dLuminousIntensity"><span class="annot"><span class="annottext">dLuminousIntensity :: Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dLuminousIntensity"><span class="hs-identifier hs-var hs-var">dLuminousIntensity</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span class="hs-comment">{-
+We will reuse the operators and function names from the Prelude.
+To prevent unpleasant surprises we give operators the same fixity
+as the Prelude.
+-}</span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span class="hs-keyword">infixr</span><span> </span><span class="hs-number">8</span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%5E"><span class="hs-operator hs-type">^</span></a></span><span>
+</span><span id="line-144"></span><span class="hs-keyword">infixl</span><span> </span><span class="hs-number">7</span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%2A"><span class="hs-operator hs-type">*</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%2F"><span class="hs-operator hs-type">/</span></a></span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span class="hs-comment">-- | Forms the product of two dimensions.</span><span>
+</span><span id="line-147"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%2A"><span class="hs-operator hs-type">(*)</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span>
+</span><span id="line-148"></span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-type">Dim'</span></a></span><span> </span><span id="local-6989586621679109116"><span class="annot"><span class="annottext">l :: Int
+</span><a href="#local-6989586621679109116"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679109115"><span class="annot"><span class="annottext">m :: Int
+</span><a href="#local-6989586621679109115"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679109114"><span class="annot"><span class="annottext">t :: Int
+</span><a href="#local-6989586621679109114"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679109113"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679109113"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679109112"><span class="annot"><span class="annottext">th :: Int
+</span><a href="#local-6989586621679109112"><span class="hs-identifier hs-var">th</span></a></span></span><span> </span><span id="local-6989586621679109111"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679109111"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679109110"><span class="annot"><span class="annottext">j :: Int
+</span><a href="#local-6989586621679109110"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span id="%2A"><span class="annot"><span class="annottext">* :: Dimension' -&gt; Dimension' -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%2A"><span class="hs-operator hs-var hs-var">*</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-type">Dim'</span></a></span><span> </span><span id="local-6989586621679109109"><span class="annot"><span class="annottext">l' :: Int
+</span><a href="#local-6989586621679109109"><span class="hs-identifier hs-var">l'</span></a></span></span><span> </span><span id="local-6989586621679109108"><span class="annot"><span class="annottext">m' :: Int
+</span><a href="#local-6989586621679109108"><span class="hs-identifier hs-var">m'</span></a></span></span><span> </span><span id="local-6989586621679109107"><span class="annot"><span class="annottext">t' :: Int
+</span><a href="#local-6989586621679109107"><span class="hs-identifier hs-var">t'</span></a></span></span><span> </span><span id="local-6989586621679109106"><span class="annot"><span class="annottext">i' :: Int
+</span><a href="#local-6989586621679109106"><span class="hs-identifier hs-var">i'</span></a></span></span><span> </span><span id="local-6989586621679109105"><span class="annot"><span class="annottext">th' :: Int
+</span><a href="#local-6989586621679109105"><span class="hs-identifier hs-var">th'</span></a></span></span><span> </span><span id="local-6989586621679109104"><span class="annot"><span class="annottext">n' :: Int
+</span><a href="#local-6989586621679109104"><span class="hs-identifier hs-var">n'</span></a></span></span><span> </span><span id="local-6989586621679109103"><span class="annot"><span class="annottext">j' :: Int
+</span><a href="#local-6989586621679109103"><span class="hs-identifier hs-var">j'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109116"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109109"><span class="hs-identifier hs-var">l'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109115"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109108"><span class="hs-identifier hs-var">m'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109114"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109107"><span class="hs-identifier hs-var">t'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109113"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109106"><span class="hs-identifier hs-var">i'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109112"><span class="hs-identifier hs-var">th</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109105"><span class="hs-identifier hs-var">th'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109111"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109104"><span class="hs-identifier hs-var">n'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109110"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109103"><span class="hs-identifier hs-var">j'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span class="hs-comment">-- | Forms the quotient of two dimensions.</span><span>
+</span><span id="line-151"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%2F"><span class="hs-operator hs-type">(/)</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span>
+</span><span id="line-152"></span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-type">Dim'</span></a></span><span> </span><span id="local-6989586621679109102"><span class="annot"><span class="annottext">l :: Int
+</span><a href="#local-6989586621679109102"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679109101"><span class="annot"><span class="annottext">m :: Int
+</span><a href="#local-6989586621679109101"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679109100"><span class="annot"><span class="annottext">t :: Int
+</span><a href="#local-6989586621679109100"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679109099"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679109099"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679109098"><span class="annot"><span class="annottext">th :: Int
+</span><a href="#local-6989586621679109098"><span class="hs-identifier hs-var">th</span></a></span></span><span> </span><span id="local-6989586621679109097"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679109097"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679109096"><span class="annot"><span class="annottext">j :: Int
+</span><a href="#local-6989586621679109096"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span id="%2F"><span class="annot"><span class="annottext">/ :: Dimension' -&gt; Dimension' -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%2F"><span class="hs-operator hs-var hs-var">/</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-type">Dim'</span></a></span><span> </span><span id="local-6989586621679109095"><span class="annot"><span class="annottext">l' :: Int
+</span><a href="#local-6989586621679109095"><span class="hs-identifier hs-var">l'</span></a></span></span><span> </span><span id="local-6989586621679109094"><span class="annot"><span class="annottext">m' :: Int
+</span><a href="#local-6989586621679109094"><span class="hs-identifier hs-var">m'</span></a></span></span><span> </span><span id="local-6989586621679109093"><span class="annot"><span class="annottext">t' :: Int
+</span><a href="#local-6989586621679109093"><span class="hs-identifier hs-var">t'</span></a></span></span><span> </span><span id="local-6989586621679109092"><span class="annot"><span class="annottext">i' :: Int
+</span><a href="#local-6989586621679109092"><span class="hs-identifier hs-var">i'</span></a></span></span><span> </span><span id="local-6989586621679109091"><span class="annot"><span class="annottext">th' :: Int
+</span><a href="#local-6989586621679109091"><span class="hs-identifier hs-var">th'</span></a></span></span><span> </span><span id="local-6989586621679109090"><span class="annot"><span class="annottext">n' :: Int
+</span><a href="#local-6989586621679109090"><span class="hs-identifier hs-var">n'</span></a></span></span><span> </span><span id="local-6989586621679109089"><span class="annot"><span class="annottext">j' :: Int
+</span><a href="#local-6989586621679109089"><span class="hs-identifier hs-var">j'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109102"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109095"><span class="hs-identifier hs-var">l'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109101"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109094"><span class="hs-identifier hs-var">m'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109100"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109093"><span class="hs-identifier hs-var">t'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109099"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109092"><span class="hs-identifier hs-var">i'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109098"><span class="hs-identifier hs-var">th</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109091"><span class="hs-identifier hs-var">th'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109097"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109090"><span class="hs-identifier hs-var">n'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109096"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109089"><span class="hs-identifier hs-var">j'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span class="hs-comment">-- | Raises a dimension to an integer power.</span><span>
+</span><span id="line-155"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%5E"><span class="hs-operator hs-type">(^)</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span>
+</span><span id="line-156"></span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-type">Dim'</span></a></span><span> </span><span id="local-6989586621679109088"><span class="annot"><span class="annottext">l :: Int
+</span><a href="#local-6989586621679109088"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679109087"><span class="annot"><span class="annottext">m :: Int
+</span><a href="#local-6989586621679109087"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679109086"><span class="annot"><span class="annottext">t :: Int
+</span><a href="#local-6989586621679109086"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679109085"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679109085"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679109084"><span class="annot"><span class="annottext">th :: Int
+</span><a href="#local-6989586621679109084"><span class="hs-identifier hs-var">th</span></a></span></span><span> </span><span id="local-6989586621679109083"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679109083"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679109082"><span class="annot"><span class="annottext">j :: Int
+</span><a href="#local-6989586621679109082"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span id="%5E"><span class="annot"><span class="annottext">^ :: Dimension' -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%5E"><span class="hs-operator hs-var hs-var">^</span></a></span></span><span> </span><span id="local-6989586621679109081"><span class="annot"><span class="annottext">x :: Int
+</span><a href="#local-6989586621679109081"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109081"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">P.*</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109088"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109081"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">P.*</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109087"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109081"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">P.*</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109086"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109081"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">P.*</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109085"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109081"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">P.*</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109084"><span class="hs-identifier hs-var">th</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109081"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">P.*</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109083"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109081"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">P.*</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109082"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-157"></span><span>
+</span><span id="line-158"></span><span class="hs-comment">-- | Forms the reciprocal of a dimension.</span><span>
+</span><span id="line-159"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#recip"><span class="hs-identifier hs-type">recip</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span>
+</span><span id="line-160"></span><span id="recip"><span class="annot"><span class="annottext">recip :: Dimension' -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#recip"><span class="hs-identifier hs-var hs-var">recip</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#dOne"><span class="hs-identifier hs-var">dOne</span></a></span><span> </span><span class="annot"><span class="annottext">Dimension' -&gt; Dimension' -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#%2F"><span class="hs-operator hs-var">/</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span class="hs-comment">-- | Takes the nth root of a dimension, if it exists.</span><span>
+</span><span id="line-163"></span><span class="hs-comment">--</span><span>
+</span><span id="line-164"></span><span class="hs-comment">-- n must not be zero.</span><span>
+</span><span id="line-165"></span><span class="hs-comment">--</span><span>
+</span><span id="line-166"></span><span class="hs-comment">-- prop&gt; nroot (negate n) d == nroot n (recip d)</span><span>
+</span><span id="line-167"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#nroot"><span class="hs-identifier hs-type">nroot</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span>
+</span><span id="line-168"></span><span id="nroot"><span class="annot"><span class="annottext">nroot :: Int -&gt; Dimension' -&gt; Maybe Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#nroot"><span class="hs-identifier hs-var hs-var">nroot</span></a></span></span><span> </span><span id="local-6989586621679109079"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679109079"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679109078"><span class="annot"><span class="annottext">d :: Dimension'
+</span><a href="#local-6989586621679109078"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109079"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">((Int, Int) -&gt; Bool) -&gt; [(Int, Int)] -&gt; Bool
+forall (t :: Type -&gt; Type) a.
+Foldable t =&gt;
+(a -&gt; Bool) -&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Bool) -&gt; ((Int, Int) -&gt; Int) -&gt; (Int, Int) -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; Int
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, Int)]
+</span><a href="#local-6989586621679109077"><span class="hs-identifier hs-var">ds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Maybe Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#fromList"><span class="hs-identifier hs-var">fromList</span></a></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; Maybe Dimension')
+-&gt; ([(Int, Int)] -&gt; [Int]) -&gt; [(Int, Int)] -&gt; Maybe Dimension'
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Int, Int) -&gt; Int) -&gt; [(Int, Int)] -&gt; [Int]
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; Int
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">([(Int, Int)] -&gt; Maybe Dimension')
+-&gt; [(Int, Int)] -&gt; Maybe Dimension'
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[(Int, Int)]
+</span><a href="#local-6989586621679109077"><span class="hs-identifier hs-var">ds</span></a></span><span>
+</span><span id="line-169"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Dimension'
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-170"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-171"></span><span>    </span><span id="local-6989586621679109077"><span class="annot"><span class="annottext">ds :: [(Int, Int)]
+</span><a href="#local-6989586621679109077"><span class="hs-identifier hs-var hs-var">ds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; (Int, Int)) -&gt; [Int] -&gt; [(Int, Int)]
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; (Int, Int)
+forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
+</span><span class="hs-operator hs-var">`divMod`</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109079"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; [(Int, Int)])
+-&gt; (Dimension' -&gt; [Int]) -&gt; Dimension' -&gt; [(Int, Int)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Dimension' -&gt; [Int]
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#asList"><span class="hs-identifier hs-var">asList</span></a></span><span> </span><span class="annot"><span class="annottext">(Dimension' -&gt; [(Int, Int)]) -&gt; Dimension' -&gt; [(Int, Int)]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Dimension'
+</span><a href="#local-6989586621679109078"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-172"></span><span>
+</span><span id="line-173"></span><span class="hs-comment">-- | Takes the square root of a dimension, if it exists.</span><span>
+</span><span id="line-174"></span><span class="hs-comment">--</span><span>
+</span><span id="line-175"></span><span class="hs-comment">-- prop&gt; sqrt d == nroot 2 d</span><span>
+</span><span id="line-176"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#sqrt"><span class="hs-identifier hs-type">sqrt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span>
+</span><span id="line-177"></span><span id="sqrt"><span class="annot"><span class="annottext">sqrt :: Dimension' -&gt; Maybe Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#sqrt"><span class="hs-identifier hs-var hs-var">sqrt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Dimension' -&gt; Maybe Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#nroot"><span class="hs-identifier hs-var">nroot</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-178"></span><span>
+</span><span id="line-179"></span><span class="hs-comment">-- | Takes the cube root of a dimension, if it exists.</span><span>
+</span><span id="line-180"></span><span class="hs-comment">--</span><span>
+</span><span id="line-181"></span><span class="hs-comment">-- prop&gt; cbrt d == nroot 3 d</span><span>
+</span><span id="line-182"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#cbrt"><span class="hs-identifier hs-type">cbrt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span>
+</span><span id="line-183"></span><span id="cbrt"><span class="annot"><span class="annottext">cbrt :: Dimension' -&gt; Maybe Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#cbrt"><span class="hs-identifier hs-var hs-var">cbrt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Dimension' -&gt; Maybe Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#nroot"><span class="hs-identifier hs-var">nroot</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span>
+</span><span id="line-184"></span><span>
+</span><span id="line-185"></span><span class="hs-comment">-- | Converts a dimension to a list of 7 integers, representing the exponent associated with each</span><span>
+</span><span id="line-186"></span><span class="hs-comment">-- of the 7 SI base dimensions in the standard order.</span><span>
+</span><span id="line-187"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#asList"><span class="hs-identifier hs-type">asList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span><span>
+</span><span id="line-188"></span><span id="asList"><span class="annot"><span class="annottext">asList :: Dimension' -&gt; [Int]
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#asList"><span class="hs-identifier hs-var hs-var">asList</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-type">Dim'</span></a></span><span> </span><span id="local-6989586621679109075"><span class="annot"><span class="annottext">l :: Int
+</span><a href="#local-6989586621679109075"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679109074"><span class="annot"><span class="annottext">m :: Int
+</span><a href="#local-6989586621679109074"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679109073"><span class="annot"><span class="annottext">t :: Int
+</span><a href="#local-6989586621679109073"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679109072"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679109072"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679109071"><span class="annot"><span class="annottext">th :: Int
+</span><a href="#local-6989586621679109071"><span class="hs-identifier hs-var">th</span></a></span></span><span> </span><span id="local-6989586621679109070"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679109070"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679109069"><span class="annot"><span class="annottext">j :: Int
+</span><a href="#local-6989586621679109069"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109075"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109074"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109073"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109072"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109071"><span class="hs-identifier hs-var">th</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109070"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109069"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-189"></span><span>
+</span><span id="line-190"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#fromList"><span class="hs-identifier hs-type">fromList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dimension%27"><span class="hs-identifier hs-type">Dimension'</span></a></span><span>
+</span><span id="line-191"></span><span id="fromList"><span class="annot"><span class="annottext">fromList :: [Int] -&gt; Maybe Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#fromList"><span class="hs-identifier hs-var hs-var">fromList</span></a></span></span><span> </span><span class="hs-special">[</span><span id="local-6989586621679109068"><span class="annot"><span class="annottext">l :: Int
+</span><a href="#local-6989586621679109068"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109067"><span class="annot"><span class="annottext">m :: Int
+</span><a href="#local-6989586621679109067"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109066"><span class="annot"><span class="annottext">t :: Int
+</span><a href="#local-6989586621679109066"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109065"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679109065"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109064"><span class="annot"><span class="annottext">th :: Int
+</span><a href="#local-6989586621679109064"><span class="hs-identifier hs-var">th</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109063"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679109063"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109062"><span class="annot"><span class="annottext">j :: Int
+</span><a href="#local-6989586621679109062"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dimension' -&gt; Maybe Dimension'
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Dimension' -&gt; Maybe Dimension') -&gt; Dimension' -&gt; Maybe Dimension'
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int -&gt; Dimension'
+</span><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#Dim%27"><span class="hs-identifier hs-var">Dim'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109068"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109067"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109066"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109065"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109064"><span class="hs-identifier hs-var">th</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109063"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109062"><span class="hs-identifier hs-var">j</span></a></span><span>
+</span><span id="line-192"></span><span class="annot"><a href="Numeric.Units.Dimensional.Dimensions.TermLevel.html#fromList"><span class="hs-identifier hs-var">fromList</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Dimension'
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-193"></span></pre></body></html>

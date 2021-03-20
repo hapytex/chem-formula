@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_1Fi60GWMUKN5PCbLGBkanq"></span><span class="hs-pragma">{-# OPTIONS_HADDOCK not-home, show-extensions #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE AutoDeriveTypeable #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE ConstraintKinds #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE KindSignatures #-}</span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-10"></span><span class="hs-pragma">{-# LANGUAGE TypeOperators #-}</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-comment">{- |
+   Copyright  : Copyright (C) 2006-2018 Bjorn Buckwalter
+   License    : BSD3
+
+   Maintainer : bjorn@buckwalter.se
+   Stability  : Stable
+   Portability: GHC only
+
+Provides a type level representation of 'Variant's of dimensional values,
+which may be quantities or units.
+-}</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Numeric.Units.Dimensional.Variants</span><span>
+</span><span id="line-24"></span><span class="hs-special">(</span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Variant"><span class="hs-identifier">Variant</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Metricality"><span class="hs-identifier">Metricality</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#%2A"><span class="hs-operator">(*)</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#%2F"><span class="hs-operator">(/)</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Weaken"><span class="hs-identifier">Weaken</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#CompatibleVariants"><span class="hs-identifier">CompatibleVariants</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ExactPi.TypeLevel</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">E</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- | Encodes whether a unit is a metric unit, that is, whether it can be combined</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- with a metric prefix to form a related unit.</span><span>
+</span><span id="line-40"></span><span id="local-6989586621679109947"><span id="local-6989586621679109948"></span></span><span class="hs-keyword">data</span><span> </span><span id="Metricality"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Metricality"><span class="hs-identifier hs-var">Metricality</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Metric"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Metric"><span class="hs-identifier hs-var">Metric</span></a></span></span><span>    </span><span class="hs-comment">-- ^ Capable of receiving a metric prefix.</span><span>
+</span><span id="line-41"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="NonMetric"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#NonMetric"><span class="hs-identifier hs-var">NonMetric</span></a></span></span><span> </span><span class="hs-comment">-- ^ Incapable of receiving a metric prefix.</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109941"><span id="local-6989586621679109943"><span class="annot"><span class="annottext">Metricality -&gt; Metricality -&gt; Bool
+(Metricality -&gt; Metricality -&gt; Bool)
+-&gt; (Metricality -&gt; Metricality -&gt; Bool) -&gt; Eq Metricality
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Metricality -&gt; Metricality -&gt; Bool
+$c/= :: Metricality -&gt; Metricality -&gt; Bool
+== :: Metricality -&gt; Metricality -&gt; Bool
+$c== :: Metricality -&gt; Metricality -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109925"><span id="local-6989586621679109927"><span id="local-6989586621679109929"><span id="local-6989586621679109931"><span id="local-6989586621679109933"><span id="local-6989586621679109935"><span id="local-6989586621679109937"><span class="annot"><span class="annottext">Eq Metricality
+Eq Metricality =&gt;
+(Metricality -&gt; Metricality -&gt; Ordering)
+-&gt; (Metricality -&gt; Metricality -&gt; Bool)
+-&gt; (Metricality -&gt; Metricality -&gt; Bool)
+-&gt; (Metricality -&gt; Metricality -&gt; Bool)
+-&gt; (Metricality -&gt; Metricality -&gt; Bool)
+-&gt; (Metricality -&gt; Metricality -&gt; Metricality)
+-&gt; (Metricality -&gt; Metricality -&gt; Metricality)
+-&gt; Ord Metricality
+Metricality -&gt; Metricality -&gt; Bool
+Metricality -&gt; Metricality -&gt; Ordering
+Metricality -&gt; Metricality -&gt; Metricality
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: Metricality -&gt; Metricality -&gt; Metricality
+$cmin :: Metricality -&gt; Metricality -&gt; Metricality
+max :: Metricality -&gt; Metricality -&gt; Metricality
+$cmax :: Metricality -&gt; Metricality -&gt; Metricality
+&gt;= :: Metricality -&gt; Metricality -&gt; Bool
+$c&gt;= :: Metricality -&gt; Metricality -&gt; Bool
+&gt; :: Metricality -&gt; Metricality -&gt; Bool
+$c&gt; :: Metricality -&gt; Metricality -&gt; Bool
+&lt;= :: Metricality -&gt; Metricality -&gt; Bool
+$c&lt;= :: Metricality -&gt; Metricality -&gt; Bool
+&lt; :: Metricality -&gt; Metricality -&gt; Bool
+$c&lt; :: Metricality -&gt; Metricality -&gt; Bool
+compare :: Metricality -&gt; Metricality -&gt; Ordering
+$ccompare :: Metricality -&gt; Metricality -&gt; Ordering
+$cp1Ord :: Eq Metricality
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="%24cNonMetric"><span id="%24cMetric"><span id="%24tMetricality"><span id="local-6989586621679109895"><span id="local-6989586621679109897"><span id="local-6989586621679109899"><span id="local-6989586621679109901"><span id="local-6989586621679109903"><span id="local-6989586621679109905"><span id="local-6989586621679109907"><span id="local-6989586621679109909"><span id="local-6989586621679109911"><span id="local-6989586621679109913"><span id="local-6989586621679109915"><span id="local-6989586621679109917"><span id="local-6989586621679109919"><span id="local-6989586621679109921"><span class="annot"><span class="annottext">Typeable Metricality
+DataType
+Constr
+Typeable Metricality =&gt;
+(forall (c :: Type -&gt; Type).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; Metricality -&gt; c Metricality)
+-&gt; (forall (c :: Type -&gt; Type).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c Metricality)
+-&gt; (Metricality -&gt; Constr)
+-&gt; (Metricality -&gt; DataType)
+-&gt; (forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c Metricality))
+-&gt; (forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c Metricality))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; Metricality -&gt; Metricality)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Metricality -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Metricality -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; Metricality -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Metricality -&gt; u)
+-&gt; (forall (m :: Type -&gt; Type).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; Metricality -&gt; m Metricality)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; Metricality -&gt; m Metricality)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; Metricality -&gt; m Metricality)
+-&gt; Data Metricality
+Metricality -&gt; DataType
+Metricality -&gt; Constr
+(forall b. Data b =&gt; b -&gt; b) -&gt; Metricality -&gt; Metricality
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Metricality -&gt; c Metricality
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c Metricality
+forall a.
+Typeable a =&gt;
+(forall (c :: Type -&gt; Type).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: Type -&gt; Type).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: Type -&gt; Type).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Metricality -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; Metricality -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Metricality -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Metricality -&gt; r
+forall (m :: Type -&gt; Type).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Metricality -&gt; m Metricality
+forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Metricality -&gt; m Metricality
+forall (c :: Type -&gt; Type).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c Metricality
+forall (c :: Type -&gt; Type).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Metricality -&gt; c Metricality
+forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c Metricality)
+forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c Metricality)
+$cNonMetric :: Constr
+$cMetric :: Constr
+$tMetricality :: DataType
+gmapMo :: (forall d. Data d =&gt; d -&gt; m d) -&gt; Metricality -&gt; m Metricality
+$cgmapMo :: forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Metricality -&gt; m Metricality
+gmapMp :: (forall d. Data d =&gt; d -&gt; m d) -&gt; Metricality -&gt; m Metricality
+$cgmapMp :: forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Metricality -&gt; m Metricality
+gmapM :: (forall d. Data d =&gt; d -&gt; m d) -&gt; Metricality -&gt; m Metricality
+$cgmapM :: forall (m :: Type -&gt; Type).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Metricality -&gt; m Metricality
+gmapQi :: Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Metricality -&gt; u
+$cgmapQi :: forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Metricality -&gt; u
+gmapQ :: (forall d. Data d =&gt; d -&gt; u) -&gt; Metricality -&gt; [u]
+$cgmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; Metricality -&gt; [u]
+gmapQr :: (r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Metricality -&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Metricality -&gt; r
+gmapQl :: (r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Metricality -&gt; r
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Metricality -&gt; r
+gmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; Metricality -&gt; Metricality
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; Metricality -&gt; Metricality
+dataCast2 :: (forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c Metricality)
+$cdataCast2 :: forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c Metricality)
+dataCast1 :: (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c Metricality)
+$cdataCast1 :: forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c Metricality)
+dataTypeOf :: Metricality -&gt; DataType
+$cdataTypeOf :: Metricality -&gt; DataType
+toConstr :: Metricality -&gt; Constr
+$ctoConstr :: Metricality -&gt; Constr
+gunfold :: (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c Metricality
+$cgunfold :: forall (c :: Type -&gt; Type).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c Metricality
+gfoldl :: (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Metricality -&gt; c Metricality
+$cgfoldl :: forall (c :: Type -&gt; Type).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Metricality -&gt; c Metricality
+$cp1Data :: Typeable Metricality
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(forall x. Metricality -&gt; Rep Metricality x)
+-&gt; (forall x. Rep Metricality x -&gt; Metricality)
+-&gt; Generic Metricality
+forall x. Rep Metricality x -&gt; Metricality
+forall x. Metricality -&gt; Rep Metricality x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cto :: forall x. Rep Metricality x -&gt; Metricality
+$cfrom :: forall x. Metricality -&gt; Rep Metricality x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679109886"><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Metricality"><span class="hs-identifier hs-type">Metricality</span></a></span></span><span> </span><span class="hs-keyword">where</span><span> </span><span class="hs-comment">-- instance is derived from Generic instance</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-comment">{-
+The variety 'v' of 'Dimensional'
+
+The phantom type variable v is used to distinguish between units
+and quantities. It must be one of the following:
+-}</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- | The kind of variants of dimensional values.</span><span>
+</span><span id="line-54"></span><span id="local-6989586621679109883"><span id="local-6989586621679109884"></span></span><span class="hs-keyword">data</span><span> </span><span id="Variant"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Variant"><span class="hs-identifier hs-var">Variant</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="DQuantity"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DQuantity"><span class="hs-identifier hs-var">DQuantity</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">E.ExactPi'</span></span><span> </span><span class="hs-comment">-- ^ The value is a quantity, stored as an `ExactPi` multiple of its value in its dimension's SI coherent unit.</span><span>
+</span><span id="line-55"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span id="DUnit"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DUnit"><span class="hs-identifier hs-var">DUnit</span></a></span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Metricality"><span class="hs-identifier hs-type">Metricality</span></a></span><span>  </span><span class="hs-comment">-- ^ The value is a unit, possibly a 'Metric' unit.</span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(forall x. Variant -&gt; Rep Variant x)
+-&gt; (forall x. Rep Variant x -&gt; Variant) -&gt; Generic Variant
+forall x. Rep Variant x -&gt; Variant
+forall x. Variant -&gt; Rep Variant x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cto :: forall x. Rep Variant x -&gt; Variant
+$cfrom :: forall x. Variant -&gt; Rep Variant x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">{-
+We will reuse the operators and function names from the Prelude.
+To prevent unpleasant surprises we give operators the same fixity
+as the Prelude.
+-}</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">infixl</span><span> </span><span class="hs-number">7</span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#%2A"><span class="hs-operator hs-type">*</span></a></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- | Forms the product of two 'Variant's.</span><span>
+</span><span id="line-67"></span><span class="hs-comment">--</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- The product of units is a non-metric unit.</span><span>
+</span><span id="line-69"></span><span class="hs-comment">--</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- The product of quantities is a quantity.</span><span>
+</span><span id="line-71"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">family</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109877"><span class="annot"><a href="#local-6989586621679109877"><span class="hs-identifier hs-type">v1</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Variant"><span class="hs-identifier hs-type">Variant</span></a></span><span class="hs-special">)</span><span> </span><span id="%2A"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#%2A"><span class="hs-operator hs-var">*</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109876"><span class="annot"><a href="#local-6989586621679109876"><span class="hs-identifier hs-type">v2</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Variant"><span class="hs-identifier hs-type">Variant</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Variant"><span class="hs-identifier hs-type">Variant</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DUnit"><span class="hs-identifier hs-type">DUnit</span></a></span><span> </span><span id="local-6989586621679109875"><span class="annot"><a href="#local-6989586621679109875"><span class="hs-identifier hs-type hs-type">m1</span></a></span></span><span> </span><span id="%2A"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#%2A"><span class="hs-operator hs-var">*</span></a></span></span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DUnit"><span class="hs-identifier hs-type">DUnit</span></a></span><span> </span><span id="local-6989586621679109874"><span class="annot"><a href="#local-6989586621679109874"><span class="hs-identifier hs-type hs-type">m2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DUnit"><span class="hs-identifier hs-type">DUnit</span></a></span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#NonMetric"><span class="hs-identifier hs-type">NonMetric</span></a></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DQuantity"><span class="hs-identifier hs-type">DQuantity</span></a></span><span> </span><span id="local-6989586621679109873"><span class="annot"><a href="#local-6989586621679109873"><span class="hs-identifier hs-type hs-type">s1</span></a></span></span><span> </span><span id="%2A"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#%2A"><span class="hs-operator hs-var">*</span></a></span></span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DQuantity"><span class="hs-identifier hs-type">DQuantity</span></a></span><span> </span><span id="local-6989586621679109872"><span class="annot"><a href="#local-6989586621679109872"><span class="hs-identifier hs-type hs-type">s2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DQuantity"><span class="hs-identifier hs-type">DQuantity</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679109873"><span class="hs-identifier hs-type">s1</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">E.*</span></span><span> </span><span class="annot"><a href="#local-6989586621679109872"><span class="hs-identifier hs-type">s2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">family</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109870"><span class="annot"><a href="#local-6989586621679109870"><span class="hs-identifier hs-type">v1</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Variant"><span class="hs-identifier hs-type">Variant</span></a></span><span class="hs-special">)</span><span> </span><span id="%2F"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#%2F"><span class="hs-operator hs-var">/</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109869"><span class="annot"><a href="#local-6989586621679109869"><span class="hs-identifier hs-type">v2</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Variant"><span class="hs-identifier hs-type">Variant</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Variant"><span class="hs-identifier hs-type">Variant</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DUnit"><span class="hs-identifier hs-type">DUnit</span></a></span><span> </span><span id="local-6989586621679109868"><span class="annot"><a href="#local-6989586621679109868"><span class="hs-identifier hs-type hs-type">m1</span></a></span></span><span> </span><span id="%2F"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#%2F"><span class="hs-operator hs-var">/</span></a></span></span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DUnit"><span class="hs-identifier hs-type">DUnit</span></a></span><span> </span><span id="local-6989586621679109867"><span class="annot"><a href="#local-6989586621679109867"><span class="hs-identifier hs-type hs-type">m2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DUnit"><span class="hs-identifier hs-type">DUnit</span></a></span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#NonMetric"><span class="hs-identifier hs-type">NonMetric</span></a></span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DQuantity"><span class="hs-identifier hs-type">DQuantity</span></a></span><span> </span><span id="local-6989586621679109866"><span class="annot"><a href="#local-6989586621679109866"><span class="hs-identifier hs-type hs-type">s1</span></a></span></span><span> </span><span id="%2F"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#%2F"><span class="hs-operator hs-var">/</span></a></span></span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DQuantity"><span class="hs-identifier hs-type">DQuantity</span></a></span><span> </span><span id="local-6989586621679109865"><span class="annot"><a href="#local-6989586621679109865"><span class="hs-identifier hs-type hs-type">s2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DQuantity"><span class="hs-identifier hs-type">DQuantity</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679109866"><span class="hs-identifier hs-type">s1</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">E./</span></span><span> </span><span class="annot"><a href="#local-6989586621679109865"><span class="hs-identifier hs-type">s2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- | Weakens a 'Variant' by forgetting possibly uninteresting type-level information.</span><span>
+</span><span id="line-80"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">family</span><span> </span><span id="Weaken"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Weaken"><span class="hs-identifier hs-var">Weaken</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109863"><span class="annot"><a href="#local-6989586621679109863"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Variant"><span class="hs-identifier hs-type">Variant</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Variant"><span class="hs-identifier hs-type">Variant</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-81"></span><span>  </span><span id="Weaken"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Weaken"><span class="hs-identifier hs-var">Weaken</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DQuantity"><span class="hs-identifier hs-type">DQuantity</span></a></span><span> </span><span id="local-6989586621679109862"><span class="annot"><a href="#local-6989586621679109862"><span class="hs-identifier hs-type hs-type">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DQuantity"><span class="hs-identifier hs-type">DQuantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109862"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-82"></span><span>  </span><span id="Weaken"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Weaken"><span class="hs-identifier hs-var">Weaken</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DUnit"><span class="hs-identifier hs-type">DUnit</span></a></span><span> </span><span id="local-6989586621679109861"><span class="annot"><a href="#local-6989586621679109861"><span class="hs-identifier hs-type hs-type">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DUnit"><span class="hs-identifier hs-type">DUnit</span></a></span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#NonMetric"><span class="hs-identifier hs-type">NonMetric</span></a></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- | Two 'Variant's are compatible when dimensional values of the first may be converted</span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- into the second merely by changing the representation of their values.</span><span>
+</span><span id="line-86"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">family</span><span> </span><span id="AreCompatible"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#AreCompatible"><span class="hs-identifier hs-var">AreCompatible</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109859"><span class="annot"><a href="#local-6989586621679109859"><span class="hs-identifier hs-type">v1</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Variant"><span class="hs-identifier hs-type">Variant</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109858"><span class="annot"><a href="#local-6989586621679109858"><span class="hs-identifier hs-type">v2</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#Variant"><span class="hs-identifier hs-type">Variant</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-87"></span><span>  </span><span id="AreCompatible"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#AreCompatible"><span class="hs-identifier hs-var">AreCompatible</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DQuantity"><span class="hs-identifier hs-type">DQuantity</span></a></span><span> </span><span id="local-6989586621679109857"><span class="annot"><a href="#local-6989586621679109857"><span class="hs-identifier hs-type hs-type">s1</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-special">(</span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DQuantity"><span class="hs-identifier hs-type">DQuantity</span></a></span><span> </span><span id="local-6989586621679109856"><span class="annot"><a href="#local-6989586621679109856"><span class="hs-identifier hs-type hs-type">s2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span>
+</span><span id="line-88"></span><span>  </span><span id="AreCompatible"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#AreCompatible"><span class="hs-identifier hs-var">AreCompatible</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DUnit"><span class="hs-identifier hs-type">DUnit</span></a></span><span> </span><span id="local-6989586621679109855"><span class="annot"><a href="#local-6989586621679109855"><span class="hs-identifier hs-type hs-type">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#DUnit"><span class="hs-identifier hs-type">DUnit</span></a></span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#NonMetric"><span class="hs-identifier hs-type">NonMetric</span></a></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span>
+</span><span id="line-89"></span><span>  </span><span id="AreCompatible"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#AreCompatible"><span class="hs-identifier hs-var">AreCompatible</span></a></span></span><span> </span><span id="local-6989586621679109854"><span class="annot"><a href="#local-6989586621679109854"><span class="hs-identifier hs-type hs-type">s</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679109854"><span class="hs-identifier hs-type">s</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span>
+</span><span id="line-90"></span><span>  </span><span id="AreCompatible"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#AreCompatible"><span class="hs-identifier hs-var">AreCompatible</span></a></span></span><span> </span><span id="local-6989586621679109853"><span class="annot"><a href="#local-6989586621679109853"><span class="hs-identifier hs-type hs-type">s1</span></a></span></span><span> </span><span id="local-6989586621679109852"><span class="annot"><a href="#local-6989586621679109852"><span class="hs-identifier hs-type hs-type">s2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="annot"><span class="hs-identifier hs-type">False</span></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- | Two 'Variant's are compatible when dimensional values of the first may be converted</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- into the second merely by changing the representation of their values.</span><span>
+</span><span id="line-94"></span><span class="hs-keyword">type</span><span> </span><span id="CompatibleVariants"><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#CompatibleVariants"><span class="hs-identifier hs-var">CompatibleVariants</span></a></span></span><span> </span><span id="local-6989586621679109851"><span class="annot"><a href="#local-6989586621679109851"><span class="hs-identifier hs-type">v1</span></a></span></span><span> </span><span id="local-6989586621679109850"><span class="annot"><a href="#local-6989586621679109850"><span class="hs-identifier hs-type">v2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">'</span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Variants.html#AreCompatible"><span class="hs-identifier hs-type">AreCompatible</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109851"><span class="hs-identifier hs-type">v1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109850"><span class="hs-identifier hs-type">v2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span></pre></body></html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- |
+    Copyright  : Copyright (C) 2006-2018 Bjorn Buckwalter
+    License    : BSD3
+
+    Maintainer : bjorn@buckwalter.se
+    Stability  : Stable
+
+Defines convenience functions for inspecting and manipulating quantities with 'RealFloat'
+floating-point representations.
+
+The dimensionally-typed versions of functions from Patrick Perry's @ieee754@ package
+copy that package's API as closely as possible, by permission. In turn they are based on
+the @tango@ math library for the D language.
+
+-}</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Numeric.Units.Dimensional.Float</span><span>
+</span><span id="line-20"></span><span class="hs-special">(</span><span>
+</span><span id="line-21"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Lifted Predicates from 'RealFloat'</span></span><span>
+</span><span id="line-22"></span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#isDenormalized"><span class="hs-identifier">isDenormalized</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#isInfinite"><span class="hs-identifier">isInfinite</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#isNaN"><span class="hs-identifier">isNaN</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#isNegativeZero"><span class="hs-identifier">isNegativeZero</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Convenience Functions</span></span><span>
+</span><span id="line-24"></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#isFiniteNumber"><span class="hs-identifier">isFiniteNumber</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#scaleFloat"><span class="hs-identifier">scaleFloat</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Lifted Functions from &quot;Numeric.IEEE&quot;</span></span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Values</span></span><span>
+</span><span id="line-27"></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#infinity"><span class="hs-identifier">infinity</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#minNormal"><span class="hs-identifier">minNormal</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#maxFinite"><span class="hs-identifier">maxFinite</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#epsilon"><span class="hs-identifier">epsilon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#nan"><span class="hs-identifier">nan</span></a></span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Arithmetic</span></span><span>
+</span><span id="line-29"></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#predIEEE"><span class="hs-identifier">predIEEE</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#succIEEE"><span class="hs-identifier">succIEEE</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#bisectIEEE"><span class="hs-identifier">bisectIEEE</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#copySign"><span class="hs-identifier">copySign</span></a></span><span>
+</span><span id="line-30"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** NaN with Payload</span></span><span>
+</span><span id="line-31"></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#nanWithPayload"><span class="hs-identifier">nanWithPayload</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#nanPayload"><span class="hs-identifier">nanPayload</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">F.maxNaNPayload</span></span><span>
+</span><span id="line-32"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Comparisons</span></span><span>
+</span><span id="line-33"></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#identicalIEEE"><span class="hs-identifier">identicalIEEE</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#minNum"><span class="hs-identifier">minNum</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#maxNum"><span class="hs-identifier">maxNum</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#minNaN"><span class="hs-identifier">minNaN</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#maxNaN"><span class="hs-identifier">maxNaN</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Applicative</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Word64</span></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">RealFloat</span></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.IEEE</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">IEEE</span></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.IEEE</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html"><span class="hs-identifier">Numeric.Units.Dimensional.Internal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#liftQ"><span class="hs-identifier">liftQ</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#liftQ2"><span class="hs-identifier">liftQ2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Prelude.html"><span class="hs-identifier">Numeric.Units.Dimensional.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">RealFloat</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Coercion.html"><span class="hs-identifier">Numeric.Units.Dimensional.Coercion</span></a></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XExtendedDefaultRules</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XNegativeLiterals</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- | 'True' if the representation of the argument is too small to be represented in normalized format.</span><span>
+</span><span id="line-52"></span><span id="local-6989586621679113563"><span id="local-6989586621679113564"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#isDenormalized"><span class="hs-identifier hs-type">isDenormalized</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679113564"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113563"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113564"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-53"></span><span id="isDenormalized"><span class="annot"><span class="annottext">isDenormalized :: Quantity d a -&gt; Bool
+</span><a href="Numeric.Units.Dimensional.Float.html#isDenormalized"><span class="hs-identifier hs-var hs-var">isDenormalized</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Bool
+forall a. RealFloat a =&gt; a -&gt; Bool
+</span><span class="hs-identifier hs-var">P.isDenormalized</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Bool) -&gt; (Quantity d a -&gt; a) -&gt; Quantity d a -&gt; Bool
+forall k (cat :: k -&gt; k -&gt; Type) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Quantity d a -&gt; a
+forall (s :: ExactPi') (d :: Dimension) a. SQuantity s d a -&gt; a
+</span><a href="Numeric.Units.Dimensional.Coercion.html#unQuantity"><span class="hs-identifier hs-var">unQuantity</span></a></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- | 'True' if the representation of the argument is a number and is not infinite.</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- &gt;&gt;&gt; isFiniteNumber (_1 / _0)</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- &gt;&gt;&gt; isFiniteNumber (_0 / _0)</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- &gt;&gt;&gt; isFiniteNumber (_3 / _2)</span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- True</span><span>
+</span><span id="line-65"></span><span id="local-6989586621679113558"><span id="local-6989586621679113559"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#isFiniteNumber"><span class="hs-identifier hs-type">isFiniteNumber</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679113559"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113558"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113559"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-66"></span><span id="isFiniteNumber"><span class="annot"><span class="annottext">isFiniteNumber :: Quantity d a -&gt; Bool
+</span><a href="Numeric.Units.Dimensional.Float.html#isFiniteNumber"><span class="hs-identifier hs-var hs-var">isFiniteNumber</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool) -&gt; (Quantity d a -&gt; Bool) -&gt; Quantity d a -&gt; Bool
+forall k (cat :: k -&gt; k -&gt; Type) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool -&gt; Bool)
+-&gt; (Quantity d a -&gt; Bool)
+-&gt; (Quantity d a -&gt; Bool)
+-&gt; Quantity d a
+-&gt; Bool
+forall (f :: Type -&gt; Type) a b c.
+Applicative f =&gt;
+(a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c
+</span><span class="hs-identifier hs-var">liftA2</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">(||)</span></span><span> </span><span class="annot"><span class="annottext">Quantity d a -&gt; Bool
+forall a (d :: Dimension). RealFloat a =&gt; Quantity d a -&gt; Bool
+</span><a href="Numeric.Units.Dimensional.Float.html#isNaN"><span class="hs-identifier hs-var">isNaN</span></a></span><span> </span><span class="annot"><span class="annottext">Quantity d a -&gt; Bool
+forall a (d :: Dimension). RealFloat a =&gt; Quantity d a -&gt; Bool
+</span><a href="Numeric.Units.Dimensional.Float.html#isInfinite"><span class="hs-identifier hs-var">isInfinite</span></a></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- | 'True' if the representation of the argument is an IEEE infinity or negative infinity.</span><span>
+</span><span id="line-69"></span><span class="hs-comment">--</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- &gt;&gt;&gt; isInfinite (_1 / _0)</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- True</span><span>
+</span><span id="line-72"></span><span class="hs-comment">--</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- &gt;&gt;&gt; isInfinite (42 *~ micro farad)</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-75"></span><span id="local-6989586621679113553"><span id="local-6989586621679113554"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#isInfinite"><span class="hs-identifier hs-type">isInfinite</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679113554"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113553"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113554"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-76"></span><span id="isInfinite"><span class="annot"><span class="annottext">isInfinite :: Quantity d a -&gt; Bool
+</span><a href="Numeric.Units.Dimensional.Float.html#isInfinite"><span class="hs-identifier hs-var hs-var">isInfinite</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Bool
+forall a. RealFloat a =&gt; a -&gt; Bool
+</span><span class="hs-identifier hs-var">P.isInfinite</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Bool) -&gt; (Quantity d a -&gt; a) -&gt; Quantity d a -&gt; Bool
+forall k (cat :: k -&gt; k -&gt; Type) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Quantity d a -&gt; a
+forall (s :: ExactPi') (d :: Dimension) a. SQuantity s d a -&gt; a
+</span><a href="Numeric.Units.Dimensional.Coercion.html#unQuantity"><span class="hs-identifier hs-var">unQuantity</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- | 'True' if the representation of the argument is an IEEE &quot;not-a-number&quot; (NaN) value.</span><span>
+</span><span id="line-79"></span><span class="hs-comment">--</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- &gt;&gt;&gt; isNaN _3</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-82"></span><span class="hs-comment">--</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- &gt;&gt;&gt; isNaN (_1 / _0)</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-85"></span><span class="hs-comment">--</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- &gt;&gt;&gt; isNaN (asin _4)</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- True</span><span>
+</span><span id="line-88"></span><span id="local-6989586621679113653"><span id="local-6989586621679113654"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#isNaN"><span class="hs-identifier hs-type">isNaN</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679113654"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113653"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113654"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-89"></span><span id="isNaN"><span class="annot"><span class="annottext">isNaN :: Quantity d a -&gt; Bool
+</span><a href="Numeric.Units.Dimensional.Float.html#isNaN"><span class="hs-identifier hs-var hs-var">isNaN</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Bool
+forall a. RealFloat a =&gt; a -&gt; Bool
+</span><span class="hs-identifier hs-var">P.isNaN</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Bool) -&gt; (Quantity d a -&gt; a) -&gt; Quantity d a -&gt; Bool
+forall k (cat :: k -&gt; k -&gt; Type) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Quantity d a -&gt; a
+forall (s :: ExactPi') (d :: Dimension) a. SQuantity s d a -&gt; a
+</span><a href="Numeric.Units.Dimensional.Coercion.html#unQuantity"><span class="hs-identifier hs-var">unQuantity</span></a></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- | 'True' if the representation of the argument is an IEEE negative zero.</span><span>
+</span><span id="line-92"></span><span class="hs-comment">--</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- &gt;&gt;&gt; isNegativeZero _0</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-95"></span><span class="hs-comment">--</span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- &gt;&gt;&gt; isNegativeZero $ (-1e-200 *~ one) * (1e-200 *~ one)</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- True</span><span>
+</span><span id="line-98"></span><span id="local-6989586621679113549"><span id="local-6989586621679113550"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#isNegativeZero"><span class="hs-identifier hs-type">isNegativeZero</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679113550"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113549"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113550"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-99"></span><span id="isNegativeZero"><span class="annot"><span class="annottext">isNegativeZero :: Quantity d a -&gt; Bool
+</span><a href="Numeric.Units.Dimensional.Float.html#isNegativeZero"><span class="hs-identifier hs-var hs-var">isNegativeZero</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Bool
+forall a. RealFloat a =&gt; a -&gt; Bool
+</span><span class="hs-identifier hs-var">P.isNegativeZero</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Bool) -&gt; (Quantity d a -&gt; a) -&gt; Quantity d a -&gt; Bool
+forall k (cat :: k -&gt; k -&gt; Type) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Quantity d a -&gt; a
+forall (s :: ExactPi') (d :: Dimension) a. SQuantity s d a -&gt; a
+</span><a href="Numeric.Units.Dimensional.Coercion.html#unQuantity"><span class="hs-identifier hs-var">unQuantity</span></a></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- | Multiplies a floating-point quantity by an integer power of the radix of the representation type.</span><span>
+</span><span id="line-102"></span><span class="hs-comment">--</span><span>
+</span><span id="line-103"></span><span class="hs-comment">-- Use 'P.floatRadix' to determine the radix.</span><span>
+</span><span id="line-104"></span><span class="hs-comment">--</span><span>
+</span><span id="line-105"></span><span class="hs-comment">-- &gt;&gt;&gt; let x = 3 *~ meter</span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- &gt;&gt;&gt; scaleFloat 3 x</span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- 24.0&#160;m</span><span>
+</span><span id="line-108"></span><span id="local-6989586621679113546"><span id="local-6989586621679113547"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#scaleFloat"><span class="hs-identifier hs-type">scaleFloat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679113547"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113546"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113547"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113546"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113547"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-109"></span><span id="scaleFloat"><span class="annot"><span class="annottext">scaleFloat :: Int -&gt; Quantity d a -&gt; Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#scaleFloat"><span class="hs-identifier hs-var hs-var">scaleFloat</span></a></span></span><span> </span><span id="local-6989586621679113545"><span class="annot"><span class="annottext">x :: Int
+</span><a href="#local-6989586621679113545"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Quantity d a
+forall (s :: ExactPi') (d :: Dimension) a.
+a -&gt; Dimensional ('DQuantity s) d a
+</span><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-var">Quantity</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Quantity d a)
+-&gt; (Quantity d a -&gt; a) -&gt; Quantity d a -&gt; Quantity d a
+forall k (cat :: k -&gt; k -&gt; Type) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; a
+forall a. RealFloat a =&gt; Int -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">P.scaleFloat</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679113545"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; a) -&gt; (Quantity d a -&gt; a) -&gt; Quantity d a -&gt; a
+forall k (cat :: k -&gt; k -&gt; Type) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Quantity d a -&gt; a
+forall (s :: ExactPi') (d :: Dimension) a. SQuantity s d a -&gt; a
+</span><a href="Numeric.Units.Dimensional.Coercion.html#unQuantity"><span class="hs-identifier hs-var">unQuantity</span></a></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- | An infinite floating-point quantity.</span><span>
+</span><span id="line-112"></span><span id="local-6989586621679113541"><span id="local-6989586621679113542"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#infinity"><span class="hs-identifier hs-type">infinity</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IEEE</span></span><span> </span><span class="annot"><a href="#local-6989586621679113542"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113541"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113542"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-113"></span><span id="infinity"><span class="annot"><span class="annottext">infinity :: Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#infinity"><span class="hs-identifier hs-var hs-var">infinity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Quantity d a
+forall (s :: ExactPi') (d :: Dimension) a.
+a -&gt; Dimensional ('DQuantity s) d a
+</span><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-var">Quantity</span></a></span><span> </span><span class="annot"><span class="annottext">a
+forall a. IEEE a =&gt; a
+</span><span class="hs-identifier hs-var">F.infinity</span></span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- | The smallest representable positive quantity whose representation is normalized.</span><span>
+</span><span id="line-116"></span><span id="local-6989586621679113538"><span id="local-6989586621679113539"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#minNormal"><span class="hs-identifier hs-type">minNormal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IEEE</span></span><span> </span><span class="annot"><a href="#local-6989586621679113539"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113538"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113539"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-117"></span><span id="minNormal"><span class="annot"><span class="annottext">minNormal :: Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#minNormal"><span class="hs-identifier hs-var hs-var">minNormal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Quantity d a
+forall (s :: ExactPi') (d :: Dimension) a.
+a -&gt; Dimensional ('DQuantity s) d a
+</span><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-var">Quantity</span></a></span><span> </span><span class="annot"><span class="annottext">a
+forall a. IEEE a =&gt; a
+</span><span class="hs-identifier hs-var">F.minNormal</span></span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span class="hs-comment">-- | The largest representable finite floating-point quantity.</span><span>
+</span><span id="line-120"></span><span id="local-6989586621679113535"><span id="local-6989586621679113536"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#maxFinite"><span class="hs-identifier hs-type">maxFinite</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IEEE</span></span><span> </span><span class="annot"><a href="#local-6989586621679113536"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113535"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113536"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-121"></span><span id="maxFinite"><span class="annot"><span class="annottext">maxFinite :: Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#maxFinite"><span class="hs-identifier hs-var hs-var">maxFinite</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Quantity d a
+forall (s :: ExactPi') (d :: Dimension) a.
+a -&gt; Dimensional ('DQuantity s) d a
+</span><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-var">Quantity</span></a></span><span> </span><span class="annot"><span class="annottext">a
+forall a. IEEE a =&gt; a
+</span><span class="hs-identifier hs-var">F.maxFinite</span></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- | The smallest positive value @x@ such that @_1 + x@ is representable.</span><span>
+</span><span id="line-124"></span><span id="local-6989586621679113533"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#epsilon"><span class="hs-identifier hs-type">epsilon</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IEEE</span></span><span> </span><span class="annot"><a href="#local-6989586621679113533"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.html#Dimensionless"><span class="hs-identifier hs-type">Dimensionless</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113533"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-125"></span><span id="epsilon"><span class="annot"><span class="annottext">epsilon :: Dimensionless a
+</span><a href="Numeric.Units.Dimensional.Float.html#epsilon"><span class="hs-identifier hs-var hs-var">epsilon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Dimensionless a
+forall (s :: ExactPi') (d :: Dimension) a.
+a -&gt; Dimensional ('DQuantity s) d a
+</span><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-var">Quantity</span></a></span><span> </span><span class="annot"><span class="annottext">a
+forall a. IEEE a =&gt; a
+</span><span class="hs-identifier hs-var">F.epsilon</span></span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- | @copySign x y@ returns the quantity @x@ with its sign changed to match that of @y@.</span><span>
+</span><span id="line-128"></span><span id="local-6989586621679113530"><span id="local-6989586621679113531"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#copySign"><span class="hs-identifier hs-type">copySign</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IEEE</span></span><span> </span><span class="annot"><a href="#local-6989586621679113531"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113530"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113531"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113530"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113531"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113530"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113531"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-129"></span><span id="copySign"><span class="annot"><span class="annottext">copySign :: Quantity d a -&gt; Quantity d a -&gt; Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#copySign"><span class="hs-identifier hs-var hs-var">copySign</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; a) -&gt; Quantity d a -&gt; Quantity d a -&gt; Quantity d a
+forall a (s1 :: ExactPi') (d1 :: Dimension) (s2 :: ExactPi')
+       (d2 :: Dimension) (s3 :: ExactPi') (d3 :: Dimension).
+(a -&gt; a -&gt; a)
+-&gt; SQuantity s1 d1 a -&gt; SQuantity s2 d2 a -&gt; SQuantity s3 d3 a
+</span><a href="Numeric.Units.Dimensional.Internal.html#liftQ2"><span class="hs-identifier hs-var">liftQ2</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. IEEE a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">F.copySign</span></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- | Return 'True' if two floating-point quantities are /exactly/ (bitwise) equal.</span><span>
+</span><span id="line-132"></span><span id="local-6989586621679113527"><span id="local-6989586621679113528"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#identicalIEEE"><span class="hs-identifier hs-type">identicalIEEE</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IEEE</span></span><span> </span><span class="annot"><a href="#local-6989586621679113528"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113527"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113528"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113527"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113528"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-133"></span><span id="identicalIEEE"><span class="annot"><span class="annottext">identicalIEEE :: Quantity d a -&gt; Quantity d a -&gt; Bool
+</span><a href="Numeric.Units.Dimensional.Float.html#identicalIEEE"><span class="hs-identifier hs-var hs-var">identicalIEEE</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span id="local-6989586621679113526"><span class="annot"><a href="#local-6989586621679113526"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span id="local-6989586621679113525"><span class="annot"><a href="#local-6989586621679113525"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. IEEE a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-identifier hs-var">F.identicalIEEE</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679113526"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679113525"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span class="hs-comment">-- | Return the next largest representable floating-point quantity (@Infinity@ and @NaN@ are unchanged).</span><span>
+</span><span id="line-136"></span><span id="local-6989586621679113522"><span id="local-6989586621679113523"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#succIEEE"><span class="hs-identifier hs-type">succIEEE</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IEEE</span></span><span> </span><span class="annot"><a href="#local-6989586621679113523"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113522"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113523"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113522"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113523"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-137"></span><span id="succIEEE"><span class="annot"><span class="annottext">succIEEE :: Quantity d a -&gt; Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#succIEEE"><span class="hs-identifier hs-var hs-var">succIEEE</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a) -&gt; Quantity d a -&gt; Quantity d a
+forall a (s1 :: ExactPi') (d1 :: Dimension) (s2 :: ExactPi')
+       (d2 :: Dimension).
+(a -&gt; a) -&gt; SQuantity s1 d1 a -&gt; SQuantity s2 d2 a
+</span><a href="Numeric.Units.Dimensional.Internal.html#liftQ"><span class="hs-identifier hs-var">liftQ</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+forall a. IEEE a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">F.succIEEE</span></span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- | Return the next smallest representable floating-point quantity (@Infinity@ and @NaN@ are unchanged).</span><span>
+</span><span id="line-140"></span><span id="local-6989586621679113519"><span id="local-6989586621679113520"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#predIEEE"><span class="hs-identifier hs-type">predIEEE</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IEEE</span></span><span> </span><span class="annot"><a href="#local-6989586621679113520"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113519"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113520"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113519"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113520"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-141"></span><span id="predIEEE"><span class="annot"><span class="annottext">predIEEE :: Quantity d a -&gt; Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#predIEEE"><span class="hs-identifier hs-var hs-var">predIEEE</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a) -&gt; Quantity d a -&gt; Quantity d a
+forall a (s1 :: ExactPi') (d1 :: Dimension) (s2 :: ExactPi')
+       (d2 :: Dimension).
+(a -&gt; a) -&gt; SQuantity s1 d1 a -&gt; SQuantity s2 d2 a
+</span><a href="Numeric.Units.Dimensional.Internal.html#liftQ"><span class="hs-identifier hs-var">liftQ</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+forall a. IEEE a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">F.predIEEE</span></span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span class="hs-comment">-- | Given two floating-point quantities with the same sign, return the quantity whose representation is halfway</span><span>
+</span><span id="line-144"></span><span class="hs-comment">-- between their representations on the IEEE number line. If the signs of the values differ or either is @NaN@,</span><span>
+</span><span id="line-145"></span><span class="hs-comment">-- the value is undefined.</span><span>
+</span><span id="line-146"></span><span id="local-6989586621679113516"><span id="local-6989586621679113517"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#bisectIEEE"><span class="hs-identifier hs-type">bisectIEEE</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IEEE</span></span><span> </span><span class="annot"><a href="#local-6989586621679113517"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113516"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113517"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113516"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113517"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113516"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113517"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-147"></span><span id="bisectIEEE"><span class="annot"><span class="annottext">bisectIEEE :: Quantity d a -&gt; Quantity d a -&gt; Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#bisectIEEE"><span class="hs-identifier hs-var hs-var">bisectIEEE</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span id="local-6989586621679113515"><span class="annot"><a href="#local-6989586621679113515"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span id="local-6989586621679113514"><span class="annot"><a href="#local-6989586621679113514"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Quantity d a
+forall (s :: ExactPi') (d :: Dimension) a.
+a -&gt; Dimensional ('DQuantity s) d a
+</span><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-var">Quantity</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Quantity d a) -&gt; a -&gt; Quantity d a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. IEEE a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">F.bisectIEEE</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679113515"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679113514"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span class="hs-comment">-- | Default @NaN@ quantity.</span><span>
+</span><span id="line-150"></span><span id="local-6989586621679113511"><span id="local-6989586621679113512"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#nan"><span class="hs-identifier hs-type">nan</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IEEE</span></span><span> </span><span class="annot"><a href="#local-6989586621679113512"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113511"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113512"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-151"></span><span id="nan"><span class="annot"><span class="annottext">nan :: Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#nan"><span class="hs-identifier hs-var hs-var">nan</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Quantity d a
+forall (s :: ExactPi') (d :: Dimension) a.
+a -&gt; Dimensional ('DQuantity s) d a
+</span><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-var">Quantity</span></a></span><span> </span><span class="annot"><span class="annottext">a
+forall a. IEEE a =&gt; a
+</span><span class="hs-identifier hs-var">F.nan</span></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span class="hs-comment">-- | Quiet @NaN@ quantity with a positive integer payload.</span><span>
+</span><span id="line-154"></span><span class="hs-comment">-- Payload must be less than 'maxNaNPayload' of the representation type.</span><span>
+</span><span id="line-155"></span><span class="hs-comment">--</span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- Beware that while some platforms allow using 0 as a payload, this behavior is not portable.</span><span>
+</span><span id="line-157"></span><span id="local-6989586621679113508"><span id="local-6989586621679113509"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#nanWithPayload"><span class="hs-identifier hs-type">nanWithPayload</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IEEE</span></span><span> </span><span class="annot"><a href="#local-6989586621679113509"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word64</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113508"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113509"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-158"></span><span id="nanWithPayload"><span class="annot"><span class="annottext">nanWithPayload :: Word64 -&gt; Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#nanWithPayload"><span class="hs-identifier hs-var hs-var">nanWithPayload</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Quantity d a
+forall (s :: ExactPi') (d :: Dimension) a.
+a -&gt; Dimensional ('DQuantity s) d a
+</span><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-var">Quantity</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Quantity d a) -&gt; (Word64 -&gt; a) -&gt; Word64 -&gt; Quantity d a
+forall k (cat :: k -&gt; k -&gt; Type) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; a
+forall a. IEEE a =&gt; Word64 -&gt; a
+</span><span class="hs-identifier hs-var">F.nanWithPayload</span></span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span class="hs-comment">-- | The payload stored in a @NaN@ quantity. Undefined if the argument is not @NaN@.</span><span>
+</span><span id="line-161"></span><span id="local-6989586621679113505"><span id="local-6989586621679113506"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#nanPayload"><span class="hs-identifier hs-type">nanPayload</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IEEE</span></span><span> </span><span class="annot"><a href="#local-6989586621679113506"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113505"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113506"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word64</span></span></span></span><span>
+</span><span id="line-162"></span><span id="nanPayload"><span class="annot"><span class="annottext">nanPayload :: Quantity d a -&gt; Word64
+</span><a href="Numeric.Units.Dimensional.Float.html#nanPayload"><span class="hs-identifier hs-var hs-var">nanPayload</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Word64
+forall a. IEEE a =&gt; a -&gt; Word64
+</span><span class="hs-identifier hs-var">F.nanPayload</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Word64) -&gt; (Quantity d a -&gt; a) -&gt; Quantity d a -&gt; Word64
+forall k (cat :: k -&gt; k -&gt; Type) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Quantity d a -&gt; a
+forall (s :: ExactPi') (d :: Dimension) a. SQuantity s d a -&gt; a
+</span><a href="Numeric.Units.Dimensional.Coercion.html#unQuantity"><span class="hs-identifier hs-var">unQuantity</span></a></span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span class="hs-comment">-- | Return the minimum of two quantities; if one value is @NaN@, return the other. Prefer the first if both values are @NaN@.</span><span>
+</span><span id="line-165"></span><span id="local-6989586621679113502"><span id="local-6989586621679113503"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#minNum"><span class="hs-identifier hs-type">minNum</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679113503"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113502"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113503"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113502"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113503"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113502"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113503"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-166"></span><span id="minNum"><span class="annot"><span class="annottext">minNum :: Quantity d a -&gt; Quantity d a -&gt; Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#minNum"><span class="hs-identifier hs-var hs-var">minNum</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; a) -&gt; Quantity d a -&gt; Quantity d a -&gt; Quantity d a
+forall a (s1 :: ExactPi') (d1 :: Dimension) (s2 :: ExactPi')
+       (d2 :: Dimension) (s3 :: ExactPi') (d3 :: Dimension).
+(a -&gt; a -&gt; a)
+-&gt; SQuantity s1 d1 a -&gt; SQuantity s2 d2 a -&gt; SQuantity s3 d3 a
+</span><a href="Numeric.Units.Dimensional.Internal.html#liftQ2"><span class="hs-identifier hs-var">liftQ2</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. RealFloat a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">F.minNum</span></span><span>
+</span><span id="line-167"></span><span>
+</span><span id="line-168"></span><span class="hs-comment">-- | Return the maximum of two quantities; if one value is @NaN@, return the other. Prefer the first if both values are @NaN@.</span><span>
+</span><span id="line-169"></span><span id="local-6989586621679113499"><span id="local-6989586621679113500"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#maxNum"><span class="hs-identifier hs-type">maxNum</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679113500"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113499"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113500"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113499"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113500"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113499"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113500"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-170"></span><span id="maxNum"><span class="annot"><span class="annottext">maxNum :: Quantity d a -&gt; Quantity d a -&gt; Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#maxNum"><span class="hs-identifier hs-var hs-var">maxNum</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; a) -&gt; Quantity d a -&gt; Quantity d a -&gt; Quantity d a
+forall a (s1 :: ExactPi') (d1 :: Dimension) (s2 :: ExactPi')
+       (d2 :: Dimension) (s3 :: ExactPi') (d3 :: Dimension).
+(a -&gt; a -&gt; a)
+-&gt; SQuantity s1 d1 a -&gt; SQuantity s2 d2 a -&gt; SQuantity s3 d3 a
+</span><a href="Numeric.Units.Dimensional.Internal.html#liftQ2"><span class="hs-identifier hs-var">liftQ2</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. RealFloat a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">F.maxNum</span></span><span>
+</span><span id="line-171"></span><span>
+</span><span id="line-172"></span><span class="hs-comment">-- | Return the minimum of two quantities; if one value is @NaN@, return it. Prefer the first if both values are @NaN@.</span><span>
+</span><span id="line-173"></span><span id="local-6989586621679113496"><span id="local-6989586621679113497"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#minNaN"><span class="hs-identifier hs-type">minNaN</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679113497"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113496"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113497"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113496"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113497"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113496"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113497"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-174"></span><span id="minNaN"><span class="annot"><span class="annottext">minNaN :: Quantity d a -&gt; Quantity d a -&gt; Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#minNaN"><span class="hs-identifier hs-var hs-var">minNaN</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; a) -&gt; Quantity d a -&gt; Quantity d a -&gt; Quantity d a
+forall a (s1 :: ExactPi') (d1 :: Dimension) (s2 :: ExactPi')
+       (d2 :: Dimension) (s3 :: ExactPi') (d3 :: Dimension).
+(a -&gt; a -&gt; a)
+-&gt; SQuantity s1 d1 a -&gt; SQuantity s2 d2 a -&gt; SQuantity s3 d3 a
+</span><a href="Numeric.Units.Dimensional.Internal.html#liftQ2"><span class="hs-identifier hs-var">liftQ2</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. RealFloat a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">F.minNaN</span></span><span>
+</span><span id="line-175"></span><span>
+</span><span id="line-176"></span><span class="hs-comment">-- | Return the maximum of two quantities; if one value is @NaN@, return it. Prefer the first if both values are @NaN@.</span><span>
+</span><span id="line-177"></span><span id="local-6989586621679113493"><span id="local-6989586621679113494"><span class="annot"><a href="Numeric.Units.Dimensional.Float.html#maxNaN"><span class="hs-identifier hs-type">maxNaN</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679113494"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113493"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113494"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113493"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113494"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier hs-type">Quantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113493"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113494"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-178"></span><span id="maxNaN"><span class="annot"><span class="annottext">maxNaN :: Quantity d a -&gt; Quantity d a -&gt; Quantity d a
+</span><a href="Numeric.Units.Dimensional.Float.html#maxNaN"><span class="hs-identifier hs-var hs-var">maxNaN</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; a) -&gt; Quantity d a -&gt; Quantity d a -&gt; Quantity d a
+forall a (s1 :: ExactPi') (d1 :: Dimension) (s2 :: ExactPi')
+       (d2 :: Dimension) (s3 :: ExactPi') (d3 :: Dimension).
+(a -&gt; a -&gt; a)
+-&gt; SQuantity s1 d1 a -&gt; SQuantity s2 d2 a -&gt; SQuantity s3 d3 a
+</span><a href="Numeric.Units.Dimensional.Internal.html#liftQ2"><span class="hs-identifier hs-var">liftQ2</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. RealFloat a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">F.maxNaN</span></span><span>
+</span><span id="line-179"></span></pre></body></html>
