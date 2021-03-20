@@ -75,3 +75,4 @@ jobs:
       with:
         branch: gh-pages
         folder: "${{ steps.haddock.outputs.haddock-path }}"
+        single-commit: true
