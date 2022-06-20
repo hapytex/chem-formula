@@ -1,0 +1,319 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE FlexibleInstances, TupleSections #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-comment">{-|
+Module      : Chemistry.Core
+Description : A module that defines the main typeclasses and functions for parsing, presenting and rendering molecules.
+Maintainer  : hapytexeu+gh@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+A module that defines the main typeclasses and functions for parsing, presenting and rendering molecules.
+-}</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Chemistry.Core</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><span class="hs-comment">-- * A collection where items can be multiplied</span></span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><a href="Chemistry.Core.html#QuantifiedElements"><span class="hs-identifier">QuantifiedElements</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Core.html#foldQuantified"><span class="hs-identifier">foldQuantified</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#listElements"><span class="hs-identifier">listElements</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#listElements%27"><span class="hs-identifier">listElements'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#listElementsCounter"><span class="hs-identifier">listElementsCounter</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Rendering formulas as text and HTML</span></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#FormulaElement"><span class="hs-identifier">FormulaElement</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Core.html#toFormula"><span class="hs-identifier">toFormula</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#toFormulaPrec"><span class="hs-identifier">toFormulaPrec</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#toFormulaMarkup"><span class="hs-identifier">toFormulaMarkup</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#toFormulaMarkupPrec"><span class="hs-identifier">toFormulaMarkupPrec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Items that have weight</span></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#Weight"><span class="hs-identifier">Weight</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Core.html#weight"><span class="hs-identifier">weight</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#quantifiedWeight"><span class="hs-identifier">quantifiedWeight</span></a></span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Hill system</span></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#HillCompare"><span class="hs-identifier">HillCompare</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Core.html#hillCompare"><span class="hs-identifier">hillCompare</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Helper functions to render parenthesis</span></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#showParenText"><span class="hs-identifier">showParenText</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#showParenMarkup"><span class="hs-identifier">showParenMarkup</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Applicative</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">liftA2</span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Arrow</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">second</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bool</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">bool</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Hashable</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Hashable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.HashMap.Strict</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">HashMap</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">fromListWith</span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">cons</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">empty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.Units.Dimensional</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">DMass</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Quantity</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-operator">(*~)</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">one</span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.Units.Dimensional</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">D</span></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Blaze</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Markup</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">string</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- | A helper function to wrap the text generator in parenthesis if the given condition is 'True', and simply returns the text generator otherwise.</span><span>
+</span><span id="line-40"></span><span class="annot"><a href="Chemistry.Core.html#showParenText"><span class="hs-identifier hs-type">showParenText</span></a></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>  </span><span class="hs-comment">-- ^ A 'Bool' that determines if we generate parenthesis.</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- ^ A text generator function that can be wrapped in parenthesis.</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>  </span><span class="hs-comment">-- ^ The resulting text generator.</span><span>
+</span><span id="line-44"></span><span id="showParenText"><span class="annot"><span class="annottext">showParenText :: Bool -&gt; (Text -&gt; Text) -&gt; Text -&gt; Text
+</span><a href="Chemistry.Core.html#showParenText"><span class="hs-identifier hs-var hs-var">showParenText</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Text -&gt; Text) -&gt; Text -&gt; Text)
+-&gt; ((Text -&gt; Text) -&gt; Text -&gt; Text)
+-&gt; Bool
+-&gt; (Text -&gt; Text)
+-&gt; Text
+-&gt; Text
+forall a. a -&gt; a -&gt; Bool -&gt; a
+</span><span class="hs-identifier hs-var">bool</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Text) -&gt; Text -&gt; Text
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Text -&gt; Text
+</span><span class="hs-identifier hs-var">cons</span></span><span> </span><span class="annot"><span class="hs-char">'('</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Text) -&gt; (Text -&gt; Text) -&gt; Text -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Text -&gt; Text) -&gt; Text -&gt; Text)
+-&gt; ((Text -&gt; Text) -&gt; Text -&gt; Text)
+-&gt; (Text -&gt; Text)
+-&gt; Text
+-&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Text -&gt; Text) -&gt; (Text -&gt; Text) -&gt; Text -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Text -&gt; Text
+</span><span class="hs-identifier hs-var">cons</span></span><span> </span><span class="annot"><span class="hs-char">')'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- | A helper function to wrap the markup generator in parenthesis if the given condition is 'True', and simply returns the markup generator otherwise.</span><span>
+</span><span id="line-47"></span><span class="annot"><a href="Chemistry.Core.html#showParenMarkup"><span class="hs-identifier hs-type">showParenMarkup</span></a></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>  </span><span class="hs-comment">-- ^ A 'Bool' that determines if we generate parenthesis.</span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Markup</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Markup</span></span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- ^ A markup generator function that can be wrapped in parenthesis.</span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Markup</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Markup</span></span><span>  </span><span class="hs-comment">-- ^ The resulting markup generator.</span><span>
+</span><span id="line-51"></span><span id="showParenMarkup"><span class="annot"><span class="annottext">showParenMarkup :: Bool -&gt; (Markup -&gt; Markup) -&gt; Markup -&gt; Markup
+</span><a href="Chemistry.Core.html#showParenMarkup"><span class="hs-identifier hs-var hs-var">showParenMarkup</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Markup -&gt; Markup) -&gt; Markup -&gt; Markup)
+-&gt; ((Markup -&gt; Markup) -&gt; Markup -&gt; Markup)
+-&gt; Bool
+-&gt; (Markup -&gt; Markup)
+-&gt; Markup
+-&gt; Markup
+forall a. a -&gt; a -&gt; Bool -&gt; a
+</span><span class="hs-identifier hs-var">bool</span></span><span> </span><span class="annot"><span class="annottext">(Markup -&gt; Markup) -&gt; Markup -&gt; Markup
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Markup
+</span><span class="hs-identifier hs-var">string</span></span><span> </span><span class="annot"><span class="hs-string">&quot;(&quot;</span></span><span> </span><span class="annot"><span class="annottext">Markup -&gt; Markup -&gt; Markup
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Markup -&gt; Markup) -&gt; (Markup -&gt; Markup) -&gt; Markup -&gt; Markup
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Markup -&gt; Markup) -&gt; Markup -&gt; Markup)
+-&gt; ((Markup -&gt; Markup) -&gt; Markup -&gt; Markup)
+-&gt; (Markup -&gt; Markup)
+-&gt; Markup
+-&gt; Markup
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Markup -&gt; Markup) -&gt; (Markup -&gt; Markup) -&gt; Markup -&gt; Markup
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Markup -&gt; Markup -&gt; Markup
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Markup
+</span><span class="hs-identifier hs-var">string</span></span><span> </span><span class="annot"><span class="hs-string">&quot;)&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- | A typeclass to represent types that can be rendered as chemical formulas.</span><span>
+</span><span id="line-54"></span><span class="hs-keyword">class</span><span> </span><span id="FormulaElement"><span class="annot"><a href="Chemistry.Core.html#FormulaElement"><span class="hs-identifier hs-var">FormulaElement</span></a></span></span><span> </span><span id="local-6989586621679141173"><span class="annot"><a href="#local-6989586621679141173"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>    </span><span class="hs-comment">-- | Render the given item as 'Text'.</span><span>
+</span><span id="line-56"></span><span>    </span><span id="toFormula"><span class="annot"><a href="Chemistry.Core.html#toFormula"><span class="hs-identifier hs-type">toFormula</span></a></span></span><span>
+</span><span id="line-57"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679141173"><span class="hs-identifier hs-type">a</span></a></span><span>  </span><span class="hs-comment">-- ^ The given item to render.</span><span>
+</span><span id="line-58"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>  </span><span class="hs-comment">-- ^ A 'Text' object that represents the given chemical item.</span><span>
+</span><span id="line-59"></span><span>    </span><span id="local-6989586621679141077"><span class="annot"><a href="Chemistry.Core.html#toFormula"><span class="hs-identifier hs-var hs-var">toFormula</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Text -&gt; Text) -&gt; Text -&gt; a -&gt; Text
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; a -&gt; Text -&gt; Text
+forall a. FormulaElement a =&gt; Int -&gt; a -&gt; Text -&gt; Text
+</span><a href="Chemistry.Core.html#toFormulaPrec"><span class="hs-identifier hs-var">toFormulaPrec</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-identifier hs-var">empty</span></span></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span>    </span><span class="hs-comment">-- | Render the given chemical item with the /precedence/ value.</span><span>
+</span><span id="line-62"></span><span>    </span><span id="toFormulaPrec"><span class="annot"><a href="Chemistry.Core.html#toFormulaPrec"><span class="hs-identifier hs-type">toFormulaPrec</span></a></span></span><span>
+</span><span id="line-63"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>  </span><span class="hs-comment">-- ^ The given precedence value.</span><span>
+</span><span id="line-64"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141173"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-comment">-- ^ The chemical item to render.</span><span>
+</span><span id="line-65"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-comment">-- ^ The 'Text' object that is the &quot;tail&quot; of the 'Text' that will be generated.</span><span>
+</span><span id="line-66"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-comment">-- ^ The 'Text' that represents the chemical item appended with the given tail.</span><span>
+</span><span id="line-67"></span><span>    </span><span id="local-6989586621679141075"><span class="annot"><a href="Chemistry.Core.html#toFormulaPrec"><span class="hs-identifier hs-var hs-var">toFormulaPrec</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Text -&gt; Text) -&gt; (a -&gt; Text) -&gt; a -&gt; Text -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Text
+forall a. FormulaElement a =&gt; a -&gt; Text
+</span><a href="Chemistry.Core.html#toFormula"><span class="hs-identifier hs-var">toFormula</span></a></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-comment">-- | Render the given chemical item as 'Markup'.</span></span><span>
+</span><span id="line-70"></span><span>    </span><span id="toFormulaMarkup"><span class="annot"><a href="Chemistry.Core.html#toFormulaMarkup"><span class="hs-identifier hs-type">toFormulaMarkup</span></a></span></span><span>
+</span><span id="line-71"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679141173"><span class="hs-identifier hs-type">a</span></a></span><span>  </span><span class="hs-comment">-- ^ The given item to render.</span><span>
+</span><span id="line-72"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Markup</span></span><span> </span><span class="hs-comment">-- ^ A 'Markup' object that represents the given chemical item.</span><span>
+</span><span id="line-73"></span><span>    </span><span id="local-6989586621679141074"><span class="annot"><a href="Chemistry.Core.html#toFormulaMarkup"><span class="hs-identifier hs-var hs-var">toFormulaMarkup</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Markup
+</span><span class="hs-identifier hs-var">text</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Markup) -&gt; (a -&gt; Text) -&gt; a -&gt; Markup
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Text
+forall a. FormulaElement a =&gt; a -&gt; Text
+</span><a href="Chemistry.Core.html#toFormula"><span class="hs-identifier hs-var">toFormula</span></a></span></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-comment">-- | Render the given chemical item with the /precedence/ value.</span><span>
+</span><span id="line-76"></span><span>    </span><span id="toFormulaMarkupPrec"><span class="annot"><a href="Chemistry.Core.html#toFormulaMarkupPrec"><span class="hs-identifier hs-type">toFormulaMarkupPrec</span></a></span></span><span>
+</span><span id="line-77"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>  </span><span class="hs-comment">-- ^ The given precedence value.</span><span>
+</span><span id="line-78"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141173"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-comment">-- ^ The chemical item to render.</span><span>
+</span><span id="line-79"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Markup</span></span><span> </span><span class="hs-comment">-- ^ The given 'Markup' object that is the &quot;tail&quot; of the 'Markup' that will be generated.</span><span>
+</span><span id="line-80"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Markup</span></span><span> </span><span class="hs-comment">-- ^ The 'Markup' that represents the chemical item appended with the given tail.</span><span>
+</span><span id="line-81"></span><span>    </span><span id="local-6989586621679141073"><span class="annot"><a href="Chemistry.Core.html#toFormulaMarkupPrec"><span class="hs-identifier hs-var hs-var">toFormulaMarkupPrec</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Markup -&gt; Markup -&gt; Markup
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span> </span><span class="annot"><span class="annottext">(Markup -&gt; Markup -&gt; Markup)
+-&gt; (a -&gt; Markup) -&gt; a -&gt; Markup -&gt; Markup
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Markup
+forall a. FormulaElement a =&gt; a -&gt; Markup
+</span><a href="Chemistry.Core.html#toFormulaMarkup"><span class="hs-identifier hs-var">toFormulaMarkup</span></a></span></span><span>
+</span><span id="line-82"></span><span>    </span><span class="hs-pragma">{-# MINIMAL</span><span> </span><span class="annot"><a href="Chemistry.Core.html#toFormulaPrec"><span class="hs-pragma hs-type">toFormulaPrec</span></a></span><span> </span><span class="hs-pragma">|</span><span> </span><span class="annot"><a href="Chemistry.Core.html#toFormula"><span class="hs-pragma hs-type">toFormula</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- | A typeclass that represents that the given type has a /weight/.</span><span>
+</span><span id="line-85"></span><span class="hs-keyword">class</span><span> </span><span id="Weight"><span class="annot"><a href="Chemistry.Core.html#Weight"><span class="hs-identifier hs-var">Weight</span></a></span></span><span> </span><span id="local-6989586621679141168"><span class="annot"><a href="#local-6989586621679141168"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-86"></span><span>    </span><span class="hs-comment">-- | Calculate the weight of the given item.</span><span>
+</span><span id="line-87"></span><span>    </span><span id="local-6989586621679141153"><span id="weight"><span class="annot"><a href="Chemistry.Core.html#weight"><span class="hs-identifier hs-type">weight</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Floating</span></span><span> </span><span class="annot"><a href="#local-6989586621679141153"><span class="hs-identifier hs-type">b</span></a></span><span>
+</span><span id="line-88"></span><span>      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141168"><span class="hs-identifier hs-type">a</span></a></span><span>  </span><span class="hs-comment">-- ^ The given item to determine the weight from.</span><span>
+</span><span id="line-89"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Quantity</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DMass</span></span><span> </span><span class="annot"><a href="#local-6989586621679141153"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- ^ The weight of the given item, given the item has a weight.</span></span><span>
+</span><span id="line-90"></span><span>    </span><span id="local-6989586621679141072"><span class="annot"><a href="Chemistry.Core.html#weight"><span class="hs-identifier hs-var hs-var">weight</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Quantity DMass b) -&gt; a -&gt; Maybe (Quantity DMass b)
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Maybe (Quantity DMass b)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span></span><span>
+</span><span id="line-91"></span><span>    </span><span class="hs-pragma">{-# MINIMAL</span><span> </span><span class="annot"><a href="Chemistry.Core.html#weight"><span class="hs-pragma hs-type">weight</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- | Determine the weight of the given 'QuantifiedElements' object. This is implemented by summing and</span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- multiplying the weights of the individual elements.</span><span>
+</span><span id="line-96"></span><span id="local-6989586621679141068"><span id="local-6989586621679141069"><span id="local-6989586621679141070"><span class="annot"><a href="Chemistry.Core.html#quantifiedWeight"><span class="hs-identifier hs-type">quantifiedWeight</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Core.html#QuantifiedElements"><span class="hs-identifier hs-type">QuantifiedElements</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141070"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#Weight"><span class="hs-identifier hs-type">Weight</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141069"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Floating</span></span><span> </span><span class="annot"><a href="#local-6989586621679141068"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-97"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141070"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141069"><span class="hs-identifier hs-type">a</span></a></span><span>  </span><span class="hs-comment">-- ^ The given item to determine the weight from.</span><span>
+</span><span id="line-98"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Quantity</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DMass</span></span><span> </span><span class="annot"><a href="#local-6989586621679141068"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- ^ The corresponding weight of the given checmical item.</span></span></span></span><span>
+</span><span id="line-99"></span><span id="quantifiedWeight"><span class="annot"><span class="annottext">quantifiedWeight :: f a -&gt; Maybe (Quantity DMass b)
+</span><a href="Chemistry.Core.html#quantifiedWeight"><span class="hs-identifier hs-var hs-var">quantifiedWeight</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Maybe (Quantity DMass b))
+-&gt; (Maybe (Quantity DMass b)
+    -&gt; Maybe (Quantity DMass b) -&gt; Maybe (Quantity DMass b))
+-&gt; (Int -&gt; Maybe (Quantity DMass b) -&gt; Maybe (Quantity DMass b))
+-&gt; f a
+-&gt; Maybe (Quantity DMass b)
+forall (f :: * -&gt; *) a b.
+QuantifiedElements f =&gt;
+(a -&gt; b) -&gt; (b -&gt; b -&gt; b) -&gt; (Int -&gt; b -&gt; b) -&gt; f a -&gt; b
+</span><a href="Chemistry.Core.html#foldQuantified"><span class="hs-identifier hs-var">foldQuantified</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe (Quantity DMass b)
+forall a b. (Weight a, Floating b) =&gt; a -&gt; Maybe (Quantity DMass b)
+</span><a href="Chemistry.Core.html#weight"><span class="hs-identifier hs-var">weight</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Quantity DMass b -&gt; Quantity DMass b -&gt; Quantity DMass b)
+-&gt; Maybe (Quantity DMass b)
+-&gt; Maybe (Quantity DMass b)
+-&gt; Maybe (Quantity DMass b)
+forall (f :: * -&gt; *) a b c.
+Applicative f =&gt;
+(a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c
+</span><span class="hs-identifier hs-var">liftA2</span></span><span> </span><span class="annot"><span class="annottext">Quantity DMass b -&gt; Quantity DMass b -&gt; Quantity DMass b
+forall a (d :: Dimension).
+Num a =&gt;
+Quantity d a -&gt; Quantity d a -&gt; Quantity d a
+</span><span class="hs-operator hs-var">(D.+)</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Quantity DMass b -&gt; Quantity DMass b)
+-&gt; Maybe (Quantity DMass b) -&gt; Maybe (Quantity DMass b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">((Quantity DMass b -&gt; Quantity DMass b)
+ -&gt; Maybe (Quantity DMass b) -&gt; Maybe (Quantity DMass b))
+-&gt; (Int -&gt; Quantity DMass b -&gt; Quantity DMass b)
+-&gt; Int
+-&gt; Maybe (Quantity DMass b)
+-&gt; Maybe (Quantity DMass b)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Dimensional ('DQuantity One) DOne b
+-&gt; Quantity DMass b -&gt; Quantity DMass b
+forall (v1 :: Variant) (v2 :: Variant) a (d1 :: Dimension)
+       (d2 :: Dimension).
+(KnownVariant v1, KnownVariant v2, KnownVariant (v1 * v2),
+ Num a) =&gt;
+Dimensional v1 d1 a
+-&gt; Dimensional v2 d2 a -&gt; Dimensional (v1 * v2) (d1 * d2) a
+</span><span class="hs-operator hs-var">(D.*)</span></span><span> </span><span class="annot"><span class="annottext">(Dimensional ('DQuantity One) DOne b
+ -&gt; Quantity DMass b -&gt; Quantity DMass b)
+-&gt; (Int -&gt; Dimensional ('DQuantity One) DOne b)
+-&gt; Int
+-&gt; Quantity DMass b
+-&gt; Quantity DMass b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; Unit 'NonMetric DOne b -&gt; Dimensional ('DQuantity One) DOne b
+forall a (m :: Metricality) (d :: Dimension).
+Num a =&gt;
+a -&gt; Unit m d a -&gt; Quantity d a
+</span><span class="hs-operator hs-var">*~</span></span><span> </span><span class="annot"><span class="annottext">Unit 'NonMetric DOne b
+forall a. Num a =&gt; Unit 'NonMetric DOne a
+</span><span class="hs-identifier hs-var">one</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(b -&gt; Dimensional ('DQuantity One) DOne b)
+-&gt; (Int -&gt; b) -&gt; Int -&gt; Dimensional ('DQuantity One) DOne b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; b
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- | A typeclass that specifies a collection where items can have a multiplication factor.</span><span>
+</span><span id="line-102"></span><span class="hs-keyword">class</span><span> </span><span id="QuantifiedElements"><span class="annot"><a href="Chemistry.Core.html#QuantifiedElements"><span class="hs-identifier hs-var">QuantifiedElements</span></a></span></span><span> </span><span id="local-6989586621679141158"><span class="annot"><a href="#local-6989586621679141158"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-comment">-- | Fold a given 'QuantifiedElements' object by defining rules for mapping, appending, and multiplying.</span><span>
+</span><span id="line-104"></span><span>    </span><span id="local-6989586621679141155"><span id="local-6989586621679141156"><span id="foldQuantified"><span class="annot"><a href="Chemistry.Core.html#foldQuantified"><span class="hs-identifier hs-type">foldQuantified</span></a></span></span><span>
+</span><span id="line-105"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679141156"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141155"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- ^ The given mapping function that maps items to a result type.</span><span>
+</span><span id="line-106"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679141155"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141155"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141155"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- ^ The given append function that is triggered when we have a combination of two 'QuantifiedElements' subexpressions.</span><span>
+</span><span id="line-107"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141155"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141155"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- ^ The given multiplication function when a certain subexpression occurs a given number of times.</span><span>
+</span><span id="line-108"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141158"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141156"><span class="hs-identifier hs-type">a</span></a></span><span>  </span><span class="hs-comment">-- ^ The 'QuantifiedElements' object that will be folded.</span><span>
+</span><span id="line-109"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141155"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-comment">-- ^ The corresponding result of the fold operation.</span></span></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span>    </span><span class="hs-comment">-- | List the elements in the 'QuantifiedElements' expression and append a given list. Items can occur /multiple/ times.</span><span>
+</span><span id="line-112"></span><span>    </span><span id="local-6989586621679141065"><span id="listElements%27"><span class="annot"><a href="Chemistry.Core.html#listElements%27"><span class="hs-identifier hs-type">listElements'</span></a></span></span><span>
+</span><span id="line-113"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679141158"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141065"><span class="hs-identifier hs-type">a</span></a></span><span>  </span><span class="hs-comment">-- ^ The given 'QuantifiedElements' to determine the items from.</span><span>
+</span><span id="line-114"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679141065"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>  </span><span class="hs-comment">-- ^ The given list to append to the result.</span><span>
+</span><span id="line-115"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679141065"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>  </span><span class="hs-comment">-- ^ The result of determining the number of occurrences of the chemical items together with the given list.</span></span><span>
+</span><span id="line-116"></span><span>    </span><span id="local-6989586621679141064"><span class="annot"><a href="Chemistry.Core.html#listElements%27"><span class="hs-identifier hs-var hs-var">listElements'</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(a, Int)] -&gt; [(a, Int)] -&gt; [(a, Int)]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span> </span><span class="annot"><span class="annottext">([(a, Int)] -&gt; [(a, Int)] -&gt; [(a, Int)])
+-&gt; (f a -&gt; [(a, Int)]) -&gt; f a -&gt; [(a, Int)] -&gt; [(a, Int)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">f a -&gt; [(a, Int)]
+forall (f :: * -&gt; *) a. QuantifiedElements f =&gt; f a -&gt; [(a, Int)]
+</span><a href="Chemistry.Core.html#listElements"><span class="hs-identifier hs-var">listElements</span></a></span></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span>    </span><span class="hs-comment">-- | List the elements in the 'QuantifiedElements'. Items can occur /multiple/ times.</span><span>
+</span><span id="line-119"></span><span>    </span><span id="local-6989586621679141119"><span id="listElements"><span class="annot"><a href="Chemistry.Core.html#listElements"><span class="hs-identifier hs-type">listElements</span></a></span></span><span>
+</span><span id="line-120"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679141158"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141119"><span class="hs-identifier hs-type">a</span></a></span><span>  </span><span class="hs-comment">-- ^ The given 'QuantifiedElements' to determine the item count from.</span><span>
+</span><span id="line-121"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679141119"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>  </span><span class="hs-comment">-- ^ A list of items with the number of times these occur. An item can occur /multiple/ times.</span></span><span>
+</span><span id="line-122"></span><span>    </span><span id="local-6989586621679141063"><span class="annot"><a href="Chemistry.Core.html#listElements"><span class="hs-identifier hs-var hs-var">listElements</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; [(a, Int)])
+-&gt; ([(a, Int)] -&gt; [(a, Int)] -&gt; [(a, Int)])
+-&gt; (Int -&gt; [(a, Int)] -&gt; [(a, Int)])
+-&gt; f a
+-&gt; [(a, Int)]
+forall (f :: * -&gt; *) a b.
+QuantifiedElements f =&gt;
+(a -&gt; b) -&gt; (b -&gt; b -&gt; b) -&gt; (Int -&gt; b -&gt; b) -&gt; f a -&gt; b
+</span><a href="Chemistry.Core.html#foldQuantified"><span class="hs-identifier hs-var">foldQuantified</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a, Int) -&gt; [(a, Int)]
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">((a, Int) -&gt; [(a, Int)]) -&gt; (a -&gt; (a, Int)) -&gt; a -&gt; [(a, Int)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-special">,</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(a, Int)] -&gt; [(a, Int)] -&gt; [(a, Int)]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((a, Int) -&gt; (a, Int)) -&gt; [(a, Int)] -&gt; [(a, Int)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(((a, Int) -&gt; (a, Int)) -&gt; [(a, Int)] -&gt; [(a, Int)])
+-&gt; (Int -&gt; (a, Int) -&gt; (a, Int)) -&gt; Int -&gt; [(a, Int)] -&gt; [(a, Int)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Int) -&gt; (a, Int) -&gt; (a, Int)
+forall (a :: * -&gt; * -&gt; *) b c d.
+Arrow a =&gt;
+a b c -&gt; a (d, b) (d, c)
+</span><span class="hs-identifier hs-var">second</span></span><span> </span><span class="annot"><span class="annottext">((Int -&gt; Int) -&gt; (a, Int) -&gt; (a, Int))
+-&gt; (Int -&gt; Int -&gt; Int) -&gt; Int -&gt; (a, Int) -&gt; (a, Int)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(*)</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-123"></span><span>
+</span><span id="line-124"></span><span>    </span><span class="hs-comment">-- | Convert the given 'QuantifiedElements' to a 'HashMap' that maps each item to the number of times it is present.</span><span>
+</span><span id="line-125"></span><span>    </span><span id="local-6989586621679141061"><span id="listElementsCounter"><span class="annot"><a href="Chemistry.Core.html#listElementsCounter"><span class="hs-identifier hs-type">listElementsCounter</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679141061"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Hashable</span></span><span> </span><span class="annot"><a href="#local-6989586621679141061"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-126"></span><span>      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141158"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141061"><span class="hs-identifier hs-type">a</span></a></span><span>  </span><span class="hs-comment">-- ^ The given 'QuantifiedElements' to determine the item count from.</span><span>
+</span><span id="line-127"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HashMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679141061"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>  </span><span class="hs-comment">-- ^ A 'HashMap' that maps the items to the number of times these occur.</span></span><span>
+</span><span id="line-128"></span><span>    </span><span id="local-6989586621679141060"><span class="annot"><a href="Chemistry.Core.html#listElementsCounter"><span class="hs-identifier hs-var hs-var">listElementsCounter</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Int -&gt; Int) -&gt; [(a, Int)] -&gt; HashMap a Int
+forall k v.
+(Eq k, Hashable k) =&gt;
+(v -&gt; v -&gt; v) -&gt; [(k, v)] -&gt; HashMap k v
+</span><span class="hs-identifier hs-var">fromListWith</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(+)</span></span><span> </span><span class="annot"><span class="annottext">([(a, Int)] -&gt; HashMap a Int)
+-&gt; (f a -&gt; [(a, Int)]) -&gt; f a -&gt; HashMap a Int
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">f a -&gt; [(a, Int)]
+forall (f :: * -&gt; *) a. QuantifiedElements f =&gt; f a -&gt; [(a, Int)]
+</span><a href="Chemistry.Core.html#listElements"><span class="hs-identifier hs-var">listElements</span></a></span></span><span>
+</span><span id="line-129"></span><span>    </span><span class="hs-pragma">{-# MINIMAL</span><span> </span><span class="annot"><a href="Chemistry.Core.html#foldQuantified"><span class="hs-pragma hs-type">foldQuantified</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- | A typeclass that spans an order relation based on the rules of a /Hill system/.</span><span>
+</span><span id="line-132"></span><span class="hs-keyword">class</span><span> </span><span id="HillCompare"><span class="annot"><a href="Chemistry.Core.html#HillCompare"><span class="hs-identifier hs-var">HillCompare</span></a></span></span><span> </span><span id="local-6989586621679141058"><span class="annot"><a href="#local-6989586621679141058"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-133"></span><span>    </span><span class="hs-comment">-- | Compare the two given items according to the hill system.</span><span>
+</span><span id="line-134"></span><span>    </span><span id="hillCompare"><span class="annot"><a href="Chemistry.Core.html#hillCompare"><span class="hs-identifier hs-type">hillCompare</span></a></span></span><span>
+</span><span id="line-135"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679141058"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-comment">-- ^ The first item to compare with the Hill system.</span><span>
+</span><span id="line-136"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679141058"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-comment">-- ^ The second item to compare with the Hill system.</span><span>
+</span><span id="line-137"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span> </span><span class="hs-comment">-- ^ The result of the comparison with the Hill system.</span><span>
+</span><span id="line-138"></span><span>    </span><span class="hs-pragma">{-# MINIMAL</span><span> </span><span class="annot"><a href="Chemistry.Core.html#hillCompare"><span class="hs-pragma hs-type">hillCompare</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-139"></span></pre></body></html>

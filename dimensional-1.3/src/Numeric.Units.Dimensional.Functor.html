@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# OPTIONS_HADDOCK show-extensions #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-comment">{- |
+   Copyright  : Copyright (C) 2006-2018 Bjorn Buckwalter
+   License    : BSD3
+
+   Maintainer : bjorn@buckwalter.se
+   Stability  : Stable
+   Portability: GHC only
+
+Provides a 'Functor' instance for 'Dimensional'.
+
+Note that this instance is dubious, because it allows you to break the dimensional abstraction. See 'dmap' for more information.
+
+Note that, while this instance overlaps with that given for 'Dimensionless', it is confluent with that instance.
+
+Note that this is an orphan instance.
+-}</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Numeric.Units.Dimensional.Functor</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.html"><span class="hs-identifier">Numeric.Units.Dimensional</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- | A 'Functor' instance for 'Dimensional'.</span><span>
+</span><span id="line-26"></span><span class="hs-comment">--</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- Note that this instance is dubious, because it allows you to break the dimensional abstraction. See 'dmap' for more information.</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- Note that, while this instance overlaps with that given for 'Dimensionless', it is confluent with that instance.</span><span>
+</span><span id="line-30"></span><span class="hs-comment">--</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- Note that this is an orphan instance.</span><span>
+</span><span id="line-32"></span><span id="local-6989586621679114409"><span id="local-6989586621679114410"><span class="hs-keyword">instance</span><span> </span><span class="hs-pragma">{-# OVERLAPPING</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span id="local-6989586621679114406"><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#KnownVariant"><span class="hs-identifier hs-type">KnownVariant</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114410"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Dimensional"><span class="hs-identifier hs-type">Dimensional</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114410"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114409"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-33"></span><span>  </span><span id="local-6989586621679114404"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; Dimensional v d a -&gt; Dimensional v d b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; Dimensional v d a -&gt; Dimensional v d b
+forall (v :: Variant) a1 a2 (d :: Dimension).
+KnownVariant v =&gt;
+(a1 -&gt; a2) -&gt; Dimensional v d a1 -&gt; Dimensional v d a2
+</span><a href="Numeric.Units.Dimensional.Internal.html#dmap"><span class="hs-identifier hs-var">dmap</span></a></span></span></span><span>
+</span><span id="line-34"></span></pre></body></html>

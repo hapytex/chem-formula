@@ -1,0 +1,621 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE ForeignFunctionInterface #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module     : Numeric.IEEE</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright  : Copyright (c) 2010, Patrick Perry &lt;patperry@gmail.com&gt;</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License    : BSD3</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer : Patrick Perry &lt;patperry@gmail.com&gt;</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Stability  : experimental</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Operations on IEEE floating point numbers.</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Numeric.IEEE</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-13"></span><span>    </span><span class="annot"><span class="hs-comment">-- * IEEE type class</span></span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><a href="Numeric.IEEE.html#IEEE"><span class="hs-identifier">IEEE</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><span class="hs-comment">-- * NaN-aware minimum and maximum</span></span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><a href="Numeric.IEEE.html#minNum"><span class="hs-identifier">minNum</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><a href="Numeric.IEEE.html#maxNum"><span class="hs-identifier">maxNum</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><a href="Numeric.IEEE.html#minNaN"><span class="hs-identifier">minNaN</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><a href="Numeric.IEEE.html#maxNaN"><span class="hs-identifier">maxNaN</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-20"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C.Types</span></span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">CFloat</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">CDouble</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- | IEEE floating point types.</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">class</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span id="IEEE"><span class="annot"><a href="Numeric.IEEE.html#IEEE"><span class="hs-identifier hs-var">IEEE</span></a></span></span><span> </span><span id="local-6989586621679051783"><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-27"></span><span>    </span><span class="hs-comment">-- | Infinity value.</span><span>
+</span><span id="line-28"></span><span>    </span><span id="infinity"><span class="annot"><a href="Numeric.IEEE.html#infinity"><span class="hs-identifier hs-type">infinity</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span>    </span><span class="hs-comment">-- | The smallest representable positive value.</span><span>
+</span><span id="line-31"></span><span>    </span><span id="minDenormal"><span class="annot"><a href="Numeric.IEEE.html#minDenormal"><span class="hs-identifier hs-type">minDenormal</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span>    </span><span class="hs-comment">-- | The smallest representable positive normalized value.</span><span>
+</span><span id="line-34"></span><span>    </span><span id="minNormal"><span class="annot"><a href="Numeric.IEEE.html#minNormal"><span class="hs-identifier hs-type">minNormal</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span>    </span><span class="hs-comment">-- | The largest representable finite value.</span><span>
+</span><span id="line-37"></span><span>    </span><span id="maxFinite"><span class="annot"><a href="Numeric.IEEE.html#maxFinite"><span class="hs-identifier hs-type">maxFinite</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-comment">-- | The smallest positive value @x@ such that @1 + x@ is representable.</span><span>
+</span><span id="line-40"></span><span>    </span><span id="epsilon"><span class="annot"><a href="Numeric.IEEE.html#epsilon"><span class="hs-identifier hs-type">epsilon</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span>    </span><span class="hs-comment">-- | @copySign x y@ returns @x@ with its sign changed to @y@'s.</span><span>
+</span><span id="line-43"></span><span>    </span><span id="copySign"><span class="annot"><a href="Numeric.IEEE.html#copySign"><span class="hs-identifier hs-type">copySign</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span>    </span><span class="hs-comment">-- | Return 'True' if two values are /exactly/ (bitwise) equal.</span><span>
+</span><span id="line-46"></span><span>    </span><span id="identicalIEEE"><span class="annot"><a href="Numeric.IEEE.html#identicalIEEE"><span class="hs-identifier hs-type">identicalIEEE</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span>    </span><span class="hs-comment">-- | Return the next largest IEEE value (@Infinity@ and @NaN@ are</span><span>
+</span><span id="line-49"></span><span>    </span><span class="hs-comment">-- unchanged).</span><span>
+</span><span id="line-50"></span><span>    </span><span id="succIEEE"><span class="annot"><a href="Numeric.IEEE.html#succIEEE"><span class="hs-identifier hs-type">succIEEE</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span>    </span><span class="hs-comment">-- | Return the next smallest IEEE value (@-Infinity@ and @NaN@ are</span><span>
+</span><span id="line-53"></span><span>    </span><span class="hs-comment">-- unchanged).</span><span>
+</span><span id="line-54"></span><span>    </span><span id="predIEEE"><span class="annot"><a href="Numeric.IEEE.html#predIEEE"><span class="hs-identifier hs-type">predIEEE</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span>    </span><span class="hs-comment">-- | Given two values with the same sign, return the value halfway</span><span>
+</span><span id="line-57"></span><span>    </span><span class="hs-comment">-- between them on the IEEE number line.  If the signs of the values</span><span>
+</span><span id="line-58"></span><span>    </span><span class="hs-comment">-- differ or either is @NaN@, the value is undefined.</span><span>
+</span><span id="line-59"></span><span>    </span><span id="bisectIEEE"><span class="annot"><a href="Numeric.IEEE.html#bisectIEEE"><span class="hs-identifier hs-type">bisectIEEE</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span>    </span><span class="hs-comment">-- | The number of significand bits which are equal in the two arguments</span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-comment">-- (equivalent to @feqrel@ from the Tango Math library).  The result is</span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-comment">-- between @0@ and @'floatDigits'@.</span><span>
+</span><span id="line-64"></span><span>    </span><span id="sameSignificandBits"><span class="annot"><a href="Numeric.IEEE.html#sameSignificandBits"><span class="hs-identifier hs-type">sameSignificandBits</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span>    </span><span class="hs-comment">-- | Default @NaN@ value.</span><span>
+</span><span id="line-67"></span><span>    </span><span id="nan"><span class="annot"><a href="Numeric.IEEE.html#nan"><span class="hs-identifier hs-type">nan</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-comment">-- | Quiet @NaN@ value with a positive integer payload.  Payload must be</span><span>
+</span><span id="line-70"></span><span>    </span><span class="hs-comment">-- less than 'maxNaNPayload'.  Beware that while some platforms allow</span><span>
+</span><span id="line-71"></span><span>    </span><span class="hs-comment">-- using @0@ as a payload, this behavior is not portable.</span><span>
+</span><span id="line-72"></span><span>    </span><span id="nanWithPayload"><span class="annot"><a href="Numeric.IEEE.html#nanWithPayload"><span class="hs-identifier hs-type">nanWithPayload</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word64</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-comment">-- | Maximum @NaN@ payload for type @a@.</span><span>
+</span><span id="line-75"></span><span>    </span><span id="maxNaNPayload"><span class="annot"><a href="Numeric.IEEE.html#maxNaNPayload"><span class="hs-identifier hs-type">maxNaNPayload</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word64</span></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span>    </span><span class="hs-comment">-- | The payload stored in a @NaN@ value.  Undefined if the argument</span><span>
+</span><span id="line-78"></span><span>    </span><span class="hs-comment">-- is not @NaN@.</span><span>
+</span><span id="line-79"></span><span>    </span><span id="nanPayload"><span class="annot"><a href="Numeric.IEEE.html#nanPayload"><span class="hs-identifier hs-type">nanPayload</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051783"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word64</span></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- | Return the maximum of two values; if one value is @NaN@, return the</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- other.  Prefer the first if both values are @NaN@.</span><span>
+</span><span id="line-84"></span><span id="local-6989586621679051752"><span class="annot"><a href="Numeric.IEEE.html#maxNum"><span class="hs-identifier hs-type">maxNum</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679051752"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051752"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051752"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051752"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-85"></span><span id="maxNum"><span class="annot"><span class="annottext">maxNum :: a -&gt; a -&gt; a
+</span><a href="Numeric.IEEE.html#maxNum"><span class="hs-identifier hs-var hs-var">maxNum</span></a></span></span><span> </span><span id="local-6989586621679051751"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679051751"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051750"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679051750"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051751"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051750"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Bool
+forall a. RealFloat a =&gt; a -&gt; Bool
+</span><span class="hs-identifier hs-var">isNaN</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051750"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051751"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-86"></span><span>           </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051750"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-87"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#maxNum"><span class="hs-pragma hs-type">maxNum</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- | Return the minimum of two values; if one value is @NaN@, return the</span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- other.  Prefer the first if both values are @NaN@.</span><span>
+</span><span id="line-91"></span><span id="local-6989586621679051747"><span class="annot"><a href="Numeric.IEEE.html#minNum"><span class="hs-identifier hs-type">minNum</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679051747"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051747"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051747"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051747"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-92"></span><span id="minNum"><span class="annot"><span class="annottext">minNum :: a -&gt; a -&gt; a
+</span><a href="Numeric.IEEE.html#minNum"><span class="hs-identifier hs-var hs-var">minNum</span></a></span></span><span> </span><span id="local-6989586621679051746"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679051746"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051745"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679051745"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051746"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051745"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Bool
+forall a. RealFloat a =&gt; a -&gt; Bool
+</span><span class="hs-identifier hs-var">isNaN</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051745"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051746"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-93"></span><span>           </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051745"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-94"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#minNum"><span class="hs-pragma hs-type">minNum</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- | Return the maximum of two values; if one value is @NaN@, return it.</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- Prefer the first if both values are @NaN@.</span><span>
+</span><span id="line-98"></span><span id="local-6989586621679051743"><span class="annot"><a href="Numeric.IEEE.html#maxNaN"><span class="hs-identifier hs-type">maxNaN</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679051743"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051743"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051743"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051743"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-99"></span><span id="maxNaN"><span class="annot"><span class="annottext">maxNaN :: a -&gt; a -&gt; a
+</span><a href="Numeric.IEEE.html#maxNaN"><span class="hs-identifier hs-var hs-var">maxNaN</span></a></span></span><span> </span><span id="local-6989586621679051742"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679051742"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051741"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679051741"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051742"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051741"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Bool
+forall a. RealFloat a =&gt; a -&gt; Bool
+</span><span class="hs-identifier hs-var">isNaN</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051742"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051742"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-100"></span><span>           </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051741"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-101"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#maxNaN"><span class="hs-pragma hs-type">maxNaN</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span class="hs-comment">-- | Return the minimum of two values; if one value is @NaN@, return it.</span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- Prefer the first if both values are @NaN@.</span><span>
+</span><span id="line-105"></span><span id="local-6989586621679051740"><span class="annot"><a href="Numeric.IEEE.html#minNaN"><span class="hs-identifier hs-type">minNaN</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="annot"><a href="#local-6989586621679051740"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>  </span><span class="annot"><a href="#local-6989586621679051740"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051740"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679051740"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-106"></span><span id="minNaN"><span class="annot"><span class="annottext">minNaN :: a -&gt; a -&gt; a
+</span><a href="Numeric.IEEE.html#minNaN"><span class="hs-identifier hs-var hs-var">minNaN</span></a></span></span><span> </span><span id="local-6989586621679051739"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679051739"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051738"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679051738"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051739"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051738"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Bool
+forall a. RealFloat a =&gt; a -&gt; Bool
+</span><span class="hs-identifier hs-var">isNaN</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051739"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051739"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-107"></span><span>           </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679051738"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-108"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#minNaN"><span class="hs-pragma hs-type">minNaN</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#IEEE"><span class="hs-identifier hs-type">IEEE</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-112"></span><span>    </span><span id="local-6989586621679051720"><span class="annot"><span class="annottext">identicalIEEE :: Float -&gt; Float -&gt; Bool
+</span><a href="#local-6989586621679051720"><span class="hs-identifier hs-var hs-var hs-var hs-var">identicalIEEE</span></a></span></span><span> </span><span id="local-6989586621679051719"><span class="annot"><span class="annottext">x :: Float
+</span><a href="#local-6989586621679051719"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051718"><span class="annot"><span class="annottext">y :: Float
+</span><a href="#local-6989586621679051718"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; Float -&gt; Int
+</span><a href="Numeric.IEEE.html#c_identicalf"><span class="hs-identifier hs-var">c_identicalf</span></a></span><span> </span><span class="annot"><span class="annottext">Float
+</span><a href="#local-6989586621679051719"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Float
+</span><a href="#local-6989586621679051718"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-113"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#identicalIEEE"><span class="hs-pragma hs-type">identicalIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-114"></span><span>    </span><span id="local-6989586621679051715"><span class="annot"><span class="annottext">infinity :: Float
+</span><a href="#local-6989586621679051715"><span class="hs-identifier hs-var hs-var hs-var hs-var">infinity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="annot"><span class="annottext">Float -&gt; Float -&gt; Float
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-115"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#infinity"><span class="hs-pragma hs-type">infinity</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-116"></span><span>    </span><span id="local-6989586621679051713"><span class="annot"><span class="annottext">nan :: Float
+</span><a href="#local-6989586621679051713"><span class="hs-identifier hs-var hs-var hs-var hs-var">nan</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">0</span></span><span class="annot"><span class="annottext">Float -&gt; Float -&gt; Float
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#nan"><span class="hs-pragma hs-type">nan</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-118"></span><span>    </span><span id="local-6989586621679051712"><span class="annot"><span class="annottext">nanWithPayload :: Word64 -&gt; Float
+</span><a href="#local-6989586621679051712"><span class="hs-identifier hs-var hs-var hs-var hs-var">nanWithPayload</span></a></span></span><span> </span><span id="local-6989586621679051711"><span class="annot"><span class="annottext">n :: Word64
+</span><a href="#local-6989586621679051711"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Float
+</span><a href="Numeric.IEEE.html#c_mknanf"><span class="hs-identifier hs-var">c_mknanf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Word32
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621679051711"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-119"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#nanWithPayload"><span class="hs-pragma hs-type">nanWithPayload</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-120"></span><span>    </span><span id="local-6989586621679051709"><span class="annot"><span class="annottext">maxNaNPayload :: Float -&gt; Word64
+</span><a href="#local-6989586621679051709"><span class="hs-identifier hs-var hs-var hs-var hs-var">maxNaNPayload</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">0x003FFFFF</span></span><span>
+</span><span id="line-121"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#maxNaNPayload"><span class="hs-pragma hs-type">maxNaNPayload</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-122"></span><span>    </span><span id="local-6989586621679051708"><span class="annot"><span class="annottext">nanPayload :: Float -&gt; Word64
+</span><a href="#local-6989586621679051708"><span class="hs-identifier hs-var hs-var hs-var hs-var">nanPayload</span></a></span></span><span> </span><span id="local-6989586621679051707"><span class="annot"><span class="annottext">x :: Float
+</span><a href="#local-6989586621679051707"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Word64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">(Word32 -&gt; Word64) -&gt; Word32 -&gt; Word64
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Float -&gt; Word32
+</span><a href="Numeric.IEEE.html#c_getnanf"><span class="hs-identifier hs-var">c_getnanf</span></a></span><span> </span><span class="annot"><span class="annottext">Float
+</span><a href="#local-6989586621679051707"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-123"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#nanPayload"><span class="hs-pragma hs-type">nanPayload</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-124"></span><span>    </span><span id="local-6989586621679051705"><span class="annot"><span class="annottext">minDenormal :: Float
+</span><a href="#local-6989586621679051705"><span class="hs-identifier hs-var hs-var hs-var hs-var">minDenormal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1e-45</span></span><span>
+</span><span id="line-125"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#minDenormal"><span class="hs-pragma hs-type">minDenormal</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-126"></span><span>    </span><span id="local-6989586621679051704"><span class="annot"><span class="annottext">minNormal :: Float
+</span><a href="#local-6989586621679051704"><span class="hs-identifier hs-var hs-var hs-var hs-var">minNormal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1.17549435e-38</span></span><span>
+</span><span id="line-127"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#minNormal"><span class="hs-pragma hs-type">minNormal</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-128"></span><span>    </span><span id="local-6989586621679051703"><span class="annot"><span class="annottext">maxFinite :: Float
+</span><a href="#local-6989586621679051703"><span class="hs-identifier hs-var hs-var hs-var hs-var">maxFinite</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">3.40282347e+38</span></span><span>
+</span><span id="line-129"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#maxFinite"><span class="hs-pragma hs-type">maxFinite</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-130"></span><span>    </span><span id="local-6989586621679051702"><span class="annot"><span class="annottext">epsilon :: Float
+</span><a href="#local-6989586621679051702"><span class="hs-identifier hs-var hs-var hs-var hs-var">epsilon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1.19209290e-07</span></span><span>
+</span><span id="line-131"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#epsilon"><span class="hs-pragma hs-type">epsilon</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-132"></span><span>    </span><span id="local-6989586621679051701"><span class="annot"><span class="annottext">copySign :: Float -&gt; Float -&gt; Float
+</span><a href="#local-6989586621679051701"><span class="hs-identifier hs-var hs-var hs-var hs-var">copySign</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; Float -&gt; Float
+</span><a href="Numeric.IEEE.html#c_copysignf"><span class="hs-identifier hs-var">c_copysignf</span></a></span><span>
+</span><span id="line-133"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#copySign"><span class="hs-pragma hs-type">copySign</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-134"></span><span>    </span><span id="local-6989586621679051699"><span class="annot"><span class="annottext">succIEEE :: Float -&gt; Float
+</span><a href="#local-6989586621679051699"><span class="hs-identifier hs-var hs-var hs-var hs-var">succIEEE</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; Float
+</span><a href="Numeric.IEEE.html#c_ieeesuccf"><span class="hs-identifier hs-var">c_ieeesuccf</span></a></span><span>
+</span><span id="line-135"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#succIEEE"><span class="hs-pragma hs-type">succIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-136"></span><span>    </span><span id="local-6989586621679051697"><span class="annot"><span class="annottext">predIEEE :: Float -&gt; Float
+</span><a href="#local-6989586621679051697"><span class="hs-identifier hs-var hs-var hs-var hs-var">predIEEE</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; Float
+</span><a href="Numeric.IEEE.html#c_ieeepredf"><span class="hs-identifier hs-var">c_ieeepredf</span></a></span><span>
+</span><span id="line-137"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#predIEEE"><span class="hs-pragma hs-type">predIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-138"></span><span>    </span><span id="local-6989586621679051695"><span class="annot"><span class="annottext">bisectIEEE :: Float -&gt; Float -&gt; Float
+</span><a href="#local-6989586621679051695"><span class="hs-identifier hs-var hs-var hs-var hs-var">bisectIEEE</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; Float -&gt; Float
+</span><a href="Numeric.IEEE.html#c_ieeemeanf"><span class="hs-identifier hs-var">c_ieeemeanf</span></a></span><span>
+</span><span id="line-139"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#bisectIEEE"><span class="hs-pragma hs-type">bisectIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-140"></span><span>    </span><span id="local-6989586621679051693"><span class="annot"><span class="annottext">sameSignificandBits :: Float -&gt; Float -&gt; Int
+</span><a href="#local-6989586621679051693"><span class="hs-identifier hs-var hs-var hs-var hs-var">sameSignificandBits</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; Float -&gt; Int
+</span><a href="Numeric.IEEE.html#c_feqrelf"><span class="hs-identifier hs-var">c_feqrelf</span></a></span><span>
+</span><span id="line-141"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#sameSignificandBits"><span class="hs-pragma hs-type">sameSignificandBits</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#IEEE"><span class="hs-identifier hs-type">IEEE</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CFloat</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-145"></span><span>    </span><span id="local-6989586621679051675"><span class="annot"><span class="annottext">identicalIEEE :: CFloat -&gt; CFloat -&gt; Bool
+</span><a href="#local-6989586621679051675"><span class="hs-identifier hs-var hs-var hs-var hs-var">identicalIEEE</span></a></span></span><span> </span><span id="local-6989586621679051674"><span class="annot"><span class="annottext">x :: CFloat
+</span><a href="#local-6989586621679051674"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051673"><span class="annot"><span class="annottext">y :: CFloat
+</span><a href="#local-6989586621679051673"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; Float -&gt; Int
+</span><a href="Numeric.IEEE.html#c_identicalf"><span class="hs-identifier hs-var">c_identicalf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CFloat -&gt; Float
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CFloat
+</span><a href="#local-6989586621679051674"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CFloat -&gt; Float
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CFloat
+</span><a href="#local-6989586621679051673"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-146"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#identicalIEEE"><span class="hs-pragma hs-type">identicalIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-147"></span><span>    </span><span id="local-6989586621679051672"><span class="annot"><span class="annottext">infinity :: CFloat
+</span><a href="#local-6989586621679051672"><span class="hs-identifier hs-var hs-var hs-var hs-var">infinity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="annot"><span class="annottext">CFloat -&gt; CFloat -&gt; CFloat
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-148"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#infinity"><span class="hs-pragma hs-type">infinity</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-149"></span><span>    </span><span id="local-6989586621679051671"><span class="annot"><span class="annottext">nan :: CFloat
+</span><a href="#local-6989586621679051671"><span class="hs-identifier hs-var hs-var hs-var hs-var">nan</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">0</span></span><span class="annot"><span class="annottext">CFloat -&gt; CFloat -&gt; CFloat
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-150"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#nan"><span class="hs-pragma hs-type">nan</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-151"></span><span>    </span><span id="local-6989586621679051670"><span class="annot"><span class="annottext">nanWithPayload :: Word64 -&gt; CFloat
+</span><a href="#local-6989586621679051670"><span class="hs-identifier hs-var hs-var hs-var hs-var">nanWithPayload</span></a></span></span><span> </span><span id="local-6989586621679051669"><span class="annot"><span class="annottext">n :: Word64
+</span><a href="#local-6989586621679051669"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; CFloat
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">(Float -&gt; CFloat) -&gt; Float -&gt; CFloat
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Float
+</span><a href="Numeric.IEEE.html#c_mknanf"><span class="hs-identifier hs-var">c_mknanf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Word32
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621679051669"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-152"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#nanWithPayload"><span class="hs-pragma hs-type">nanWithPayload</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-153"></span><span>    </span><span id="local-6989586621679051668"><span class="annot"><span class="annottext">maxNaNPayload :: CFloat -&gt; Word64
+</span><a href="#local-6989586621679051668"><span class="hs-identifier hs-var hs-var hs-var hs-var">maxNaNPayload</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">0x003FFFFF</span></span><span>
+</span><span id="line-154"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#maxNaNPayload"><span class="hs-pragma hs-type">maxNaNPayload</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-155"></span><span>    </span><span id="local-6989586621679051667"><span class="annot"><span class="annottext">nanPayload :: CFloat -&gt; Word64
+</span><a href="#local-6989586621679051667"><span class="hs-identifier hs-var hs-var hs-var hs-var">nanPayload</span></a></span></span><span> </span><span id="local-6989586621679051666"><span class="annot"><span class="annottext">x :: CFloat
+</span><a href="#local-6989586621679051666"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Word64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">(Word32 -&gt; Word64) -&gt; Word32 -&gt; Word64
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Float -&gt; Word32
+</span><a href="Numeric.IEEE.html#c_getnanf"><span class="hs-identifier hs-var">c_getnanf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CFloat -&gt; Float
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CFloat
+</span><a href="#local-6989586621679051666"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-156"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#nanPayload"><span class="hs-pragma hs-type">nanPayload</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-157"></span><span>    </span><span id="local-6989586621679051665"><span class="annot"><span class="annottext">minDenormal :: CFloat
+</span><a href="#local-6989586621679051665"><span class="hs-identifier hs-var hs-var hs-var hs-var">minDenormal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1e-45</span></span><span>
+</span><span id="line-158"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#minDenormal"><span class="hs-pragma hs-type">minDenormal</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-159"></span><span>    </span><span id="local-6989586621679051664"><span class="annot"><span class="annottext">minNormal :: CFloat
+</span><a href="#local-6989586621679051664"><span class="hs-identifier hs-var hs-var hs-var hs-var">minNormal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1.17549435e-38</span></span><span>
+</span><span id="line-160"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#minNormal"><span class="hs-pragma hs-type">minNormal</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-161"></span><span>    </span><span id="local-6989586621679051663"><span class="annot"><span class="annottext">maxFinite :: CFloat
+</span><a href="#local-6989586621679051663"><span class="hs-identifier hs-var hs-var hs-var hs-var">maxFinite</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">3.40282347e+38</span></span><span>
+</span><span id="line-162"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#maxFinite"><span class="hs-pragma hs-type">maxFinite</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-163"></span><span>    </span><span id="local-6989586621679051662"><span class="annot"><span class="annottext">epsilon :: CFloat
+</span><a href="#local-6989586621679051662"><span class="hs-identifier hs-var hs-var hs-var hs-var">epsilon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1.19209290e-07</span></span><span>
+</span><span id="line-164"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#epsilon"><span class="hs-pragma hs-type">epsilon</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-165"></span><span>    </span><span id="local-6989586621679051661"><span class="annot"><span class="annottext">copySign :: CFloat -&gt; CFloat -&gt; CFloat
+</span><a href="#local-6989586621679051661"><span class="hs-identifier hs-var hs-var hs-var hs-var">copySign</span></a></span></span><span> </span><span id="local-6989586621679051660"><span class="annot"><span class="annottext">x :: CFloat
+</span><a href="#local-6989586621679051660"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051659"><span class="annot"><span class="annottext">y :: CFloat
+</span><a href="#local-6989586621679051659"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; CFloat
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">(Float -&gt; CFloat) -&gt; Float -&gt; CFloat
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Float -&gt; Float -&gt; Float
+</span><a href="Numeric.IEEE.html#c_copysignf"><span class="hs-identifier hs-var">c_copysignf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CFloat -&gt; Float
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CFloat
+</span><a href="#local-6989586621679051660"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CFloat -&gt; Float
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CFloat
+</span><a href="#local-6989586621679051659"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-166"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#copySign"><span class="hs-pragma hs-type">copySign</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-167"></span><span>    </span><span id="local-6989586621679051658"><span class="annot"><span class="annottext">succIEEE :: CFloat -&gt; CFloat
+</span><a href="#local-6989586621679051658"><span class="hs-identifier hs-var hs-var hs-var hs-var">succIEEE</span></a></span></span><span> </span><span id="local-6989586621679051657"><span class="annot"><span class="annottext">x :: CFloat
+</span><a href="#local-6989586621679051657"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; CFloat
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">(Float -&gt; CFloat) -&gt; Float -&gt; CFloat
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Float -&gt; Float
+</span><a href="Numeric.IEEE.html#c_ieeesuccf"><span class="hs-identifier hs-var">c_ieeesuccf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CFloat -&gt; Float
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CFloat
+</span><a href="#local-6989586621679051657"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-168"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#succIEEE"><span class="hs-pragma hs-type">succIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-169"></span><span>    </span><span id="local-6989586621679051656"><span class="annot"><span class="annottext">predIEEE :: CFloat -&gt; CFloat
+</span><a href="#local-6989586621679051656"><span class="hs-identifier hs-var hs-var hs-var hs-var">predIEEE</span></a></span></span><span> </span><span id="local-6989586621679051655"><span class="annot"><span class="annottext">x :: CFloat
+</span><a href="#local-6989586621679051655"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; CFloat
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">(Float -&gt; CFloat) -&gt; Float -&gt; CFloat
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Float -&gt; Float
+</span><a href="Numeric.IEEE.html#c_ieeepredf"><span class="hs-identifier hs-var">c_ieeepredf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CFloat -&gt; Float
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CFloat
+</span><a href="#local-6989586621679051655"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-170"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#predIEEE"><span class="hs-pragma hs-type">predIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-171"></span><span>    </span><span id="local-6989586621679051654"><span class="annot"><span class="annottext">bisectIEEE :: CFloat -&gt; CFloat -&gt; CFloat
+</span><a href="#local-6989586621679051654"><span class="hs-identifier hs-var hs-var hs-var hs-var">bisectIEEE</span></a></span></span><span> </span><span id="local-6989586621679051653"><span class="annot"><span class="annottext">x :: CFloat
+</span><a href="#local-6989586621679051653"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051652"><span class="annot"><span class="annottext">y :: CFloat
+</span><a href="#local-6989586621679051652"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; CFloat
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">(Float -&gt; CFloat) -&gt; Float -&gt; CFloat
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Float -&gt; Float -&gt; Float
+</span><a href="Numeric.IEEE.html#c_ieeemeanf"><span class="hs-identifier hs-var">c_ieeemeanf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CFloat -&gt; Float
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CFloat
+</span><a href="#local-6989586621679051653"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CFloat -&gt; Float
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CFloat
+</span><a href="#local-6989586621679051652"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-172"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#bisectIEEE"><span class="hs-pragma hs-type">bisectIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-173"></span><span>    </span><span id="local-6989586621679051651"><span class="annot"><span class="annottext">sameSignificandBits :: CFloat -&gt; CFloat -&gt; Int
+</span><a href="#local-6989586621679051651"><span class="hs-identifier hs-var hs-var hs-var hs-var">sameSignificandBits</span></a></span></span><span> </span><span id="local-6989586621679051650"><span class="annot"><span class="annottext">x :: CFloat
+</span><a href="#local-6989586621679051650"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051649"><span class="annot"><span class="annottext">y :: CFloat
+</span><a href="#local-6989586621679051649"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Float -&gt; Float -&gt; Int
+</span><a href="Numeric.IEEE.html#c_feqrelf"><span class="hs-identifier hs-var">c_feqrelf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CFloat -&gt; Float
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CFloat
+</span><a href="#local-6989586621679051650"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CFloat -&gt; Float
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CFloat
+</span><a href="#local-6989586621679051649"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-174"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#sameSignificandBits"><span class="hs-pragma hs-type">sameSignificandBits</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-175"></span><span>
+</span><span id="line-176"></span><span>
+</span><span id="line-177"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#IEEE"><span class="hs-identifier hs-type">IEEE</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-178"></span><span>    </span><span id="local-6989586621679051632"><span class="annot"><span class="annottext">identicalIEEE :: Double -&gt; Double -&gt; Bool
+</span><a href="#local-6989586621679051632"><span class="hs-identifier hs-var hs-var hs-var hs-var">identicalIEEE</span></a></span></span><span> </span><span id="local-6989586621679051631"><span class="annot"><span class="annottext">x :: Double
+</span><a href="#local-6989586621679051631"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051630"><span class="annot"><span class="annottext">y :: Double
+</span><a href="#local-6989586621679051630"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Int
+</span><a href="Numeric.IEEE.html#c_identical"><span class="hs-identifier hs-var">c_identical</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679051631"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679051630"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-179"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#identicalIEEE"><span class="hs-pragma hs-type">identicalIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-180"></span><span>    </span><span id="local-6989586621679051628"><span class="annot"><span class="annottext">infinity :: Double
+</span><a href="#local-6989586621679051628"><span class="hs-identifier hs-var hs-var hs-var hs-var">infinity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-181"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#infinity"><span class="hs-pragma hs-type">infinity</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-182"></span><span>    </span><span id="local-6989586621679051627"><span class="annot"><span class="annottext">nan :: Double
+</span><a href="#local-6989586621679051627"><span class="hs-identifier hs-var hs-var hs-var hs-var">nan</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">0</span></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-183"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#nan"><span class="hs-pragma hs-type">nan</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-184"></span><span>    </span><span id="local-6989586621679051626"><span class="annot"><span class="annottext">nanWithPayload :: Word64 -&gt; Double
+</span><a href="#local-6989586621679051626"><span class="hs-identifier hs-var hs-var hs-var hs-var">nanWithPayload</span></a></span></span><span> </span><span id="local-6989586621679051625"><span class="annot"><span class="annottext">n :: Word64
+</span><a href="#local-6989586621679051625"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Double
+</span><a href="Numeric.IEEE.html#c_mknan"><span class="hs-identifier hs-var">c_mknan</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621679051625"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-185"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#nanWithPayload"><span class="hs-pragma hs-type">nanWithPayload</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-186"></span><span>    </span><span id="local-6989586621679051623"><span class="annot"><span class="annottext">maxNaNPayload :: Double -&gt; Word64
+</span><a href="#local-6989586621679051623"><span class="hs-identifier hs-var hs-var hs-var hs-var">maxNaNPayload</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">0x0007FFFFFFFFFFFF</span></span><span>
+</span><span id="line-187"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#maxNaNPayload"><span class="hs-pragma hs-type">maxNaNPayload</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-188"></span><span>    </span><span id="local-6989586621679051622"><span class="annot"><span class="annottext">nanPayload :: Double -&gt; Word64
+</span><a href="#local-6989586621679051622"><span class="hs-identifier hs-var hs-var hs-var hs-var">nanPayload</span></a></span></span><span> </span><span id="local-6989586621679051621"><span class="annot"><span class="annottext">x :: Double
+</span><a href="#local-6989586621679051621"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Word64
+</span><a href="Numeric.IEEE.html#c_getnan"><span class="hs-identifier hs-var">c_getnan</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679051621"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-189"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#nanPayload"><span class="hs-pragma hs-type">nanPayload</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-190"></span><span>    </span><span id="local-6989586621679051619"><span class="annot"><span class="annottext">minDenormal :: Double
+</span><a href="#local-6989586621679051619"><span class="hs-identifier hs-var hs-var hs-var hs-var">minDenormal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">5e-324</span></span><span>
+</span><span id="line-191"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#minDenormal"><span class="hs-pragma hs-type">minDenormal</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-192"></span><span>    </span><span id="local-6989586621679051618"><span class="annot"><span class="annottext">minNormal :: Double
+</span><a href="#local-6989586621679051618"><span class="hs-identifier hs-var hs-var hs-var hs-var">minNormal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2.2250738585072014e-308</span></span><span>
+</span><span id="line-193"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#minNormal"><span class="hs-pragma hs-type">minNormal</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-194"></span><span>    </span><span id="local-6989586621679051617"><span class="annot"><span class="annottext">maxFinite :: Double
+</span><a href="#local-6989586621679051617"><span class="hs-identifier hs-var hs-var hs-var hs-var">maxFinite</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1.7976931348623157e+308</span></span><span>
+</span><span id="line-195"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#maxFinite"><span class="hs-pragma hs-type">maxFinite</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-196"></span><span>    </span><span id="local-6989586621679051616"><span class="annot"><span class="annottext">epsilon :: Double
+</span><a href="#local-6989586621679051616"><span class="hs-identifier hs-var hs-var hs-var hs-var">epsilon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2.2204460492503131e-16</span></span><span>
+</span><span id="line-197"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#epsilon"><span class="hs-pragma hs-type">epsilon</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-198"></span><span>    </span><span id="local-6989586621679051615"><span class="annot"><span class="annottext">copySign :: Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679051615"><span class="hs-identifier hs-var hs-var hs-var hs-var">copySign</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="Numeric.IEEE.html#c_copysign"><span class="hs-identifier hs-var">c_copysign</span></a></span><span>
+</span><span id="line-199"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#copySign"><span class="hs-pragma hs-type">copySign</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-200"></span><span>    </span><span id="local-6989586621679051613"><span class="annot"><span class="annottext">succIEEE :: Double -&gt; Double
+</span><a href="#local-6989586621679051613"><span class="hs-identifier hs-var hs-var hs-var hs-var">succIEEE</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
+</span><a href="Numeric.IEEE.html#c_ieeesucc"><span class="hs-identifier hs-var">c_ieeesucc</span></a></span><span>
+</span><span id="line-201"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#succIEEE"><span class="hs-pragma hs-type">succIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-202"></span><span>    </span><span id="local-6989586621679051611"><span class="annot"><span class="annottext">predIEEE :: Double -&gt; Double
+</span><a href="#local-6989586621679051611"><span class="hs-identifier hs-var hs-var hs-var hs-var">predIEEE</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
+</span><a href="Numeric.IEEE.html#c_ieeepred"><span class="hs-identifier hs-var">c_ieeepred</span></a></span><span>
+</span><span id="line-203"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#predIEEE"><span class="hs-pragma hs-type">predIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-204"></span><span>    </span><span id="local-6989586621679051609"><span class="annot"><span class="annottext">bisectIEEE :: Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679051609"><span class="hs-identifier hs-var hs-var hs-var hs-var">bisectIEEE</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="Numeric.IEEE.html#c_ieeemean"><span class="hs-identifier hs-var">c_ieeemean</span></a></span><span>
+</span><span id="line-205"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#bisectIEEE"><span class="hs-pragma hs-type">bisectIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-206"></span><span>    </span><span id="local-6989586621679051607"><span class="annot"><span class="annottext">sameSignificandBits :: Double -&gt; Double -&gt; Int
+</span><a href="#local-6989586621679051607"><span class="hs-identifier hs-var hs-var hs-var hs-var">sameSignificandBits</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Int
+</span><a href="Numeric.IEEE.html#c_feqrel"><span class="hs-identifier hs-var">c_feqrel</span></a></span><span>
+</span><span id="line-207"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#sameSignificandBits"><span class="hs-pragma hs-type">sameSignificandBits</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-208"></span><span>
+</span><span id="line-209"></span><span>
+</span><span id="line-210"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#IEEE"><span class="hs-identifier hs-type">IEEE</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CDouble</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-211"></span><span>    </span><span id="local-6989586621679051589"><span class="annot"><span class="annottext">identicalIEEE :: CDouble -&gt; CDouble -&gt; Bool
+</span><a href="#local-6989586621679051589"><span class="hs-identifier hs-var hs-var hs-var hs-var">identicalIEEE</span></a></span></span><span> </span><span id="local-6989586621679051588"><span class="annot"><span class="annottext">x :: CDouble
+</span><a href="#local-6989586621679051588"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051587"><span class="annot"><span class="annottext">y :: CDouble
+</span><a href="#local-6989586621679051587"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Int
+</span><a href="Numeric.IEEE.html#c_identical"><span class="hs-identifier hs-var">c_identical</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CDouble -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679051588"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CDouble -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679051587"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-212"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#identicalIEEE"><span class="hs-pragma hs-type">identicalIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-213"></span><span>    </span><span id="local-6989586621679051586"><span class="annot"><span class="annottext">infinity :: CDouble
+</span><a href="#local-6989586621679051586"><span class="hs-identifier hs-var hs-var hs-var hs-var">infinity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="annot"><span class="annottext">CDouble -&gt; CDouble -&gt; CDouble
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-214"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#infinity"><span class="hs-pragma hs-type">infinity</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-215"></span><span>    </span><span id="local-6989586621679051585"><span class="annot"><span class="annottext">nan :: CDouble
+</span><a href="#local-6989586621679051585"><span class="hs-identifier hs-var hs-var hs-var hs-var">nan</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">0</span></span><span class="annot"><span class="annottext">CDouble -&gt; CDouble -&gt; CDouble
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-216"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#nan"><span class="hs-pragma hs-type">nan</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-217"></span><span>    </span><span id="local-6989586621679051584"><span class="annot"><span class="annottext">nanWithPayload :: Word64 -&gt; CDouble
+</span><a href="#local-6989586621679051584"><span class="hs-identifier hs-var hs-var hs-var hs-var">nanWithPayload</span></a></span></span><span> </span><span id="local-6989586621679051583"><span class="annot"><span class="annottext">n :: Word64
+</span><a href="#local-6989586621679051583"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; CDouble
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">(Double -&gt; CDouble) -&gt; Double -&gt; CDouble
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Double
+</span><a href="Numeric.IEEE.html#c_mknan"><span class="hs-identifier hs-var">c_mknan</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621679051583"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-218"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#nanWithPayload"><span class="hs-pragma hs-type">nanWithPayload</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-219"></span><span>    </span><span id="local-6989586621679051582"><span class="annot"><span class="annottext">maxNaNPayload :: CDouble -&gt; Word64
+</span><a href="#local-6989586621679051582"><span class="hs-identifier hs-var hs-var hs-var hs-var">maxNaNPayload</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">0x0007FFFFFFFFFFFF</span></span><span>
+</span><span id="line-220"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#maxNaNPayload"><span class="hs-pragma hs-type">maxNaNPayload</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-221"></span><span>    </span><span id="local-6989586621679051581"><span class="annot"><span class="annottext">nanPayload :: CDouble -&gt; Word64
+</span><a href="#local-6989586621679051581"><span class="hs-identifier hs-var hs-var hs-var hs-var">nanPayload</span></a></span></span><span> </span><span id="local-6989586621679051580"><span class="annot"><span class="annottext">x :: CDouble
+</span><a href="#local-6989586621679051580"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Word64
+</span><a href="Numeric.IEEE.html#c_getnan"><span class="hs-identifier hs-var">c_getnan</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CDouble -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679051580"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-222"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#nanPayload"><span class="hs-pragma hs-type">nanPayload</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-223"></span><span>    </span><span id="local-6989586621679051579"><span class="annot"><span class="annottext">minDenormal :: CDouble
+</span><a href="#local-6989586621679051579"><span class="hs-identifier hs-var hs-var hs-var hs-var">minDenormal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">5e-324</span></span><span>
+</span><span id="line-224"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#minDenormal"><span class="hs-pragma hs-type">minDenormal</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-225"></span><span>    </span><span id="local-6989586621679051578"><span class="annot"><span class="annottext">minNormal :: CDouble
+</span><a href="#local-6989586621679051578"><span class="hs-identifier hs-var hs-var hs-var hs-var">minNormal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2.2250738585072014e-308</span></span><span>
+</span><span id="line-226"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#minNormal"><span class="hs-pragma hs-type">minNormal</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-227"></span><span>    </span><span id="local-6989586621679051577"><span class="annot"><span class="annottext">maxFinite :: CDouble
+</span><a href="#local-6989586621679051577"><span class="hs-identifier hs-var hs-var hs-var hs-var">maxFinite</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1.7976931348623157e+308</span></span><span>
+</span><span id="line-228"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#maxFinite"><span class="hs-pragma hs-type">maxFinite</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-229"></span><span>    </span><span id="local-6989586621679051576"><span class="annot"><span class="annottext">epsilon :: CDouble
+</span><a href="#local-6989586621679051576"><span class="hs-identifier hs-var hs-var hs-var hs-var">epsilon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2.2204460492503131e-16</span></span><span>
+</span><span id="line-230"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#epsilon"><span class="hs-pragma hs-type">epsilon</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-231"></span><span>    </span><span id="local-6989586621679051575"><span class="annot"><span class="annottext">succIEEE :: CDouble -&gt; CDouble
+</span><a href="#local-6989586621679051575"><span class="hs-identifier hs-var hs-var hs-var hs-var">succIEEE</span></a></span></span><span> </span><span id="local-6989586621679051574"><span class="annot"><span class="annottext">x :: CDouble
+</span><a href="#local-6989586621679051574"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; CDouble
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">(Double -&gt; CDouble) -&gt; Double -&gt; CDouble
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
+</span><a href="Numeric.IEEE.html#c_ieeesucc"><span class="hs-identifier hs-var">c_ieeesucc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CDouble -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679051574"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-232"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#succIEEE"><span class="hs-pragma hs-type">succIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-233"></span><span>    </span><span id="local-6989586621679051573"><span class="annot"><span class="annottext">copySign :: CDouble -&gt; CDouble -&gt; CDouble
+</span><a href="#local-6989586621679051573"><span class="hs-identifier hs-var hs-var hs-var hs-var">copySign</span></a></span></span><span> </span><span id="local-6989586621679051572"><span class="annot"><span class="annottext">x :: CDouble
+</span><a href="#local-6989586621679051572"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051571"><span class="annot"><span class="annottext">y :: CDouble
+</span><a href="#local-6989586621679051571"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; CDouble
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">(Double -&gt; CDouble) -&gt; Double -&gt; CDouble
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="Numeric.IEEE.html#c_copysign"><span class="hs-identifier hs-var">c_copysign</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CDouble -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679051572"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CDouble -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679051571"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-234"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#copySign"><span class="hs-pragma hs-type">copySign</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-235"></span><span>    </span><span id="local-6989586621679051570"><span class="annot"><span class="annottext">predIEEE :: CDouble -&gt; CDouble
+</span><a href="#local-6989586621679051570"><span class="hs-identifier hs-var hs-var hs-var hs-var">predIEEE</span></a></span></span><span> </span><span id="local-6989586621679051569"><span class="annot"><span class="annottext">x :: CDouble
+</span><a href="#local-6989586621679051569"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; CDouble
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">(Double -&gt; CDouble) -&gt; Double -&gt; CDouble
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
+</span><a href="Numeric.IEEE.html#c_ieeepred"><span class="hs-identifier hs-var">c_ieeepred</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CDouble -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679051569"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-236"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#predIEEE"><span class="hs-pragma hs-type">predIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-237"></span><span>    </span><span id="local-6989586621679051568"><span class="annot"><span class="annottext">bisectIEEE :: CDouble -&gt; CDouble -&gt; CDouble
+</span><a href="#local-6989586621679051568"><span class="hs-identifier hs-var hs-var hs-var hs-var">bisectIEEE</span></a></span></span><span> </span><span id="local-6989586621679051567"><span class="annot"><span class="annottext">x :: CDouble
+</span><a href="#local-6989586621679051567"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051566"><span class="annot"><span class="annottext">y :: CDouble
+</span><a href="#local-6989586621679051566"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; CDouble
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">(Double -&gt; CDouble) -&gt; Double -&gt; CDouble
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="Numeric.IEEE.html#c_ieeemean"><span class="hs-identifier hs-var">c_ieeemean</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CDouble -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679051567"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CDouble -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679051566"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-238"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#bisectIEEE"><span class="hs-pragma hs-type">bisectIEEE</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-239"></span><span>    </span><span id="local-6989586621679051565"><span class="annot"><span class="annottext">sameSignificandBits :: CDouble -&gt; CDouble -&gt; Int
+</span><a href="#local-6989586621679051565"><span class="hs-identifier hs-var hs-var hs-var hs-var">sameSignificandBits</span></a></span></span><span> </span><span id="local-6989586621679051564"><span class="annot"><span class="annottext">x :: CDouble
+</span><a href="#local-6989586621679051564"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679051563"><span class="annot"><span class="annottext">y :: CDouble
+</span><a href="#local-6989586621679051563"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Int
+</span><a href="Numeric.IEEE.html#c_feqrel"><span class="hs-identifier hs-var">c_feqrel</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CDouble -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679051564"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CDouble -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679051563"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-240"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.IEEE.html#sameSignificandBits"><span class="hs-pragma hs-type">sameSignificandBits</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-241"></span><span>
+</span><span id="line-242"></span><span>
+</span><span id="line-243"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;identical&quot;</span></span><span>
+</span><span id="line-244"></span><span>    </span><span id="c_identical"><span class="annot"><a href="Numeric.IEEE.html#c_identical"><span class="hs-identifier hs-var">c_identical</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-245"></span><span>
+</span><span id="line-246"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;identicalf&quot;</span></span><span>
+</span><span id="line-247"></span><span>    </span><span id="c_identicalf"><span class="annot"><a href="Numeric.IEEE.html#c_identicalf"><span class="hs-identifier hs-var">c_identicalf</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-248"></span><span>
+</span><span id="line-249"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;feqrel&quot;</span></span><span>
+</span><span id="line-250"></span><span>    </span><span id="c_feqrel"><span class="annot"><a href="Numeric.IEEE.html#c_feqrel"><span class="hs-identifier hs-var">c_feqrel</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-251"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;feqrelf&quot;</span></span><span>
+</span><span id="line-252"></span><span>    </span><span id="c_feqrelf"><span class="annot"><a href="Numeric.IEEE.html#c_feqrelf"><span class="hs-identifier hs-var">c_feqrelf</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-253"></span><span>
+</span><span id="line-254"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;ieeesucc&quot;</span></span><span>
+</span><span id="line-255"></span><span>    </span><span id="c_ieeesucc"><span class="annot"><a href="Numeric.IEEE.html#c_ieeesucc"><span class="hs-identifier hs-var">c_ieeesucc</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-256"></span><span>
+</span><span id="line-257"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;ieeesuccf&quot;</span></span><span>
+</span><span id="line-258"></span><span>    </span><span id="c_ieeesuccf"><span class="annot"><a href="Numeric.IEEE.html#c_ieeesuccf"><span class="hs-identifier hs-var">c_ieeesuccf</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span>
+</span><span id="line-259"></span><span>
+</span><span id="line-260"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;ieeepred&quot;</span></span><span>
+</span><span id="line-261"></span><span>    </span><span id="c_ieeepred"><span class="annot"><a href="Numeric.IEEE.html#c_ieeepred"><span class="hs-identifier hs-var">c_ieeepred</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-262"></span><span>
+</span><span id="line-263"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;ieeepredf&quot;</span></span><span>
+</span><span id="line-264"></span><span>    </span><span id="c_ieeepredf"><span class="annot"><a href="Numeric.IEEE.html#c_ieeepredf"><span class="hs-identifier hs-var">c_ieeepredf</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span>
+</span><span id="line-265"></span><span>
+</span><span id="line-266"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;ieeemean&quot;</span></span><span>
+</span><span id="line-267"></span><span>    </span><span id="c_ieeemean"><span class="annot"><a href="Numeric.IEEE.html#c_ieeemean"><span class="hs-identifier hs-var">c_ieeemean</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-268"></span><span>
+</span><span id="line-269"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;ieeemeanf&quot;</span></span><span>
+</span><span id="line-270"></span><span>    </span><span id="c_ieeemeanf"><span class="annot"><a href="Numeric.IEEE.html#c_ieeemeanf"><span class="hs-identifier hs-var">c_ieeemeanf</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span>
+</span><span id="line-271"></span><span>
+</span><span id="line-272"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;copysign&quot;</span></span><span>
+</span><span id="line-273"></span><span>    </span><span id="c_copysign"><span class="annot"><a href="Numeric.IEEE.html#c_copysign"><span class="hs-identifier hs-var">c_copysign</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-274"></span><span>
+</span><span id="line-275"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;copysignf&quot;</span></span><span>
+</span><span id="line-276"></span><span>    </span><span id="c_copysignf"><span class="annot"><a href="Numeric.IEEE.html#c_copysignf"><span class="hs-identifier hs-var">c_copysignf</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span>
+</span><span id="line-277"></span><span>
+</span><span id="line-278"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;mknan&quot;</span></span><span>
+</span><span id="line-279"></span><span>    </span><span id="c_mknan"><span class="annot"><a href="Numeric.IEEE.html#c_mknan"><span class="hs-identifier hs-var">c_mknan</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word64</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-280"></span><span>
+</span><span id="line-281"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;getnan&quot;</span></span><span>
+</span><span id="line-282"></span><span>    </span><span id="c_getnan"><span class="annot"><a href="Numeric.IEEE.html#c_getnan"><span class="hs-identifier hs-var">c_getnan</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word64</span></span><span>
+</span><span id="line-283"></span><span>
+</span><span id="line-284"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;mknanf&quot;</span></span><span>
+</span><span id="line-285"></span><span>    </span><span id="c_mknanf"><span class="annot"><a href="Numeric.IEEE.html#c_mknanf"><span class="hs-identifier hs-var">c_mknanf</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word32</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span>
+</span><span id="line-286"></span><span>
+</span><span id="line-287"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;getnanf&quot;</span></span><span>
+</span><span id="line-288"></span><span>    </span><span id="c_getnanf"><span class="annot"><a href="Numeric.IEEE.html#c_getnanf"><span class="hs-identifier hs-var">c_getnanf</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word32</span></span><span>
+</span><span id="line-289"></span></pre></body></html>

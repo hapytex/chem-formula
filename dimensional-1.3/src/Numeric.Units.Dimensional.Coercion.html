@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- |
+    Copyright  : Copyright (C) 2006-2018 Bjorn Buckwalter
+    License    : BSD3
+
+    Maintainer : bjorn@buckwalter.se
+    Stability  : Experimental
+    Portability: GHC only?
+
+Re-exports the raw 'Quantity' constructor from the Numeric.Units.Dimensional.Internal module, along with 'Data.Coerce.coerce',
+for convenience in converting between raw representations and dimensional values.
+
+Note that use of these constructs requires the user to verify the dimensional safety of the conversion,
+because the coercion doesn't explicitly mention the unit of the representation. Note also that the
+'Quantity' constructor constructs a 'Numeric.Units.Dimensional.SQuantity' which may have a scale factor
+other than 'Data.ExactPi.TypeLevel.One'.
+
+Note that the haddock documentation doesn't mention the 'Quantity' constructor because it is a part of the
+'Dimensional' associated data family, but it is exported by this module.
+
+-}</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Numeric.Units.Dimensional.Coercion</span><span>
+</span><span id="line-23"></span><span class="hs-special">(</span><span>
+</span><span id="line-24"></span><span>  </span><span class="annot"><span class="hs-identifier">coerce</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Dimensional"><span class="hs-identifier">Dimensional</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier">Quantity</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Coercion.html#unQuantity"><span class="hs-identifier">unQuantity</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">coerce</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html"><span class="hs-identifier">Numeric.Units.Dimensional.Internal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#SQuantity"><span class="hs-identifier">SQuantity</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Dimensional"><span class="hs-identifier">Dimensional</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#Quantity"><span class="hs-identifier">Quantity</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- | Unwraps a possibly-scaled `SQuantity`, yielding its underlying representation.</span><span>
+</span><span id="line-32"></span><span class="hs-comment">--</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- This is a type-restricted version of `coerce`.</span><span>
+</span><span id="line-34"></span><span id="local-6989586621679111449"><span id="local-6989586621679111450"><span id="local-6989586621679111451"><span class="annot"><a href="Numeric.Units.Dimensional.Coercion.html#unQuantity"><span class="hs-identifier hs-type">unQuantity</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.Internal.html#SQuantity"><span class="hs-identifier hs-type">SQuantity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679111451"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679111450"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679111449"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679111449"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-35"></span><span id="unQuantity"><span class="annot"><span class="annottext">unQuantity :: SQuantity s d a -&gt; a
+</span><a href="Numeric.Units.Dimensional.Coercion.html#unQuantity"><span class="hs-identifier hs-var hs-var">unQuantity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SQuantity s d a -&gt; a
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span>
+</span><span id="line-36"></span></pre></body></html>

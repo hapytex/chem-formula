@@ -1,0 +1,623 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable, DeriveLift, DeriveTraversable, OverloadedStrings #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-comment">{-|
+Module      : Chemistry.Charge
+Description : A module that defines datatypes to specify the charge of an atom.
+Maintainer  : hapytexeu+gh@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+A module that defines datatypes to specify the charge of an atoms.
+-}</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Chemistry.Charge</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-13"></span><span>    </span><span class="hs-comment">-- Constructing a charged item.</span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier">Charged</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier">Charged</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Charge.html#neutral"><span class="hs-identifier">neutral</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Chemistry.Core.html"><span class="hs-identifier">Chemistry.Core</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Core.html#FormulaElement"><span class="hs-identifier">FormulaElement</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Core.html#toFormulaPrec"><span class="hs-identifier">toFormulaPrec</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#toFormulaMarkupPrec"><span class="hs-identifier">toFormulaMarkupPrec</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#Weight"><span class="hs-identifier">Weight</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Core.html#weight"><span class="hs-identifier">weight</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#showParenText"><span class="hs-identifier">showParenText</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Chemistry.Core.html#showParenMarkup"><span class="hs-identifier">showParenMarkup</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Data</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">cons</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Char.Small</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">asSup</span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Lift</span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Blaze</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Markup</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">string</span></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Blaze.Html4.Strict</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">sup</span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Test.QuickCheck.Arbitrary</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Arbitrary</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">arbitrary</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Arbitrary1</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">liftArbitrary</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">arbitrary1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- | A data type that specifies that the given item has a /charge/.</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">data</span><span> </span><span id="Charged"><span class="annot"><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier hs-var">Charged</span></a></span></span><span> </span><span id="local-6989586621679141401"><span class="annot"><a href="#local-6989586621679141401"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Charged"><span class="annot"><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier hs-var">Charged</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679141401"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-comment">-- ^ A dataconstructor that defines a Charged item together with the charge.</span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="%24cCharged"><span id="%24tCharged"><span id="local-6989586621679141321"><span id="local-6989586621679141323"><span id="local-6989586621679141325"><span id="local-6989586621679141327"><span id="local-6989586621679141329"><span id="local-6989586621679141331"><span id="local-6989586621679141333"><span id="local-6989586621679141335"><span id="local-6989586621679141337"><span id="local-6989586621679141339"><span id="local-6989586621679141341"><span id="local-6989586621679141343"><span id="local-6989586621679141345"><span id="local-6989586621679141347"><span class="annot"><span class="annottext">Typeable (Charged a)
+DataType
+Constr
+Typeable (Charged a) =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; Charged a -&gt; c (Charged a))
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (Charged a))
+-&gt; (Charged a -&gt; Constr)
+-&gt; (Charged a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (Charged a)))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c (Charged a)))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; Charged a -&gt; Charged a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Charged a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Charged a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; Charged a -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Charged a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a))
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a))
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a))
+-&gt; Data (Charged a)
+Charged a -&gt; DataType
+Charged a -&gt; Constr
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (Charged a))
+(forall b. Data b =&gt; b -&gt; b) -&gt; Charged a -&gt; Charged a
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Charged a -&gt; c (Charged a)
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (Charged a)
+forall a. Data a =&gt; Typeable (Charged a)
+forall a. Data a =&gt; Charged a -&gt; DataType
+forall a. Data a =&gt; Charged a -&gt; Constr
+forall a.
+Data a =&gt;
+(forall b. Data b =&gt; b -&gt; b) -&gt; Charged a -&gt; Charged a
+forall a u.
+Data a =&gt;
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Charged a -&gt; u
+forall a u.
+Data a =&gt;
+(forall d. Data d =&gt; d -&gt; u) -&gt; Charged a -&gt; [u]
+forall a r r'.
+Data a =&gt;
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Charged a -&gt; r
+forall a r r'.
+Data a =&gt;
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Charged a -&gt; r
+forall a (m :: * -&gt; *).
+(Data a, Monad m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a)
+forall a (m :: * -&gt; *).
+(Data a, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a)
+forall a (c :: * -&gt; *).
+Data a =&gt;
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (Charged a)
+forall a (c :: * -&gt; *).
+Data a =&gt;
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Charged a -&gt; c (Charged a)
+forall a (t :: * -&gt; *) (c :: * -&gt; *).
+(Data a, Typeable t) =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (Charged a))
+forall a (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+(Data a, Typeable t) =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c (Charged a))
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Charged a -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; Charged a -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Charged a -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Charged a -&gt; r
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a)
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a)
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (Charged a)
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Charged a -&gt; c (Charged a)
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (Charged a))
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c (Charged a))
+$cCharged :: Constr
+$tCharged :: DataType
+gmapMo :: (forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a)
+$cgmapMo :: forall a (m :: * -&gt; *).
+(Data a, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a)
+gmapMp :: (forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a)
+$cgmapMp :: forall a (m :: * -&gt; *).
+(Data a, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a)
+gmapM :: (forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a)
+$cgmapM :: forall a (m :: * -&gt; *).
+(Data a, Monad m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Charged a -&gt; m (Charged a)
+gmapQi :: Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Charged a -&gt; u
+$cgmapQi :: forall a u.
+Data a =&gt;
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Charged a -&gt; u
+gmapQ :: (forall d. Data d =&gt; d -&gt; u) -&gt; Charged a -&gt; [u]
+$cgmapQ :: forall a u.
+Data a =&gt;
+(forall d. Data d =&gt; d -&gt; u) -&gt; Charged a -&gt; [u]
+gmapQr :: (r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Charged a -&gt; r
+$cgmapQr :: forall a r r'.
+Data a =&gt;
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Charged a -&gt; r
+gmapQl :: (r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Charged a -&gt; r
+$cgmapQl :: forall a r r'.
+Data a =&gt;
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Charged a -&gt; r
+gmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; Charged a -&gt; Charged a
+$cgmapT :: forall a.
+Data a =&gt;
+(forall b. Data b =&gt; b -&gt; b) -&gt; Charged a -&gt; Charged a
+dataCast2 :: (forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c (Charged a))
+$cdataCast2 :: forall a (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+(Data a, Typeable t) =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c (Charged a))
+dataCast1 :: (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (Charged a))
+$cdataCast1 :: forall a (t :: * -&gt; *) (c :: * -&gt; *).
+(Data a, Typeable t) =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (Charged a))
+dataTypeOf :: Charged a -&gt; DataType
+$cdataTypeOf :: forall a. Data a =&gt; Charged a -&gt; DataType
+toConstr :: Charged a -&gt; Constr
+$ctoConstr :: forall a. Data a =&gt; Charged a -&gt; Constr
+gunfold :: (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (Charged a)
+$cgunfold :: forall a (c :: * -&gt; *).
+Data a =&gt;
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (Charged a)
+gfoldl :: (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Charged a -&gt; c (Charged a)
+$cgfoldl :: forall a (c :: * -&gt; *).
+Data a =&gt;
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Charged a -&gt; c (Charged a)
+$cp1Data :: forall a. Data a =&gt; Typeable (Charged a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679141314"><span id="local-6989586621679141316"><span class="annot"><span class="annottext">Charged a -&gt; Charged a -&gt; Bool
+(Charged a -&gt; Charged a -&gt; Bool)
+-&gt; (Charged a -&gt; Charged a -&gt; Bool) -&gt; Eq (Charged a)
+forall a. Eq a =&gt; Charged a -&gt; Charged a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Charged a -&gt; Charged a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; Charged a -&gt; Charged a -&gt; Bool
+== :: Charged a -&gt; Charged a -&gt; Bool
+$c== :: forall a. Eq a =&gt; Charged a -&gt; Charged a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679141279"><span id="local-6989586621679141281"><span id="local-6989586621679141283"><span id="local-6989586621679141285"><span id="local-6989586621679141287"><span id="local-6989586621679141289"><span id="local-6989586621679141291"><span id="local-6989586621679141293"><span id="local-6989586621679141295"><span id="local-6989586621679141297"><span id="local-6989586621679141299"><span id="local-6989586621679141301"><span id="local-6989586621679141303"><span id="local-6989586621679141305"><span id="local-6989586621679141307"><span id="local-6989586621679141309"><span id="local-6989586621679141311"><span class="annot"><span class="annottext">Charged a -&gt; Bool
+(a -&gt; m) -&gt; Charged a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; Charged a -&gt; b
+(forall m. Monoid m =&gt; Charged m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Charged a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Charged a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Charged a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Charged a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Charged a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Charged a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Charged a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Charged a -&gt; a)
+-&gt; (forall a. Charged a -&gt; [a])
+-&gt; (forall a. Charged a -&gt; Bool)
+-&gt; (forall a. Charged a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Charged a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Charged a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Charged a -&gt; a)
+-&gt; (forall a. Num a =&gt; Charged a -&gt; a)
+-&gt; (forall a. Num a =&gt; Charged a -&gt; a)
+-&gt; Foldable Charged
+forall a. Eq a =&gt; a -&gt; Charged a -&gt; Bool
+forall a. Num a =&gt; Charged a -&gt; a
+forall a. Ord a =&gt; Charged a -&gt; a
+forall m. Monoid m =&gt; Charged m -&gt; m
+forall a. Charged a -&gt; Bool
+forall a. Charged a -&gt; Int
+forall a. Charged a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Charged a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Charged a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Charged a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Charged a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: Charged a -&gt; a
+$cproduct :: forall a. Num a =&gt; Charged a -&gt; a
+sum :: Charged a -&gt; a
+$csum :: forall a. Num a =&gt; Charged a -&gt; a
+minimum :: Charged a -&gt; a
+$cminimum :: forall a. Ord a =&gt; Charged a -&gt; a
+maximum :: Charged a -&gt; a
+$cmaximum :: forall a. Ord a =&gt; Charged a -&gt; a
+elem :: a -&gt; Charged a -&gt; Bool
+$celem :: forall a. Eq a =&gt; a -&gt; Charged a -&gt; Bool
+length :: Charged a -&gt; Int
+$clength :: forall a. Charged a -&gt; Int
+null :: Charged a -&gt; Bool
+$cnull :: forall a. Charged a -&gt; Bool
+toList :: Charged a -&gt; [a]
+$ctoList :: forall a. Charged a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; Charged a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Charged a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; Charged a -&gt; a
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Charged a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; Charged a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Charged a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Charged a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Charged a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; Charged a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Charged a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Charged a -&gt; b
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Charged a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; Charged a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Charged a -&gt; m
+foldMap :: (a -&gt; m) -&gt; Charged a -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Charged a -&gt; m
+fold :: Charged m -&gt; m
+$cfold :: forall m. Monoid m =&gt; Charged m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679141274"><span id="local-6989586621679141276"><span class="annot"><span class="annottext">a -&gt; Charged b -&gt; Charged a
+(a -&gt; b) -&gt; Charged a -&gt; Charged b
+(forall a b. (a -&gt; b) -&gt; Charged a -&gt; Charged b)
+-&gt; (forall a b. a -&gt; Charged b -&gt; Charged a) -&gt; Functor Charged
+forall a b. a -&gt; Charged b -&gt; Charged a
+forall a b. (a -&gt; b) -&gt; Charged a -&gt; Charged b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; Charged b -&gt; Charged a
+$c&lt;$ :: forall a b. a -&gt; Charged b -&gt; Charged a
+fmap :: (a -&gt; b) -&gt; Charged a -&gt; Charged b
+$cfmap :: forall a b. (a -&gt; b) -&gt; Charged a -&gt; Charged b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679141271"><span class="annot"><span class="annottext">Charged a -&gt; Q Exp
+(Charged a -&gt; Q Exp) -&gt; Lift (Charged a)
+forall a. Lift a =&gt; Charged a -&gt; Q Exp
+forall t. (t -&gt; Q Exp) -&gt; Lift t
+lift :: Charged a -&gt; Q Exp
+$clift :: forall a. Lift a =&gt; Charged a -&gt; Q Exp
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Lift</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679141255"><span id="local-6989586621679141257"><span id="local-6989586621679141259"><span id="local-6989586621679141261"><span id="local-6989586621679141263"><span id="local-6989586621679141265"><span id="local-6989586621679141267"><span class="annot"><span class="annottext">Eq (Charged a)
+Eq (Charged a) =&gt;
+(Charged a -&gt; Charged a -&gt; Ordering)
+-&gt; (Charged a -&gt; Charged a -&gt; Bool)
+-&gt; (Charged a -&gt; Charged a -&gt; Bool)
+-&gt; (Charged a -&gt; Charged a -&gt; Bool)
+-&gt; (Charged a -&gt; Charged a -&gt; Bool)
+-&gt; (Charged a -&gt; Charged a -&gt; Charged a)
+-&gt; (Charged a -&gt; Charged a -&gt; Charged a)
+-&gt; Ord (Charged a)
+Charged a -&gt; Charged a -&gt; Bool
+Charged a -&gt; Charged a -&gt; Ordering
+Charged a -&gt; Charged a -&gt; Charged a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (Charged a)
+forall a. Ord a =&gt; Charged a -&gt; Charged a -&gt; Bool
+forall a. Ord a =&gt; Charged a -&gt; Charged a -&gt; Ordering
+forall a. Ord a =&gt; Charged a -&gt; Charged a -&gt; Charged a
+min :: Charged a -&gt; Charged a -&gt; Charged a
+$cmin :: forall a. Ord a =&gt; Charged a -&gt; Charged a -&gt; Charged a
+max :: Charged a -&gt; Charged a -&gt; Charged a
+$cmax :: forall a. Ord a =&gt; Charged a -&gt; Charged a -&gt; Charged a
+&gt;= :: Charged a -&gt; Charged a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; Charged a -&gt; Charged a -&gt; Bool
+&gt; :: Charged a -&gt; Charged a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; Charged a -&gt; Charged a -&gt; Bool
+&lt;= :: Charged a -&gt; Charged a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; Charged a -&gt; Charged a -&gt; Bool
+&lt; :: Charged a -&gt; Charged a -&gt; Bool
+$c&lt; :: forall a. Ord a =&gt; Charged a -&gt; Charged a -&gt; Bool
+compare :: Charged a -&gt; Charged a -&gt; Ordering
+$ccompare :: forall a. Ord a =&gt; Charged a -&gt; Charged a -&gt; Ordering
+$cp1Ord :: forall a. Ord a =&gt; Eq (Charged a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679141246"><span id="local-6989586621679141248"><span id="local-6989586621679141250"><span id="local-6989586621679141252"><span class="annot"><span class="annottext">ReadPrec [Charged a]
+ReadPrec (Charged a)
+Int -&gt; ReadS (Charged a)
+ReadS [Charged a]
+(Int -&gt; ReadS (Charged a))
+-&gt; ReadS [Charged a]
+-&gt; ReadPrec (Charged a)
+-&gt; ReadPrec [Charged a]
+-&gt; Read (Charged a)
+forall a. Read a =&gt; ReadPrec [Charged a]
+forall a. Read a =&gt; ReadPrec (Charged a)
+forall a. Read a =&gt; Int -&gt; ReadS (Charged a)
+forall a. Read a =&gt; ReadS [Charged a]
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [Charged a]
+$creadListPrec :: forall a. Read a =&gt; ReadPrec [Charged a]
+readPrec :: ReadPrec (Charged a)
+$creadPrec :: forall a. Read a =&gt; ReadPrec (Charged a)
+readList :: ReadS [Charged a]
+$creadList :: forall a. Read a =&gt; ReadS [Charged a]
+readsPrec :: Int -&gt; ReadS (Charged a)
+$creadsPrec :: forall a. Read a =&gt; Int -&gt; ReadS (Charged a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679141239"><span id="local-6989586621679141241"><span id="local-6989586621679141243"><span class="annot"><span class="annottext">Int -&gt; Charged a -&gt; ShowS
+[Charged a] -&gt; ShowS
+Charged a -&gt; String
+(Int -&gt; Charged a -&gt; ShowS)
+-&gt; (Charged a -&gt; String)
+-&gt; ([Charged a] -&gt; ShowS)
+-&gt; Show (Charged a)
+forall a. Show a =&gt; Int -&gt; Charged a -&gt; ShowS
+forall a. Show a =&gt; [Charged a] -&gt; ShowS
+forall a. Show a =&gt; Charged a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [Charged a] -&gt; ShowS
+$cshowList :: forall a. Show a =&gt; [Charged a] -&gt; ShowS
+show :: Charged a -&gt; String
+$cshow :: forall a. Show a =&gt; Charged a -&gt; String
+showsPrec :: Int -&gt; Charged a -&gt; ShowS
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; Charged a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679141228"><span id="local-6989586621679141230"><span id="local-6989586621679141232"><span id="local-6989586621679141234"><span class="annot"><span class="annottext">Functor Charged
+Foldable Charged
+(Functor Charged, Foldable Charged) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; Charged a -&gt; f (Charged b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    Charged (f a) -&gt; f (Charged a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; Charged a -&gt; m (Charged b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    Charged (m a) -&gt; m (Charged a))
+-&gt; Traversable Charged
+(a -&gt; f b) -&gt; Charged a -&gt; f (Charged b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; Charged (m a) -&gt; m (Charged a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Charged (f a) -&gt; f (Charged a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Charged a -&gt; m (Charged b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Charged a -&gt; f (Charged b)
+sequence :: Charged (m a) -&gt; m (Charged a)
+$csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Charged (m a) -&gt; m (Charged a)
+mapM :: (a -&gt; m b) -&gt; Charged a -&gt; m (Charged b)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Charged a -&gt; m (Charged b)
+sequenceA :: Charged (f a) -&gt; f (Charged a)
+$csequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Charged (f a) -&gt; f (Charged a)
+traverse :: (a -&gt; f b) -&gt; Charged a -&gt; f (Charged b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Charged a -&gt; f (Charged b)
+$cp2Traversable :: Foldable Charged
+$cp1Traversable :: Functor Charged
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- | Construct a 'Charged' item with charge 0.</span><span>
+</span><span id="line-36"></span><span id="local-6989586621679141226"><span class="annot"><a href="Chemistry.Charge.html#neutral"><span class="hs-identifier hs-type">neutral</span></a></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679141226"><span class="hs-identifier hs-type">a</span></a></span><span>  </span><span class="hs-comment">-- ^ The given item to wrap in a 'Charged' data constructor.</span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier hs-type">Charged</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141226"><span class="hs-identifier hs-type">a</span></a></span><span>  </span><span class="hs-comment">-- ^ The corresponding 'Charged' item of the given chemical item.</span></span><span>
+</span><span id="line-39"></span><span id="neutral"><span class="annot"><span class="annottext">neutral :: a -&gt; Charged a
+</span><a href="Chemistry.Charge.html#neutral"><span class="hs-identifier hs-var hs-var">neutral</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int -&gt; Charged a
+forall a. a -&gt; Int -&gt; Charged a
+</span><a href="Chemistry.Charge.html#Charged"><span class="hs-operator hs-var">`Charged`</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="annot"><a href="Chemistry.Charge.html#_signify"><span class="hs-identifier hs-type">_signify</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Markup</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Markup</span></span><span>
+</span><span id="line-42"></span><span id="_signify"><span class="annot"><span class="annottext">_signify :: Int -&gt; Markup -&gt; Markup
+</span><a href="Chemistry.Charge.html#_signify"><span class="hs-identifier hs-var hs-var">_signify</span></a></span></span><span> </span><span id="local-6989586621679141224"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679141224"><span class="hs-identifier hs-var">n</span></a></span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679141224"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Markup -&gt; Markup
+</span><span class="hs-identifier hs-var">sup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Markup
+</span><span class="hs-identifier hs-var">string</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679141224"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Markup -&gt; Markup -&gt; Markup
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679141224"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Markup -&gt; Markup
+</span><span class="hs-identifier hs-var">sup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Markup
+</span><span class="hs-identifier hs-var">string</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-char">'+'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679141224"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Markup -&gt; Markup -&gt; Markup
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Markup -&gt; Markup
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="annot"><a href="Chemistry.Charge.html#_charge"><span class="hs-identifier hs-type">_charge</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-48"></span><span id="_charge"><span class="annot"><span class="annottext">_charge :: Int -&gt; Text
+</span><a href="Chemistry.Charge.html#_charge"><span class="hs-identifier hs-var hs-var">_charge</span></a></span></span><span> </span><span class="hs-number">0</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-49"></span><span class="annot"><a href="Chemistry.Charge.html#_charge"><span class="hs-identifier hs-var">_charge</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="hs-number">1</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;\x207a&quot;</span></span><span>
+</span><span id="line-50"></span><span class="annot"><a href="Chemistry.Charge.html#_charge"><span class="hs-identifier hs-var">_charge</span></a></span><span> </span><span id="local-6989586621679141218"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679141218"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679141218"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Text
+forall i. Integral i =&gt; i -&gt; Text
+</span><span class="hs-identifier hs-var">asSup</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679141218"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-51"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Text -&gt; Text
+</span><span class="hs-identifier hs-var">cons</span></span><span> </span><span class="annot"><span class="hs-char">'\x207a'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Text
+forall i. Integral i =&gt; i -&gt; Text
+</span><span class="hs-identifier hs-var">asSup</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679141218"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span id="local-6989586621679141217"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679141212"><span id="local-6989586621679141215"><span class="annot"><a href="Chemistry.Core.html#FormulaElement"><span class="hs-identifier hs-type">FormulaElement</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141217"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Chemistry.Core.html#FormulaElement"><span class="hs-identifier hs-type">FormulaElement</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier hs-type">Charged</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141217"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-54"></span><span>    </span><span id="local-6989586621679141209"><span class="annot"><span class="annottext">toFormulaPrec :: Int -&gt; Charged a -&gt; Text -&gt; Text
+</span><a href="#local-6989586621679141209"><span class="hs-identifier hs-var hs-var hs-var hs-var">toFormulaPrec</span></a></span></span><span> </span><span id="local-6989586621679141208"><span class="annot"><span class="annottext">p :: Int
+</span><a href="#local-6989586621679141208"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier hs-type">Charged</span></a></span><span> </span><span id="local-6989586621679141207"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679141207"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679141206"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679141206"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; (Text -&gt; Text) -&gt; Text -&gt; Text
+</span><a href="Chemistry.Core.html#showParenText"><span class="hs-identifier hs-var">showParenText</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679141208"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="hs-number">6</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; a -&gt; Text -&gt; Text
+forall a. FormulaElement a =&gt; Int -&gt; a -&gt; Text -&gt; Text
+</span><a href="Chemistry.Core.html#toFormulaPrec"><span class="hs-identifier hs-var">toFormulaPrec</span></a></span><span> </span><span class="annot"><span class="hs-number">5</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679141207"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Text) -&gt; (Text -&gt; Text) -&gt; Text -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Text
+</span><a href="Chemistry.Charge.html#_charge"><span class="hs-identifier hs-var">_charge</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679141206"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>    </span><span id="local-6989586621679141204"><span class="annot"><span class="annottext">toFormulaMarkupPrec :: Int -&gt; Charged a -&gt; Markup -&gt; Markup
+</span><a href="#local-6989586621679141204"><span class="hs-identifier hs-var hs-var hs-var hs-var">toFormulaMarkupPrec</span></a></span></span><span> </span><span id="local-6989586621679141203"><span class="annot"><span class="annottext">p :: Int
+</span><a href="#local-6989586621679141203"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier hs-type">Charged</span></a></span><span> </span><span id="local-6989586621679141202"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679141202"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679141201"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679141201"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; (Markup -&gt; Markup) -&gt; Markup -&gt; Markup
+</span><a href="Chemistry.Core.html#showParenMarkup"><span class="hs-identifier hs-var">showParenMarkup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679141203"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="hs-number">6</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; a -&gt; Markup -&gt; Markup
+forall a. FormulaElement a =&gt; Int -&gt; a -&gt; Markup -&gt; Markup
+</span><a href="Chemistry.Core.html#toFormulaMarkupPrec"><span class="hs-identifier hs-var">toFormulaMarkupPrec</span></a></span><span> </span><span class="annot"><span class="hs-number">5</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679141202"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(Markup -&gt; Markup) -&gt; (Markup -&gt; Markup) -&gt; Markup -&gt; Markup
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Markup -&gt; Markup
+</span><a href="Chemistry.Charge.html#_signify"><span class="hs-identifier hs-var">_signify</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679141201"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span id="local-6989586621679141200"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Chemistry.Core.html#Weight"><span class="hs-identifier hs-type">Weight</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141200"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Chemistry.Core.html#Weight"><span class="hs-identifier hs-type">Weight</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier hs-type">Charged</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141200"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679141197"><span class="annot"><span class="annottext">weight :: Charged a -&gt; Maybe (Quantity DMass b)
+</span><a href="#local-6989586621679141197"><span class="hs-identifier hs-var hs-var hs-var hs-var">weight</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier hs-type">Charged</span></a></span><span> </span><span id="local-6989586621679141196"><span class="annot"><span class="annottext">a :: a
+</span><a href="#local-6989586621679141196"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe (Quantity DMass b)
+forall a b. (Weight a, Floating b) =&gt; a -&gt; Maybe (Quantity DMass b)
+</span><a href="Chemistry.Core.html#weight"><span class="hs-identifier hs-var">weight</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679141196"><span class="hs-identifier hs-var">a</span></a></span></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span id="local-6989586621679141195"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679141192"><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679141195"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier hs-type">Charged</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679141195"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>    </span><span id="local-6989586621679141190"><span class="annot"><span class="annottext">arbitrary :: Gen (Charged a)
+</span><a href="#local-6989586621679141190"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (Charged a)
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; Gen (f a)
+</span><span class="hs-identifier hs-var">arbitrary1</span></span></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679141187"><span class="annot"><span class="hs-identifier hs-type">Arbitrary1</span></span><span> </span><span class="annot"><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier hs-type">Charged</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>    </span><span id="local-6989586621679141185"><span class="annot"><span class="annottext">liftArbitrary :: Gen a -&gt; Gen (Charged a)
+</span><a href="#local-6989586621679141185"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftArbitrary</span></a></span></span><span> </span><span id="local-6989586621679141184"><span class="annot"><span class="annottext">arb :: Gen a
+</span><a href="#local-6989586621679141184"><span class="hs-identifier hs-var">arb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Int -&gt; Charged a
+forall a. a -&gt; Int -&gt; Charged a
+</span><a href="Chemistry.Charge.html#Charged"><span class="hs-identifier hs-var">Charged</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Int -&gt; Charged a) -&gt; Gen a -&gt; Gen (Int -&gt; Charged a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen a
+</span><a href="#local-6989586621679141184"><span class="hs-identifier hs-var">arb</span></a></span><span> </span><span class="annot"><span class="annottext">Gen (Int -&gt; Charged a) -&gt; Gen Int -&gt; Gen (Charged a)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen Int
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span>
+</span><span id="line-65"></span></pre></body></html>

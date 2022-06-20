@@ -1,0 +1,600 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_IE8T2EjymgdKb6uF8agnWj"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Numeric.Units.Dimensional.UnitNames.InterchangeNames</span><span>
+</span><span id="line-5"></span><span class="hs-special">(</span><span>
+</span><span id="line-6"></span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#InterchangeNameAuthority"><span class="hs-identifier">InterchangeNameAuthority</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-7"></span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#InterchangeName"><span class="hs-identifier">InterchangeName</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>  </span><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#HasInterchangeName"><span class="hs-identifier">HasInterchangeName</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- | Represents the authority which issued an interchange name for a unit.</span><span>
+</span><span id="line-18"></span><span id="local-6989586621679109762"><span id="local-6989586621679109763"></span></span><span class="hs-keyword">data</span><span> </span><span id="InterchangeNameAuthority"><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#InterchangeNameAuthority"><span class="hs-identifier hs-var">InterchangeNameAuthority</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="UCUM"><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#UCUM"><span class="hs-identifier hs-var">UCUM</span></a></span></span><span> </span><span class="hs-comment">-- ^ The interchange name originated with the Unified Code for Units of Measure.</span><span>
+</span><span id="line-19"></span><span>                              </span><span class="hs-glyph">|</span><span> </span><span id="DimensionalLibrary"><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#DimensionalLibrary"><span class="hs-identifier hs-var">DimensionalLibrary</span></a></span></span><span> </span><span class="hs-comment">-- ^ The interchange name originated with the dimensional library.</span><span>
+</span><span id="line-20"></span><span>                              </span><span class="hs-glyph">|</span><span> </span><span id="Custom"><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#Custom"><span class="hs-identifier hs-var">Custom</span></a></span></span><span> </span><span class="hs-comment">-- ^ The interchange name originated with a user of the dimensional library.</span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109755"><span id="local-6989586621679109757"><span class="annot"><span class="annottext">InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+(InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool)
+-&gt; (InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool)
+-&gt; Eq InterchangeNameAuthority
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+$c/= :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+== :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+$c== :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109739"><span id="local-6989586621679109741"><span id="local-6989586621679109743"><span id="local-6989586621679109745"><span id="local-6989586621679109747"><span id="local-6989586621679109749"><span id="local-6989586621679109751"><span class="annot"><span class="annottext">Eq InterchangeNameAuthority
+Eq InterchangeNameAuthority =&gt;
+(InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Ordering)
+-&gt; (InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool)
+-&gt; (InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool)
+-&gt; (InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool)
+-&gt; (InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool)
+-&gt; (InterchangeNameAuthority
+    -&gt; InterchangeNameAuthority -&gt; InterchangeNameAuthority)
+-&gt; (InterchangeNameAuthority
+    -&gt; InterchangeNameAuthority -&gt; InterchangeNameAuthority)
+-&gt; Ord InterchangeNameAuthority
+InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Ordering
+InterchangeNameAuthority
+-&gt; InterchangeNameAuthority -&gt; InterchangeNameAuthority
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: InterchangeNameAuthority
+-&gt; InterchangeNameAuthority -&gt; InterchangeNameAuthority
+$cmin :: InterchangeNameAuthority
+-&gt; InterchangeNameAuthority -&gt; InterchangeNameAuthority
+max :: InterchangeNameAuthority
+-&gt; InterchangeNameAuthority -&gt; InterchangeNameAuthority
+$cmax :: InterchangeNameAuthority
+-&gt; InterchangeNameAuthority -&gt; InterchangeNameAuthority
+&gt;= :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+$c&gt;= :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+&gt; :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+$c&gt; :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+&lt;= :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+$c&lt;= :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+&lt; :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+$c&lt; :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Bool
+compare :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Ordering
+$ccompare :: InterchangeNameAuthority -&gt; InterchangeNameAuthority -&gt; Ordering
+$cp1Ord :: Eq InterchangeNameAuthority
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109732"><span id="local-6989586621679109734"><span id="local-6989586621679109736"><span class="annot"><span class="annottext">Int -&gt; InterchangeNameAuthority -&gt; ShowS
+[InterchangeNameAuthority] -&gt; ShowS
+InterchangeNameAuthority -&gt; String
+(Int -&gt; InterchangeNameAuthority -&gt; ShowS)
+-&gt; (InterchangeNameAuthority -&gt; String)
+-&gt; ([InterchangeNameAuthority] -&gt; ShowS)
+-&gt; Show InterchangeNameAuthority
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [InterchangeNameAuthority] -&gt; ShowS
+$cshowList :: [InterchangeNameAuthority] -&gt; ShowS
+show :: InterchangeNameAuthority -&gt; String
+$cshow :: InterchangeNameAuthority -&gt; String
+showsPrec :: Int -&gt; InterchangeNameAuthority -&gt; ShowS
+$cshowsPrec :: Int -&gt; InterchangeNameAuthority -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="%24cCustom"><span id="%24cDimensionalLibrary"><span id="%24cUCUM"><span id="%24tInterchangeNameAuthority"><span id="local-6989586621679109702"><span id="local-6989586621679109704"><span id="local-6989586621679109706"><span id="local-6989586621679109708"><span id="local-6989586621679109710"><span id="local-6989586621679109712"><span id="local-6989586621679109714"><span id="local-6989586621679109716"><span id="local-6989586621679109718"><span id="local-6989586621679109720"><span id="local-6989586621679109722"><span id="local-6989586621679109724"><span id="local-6989586621679109726"><span id="local-6989586621679109728"><span class="annot"><span class="annottext">Typeable InterchangeNameAuthority
+DataType
+Constr
+Typeable InterchangeNameAuthority =&gt;
+(forall (c :: Type -&gt; Type).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g)
+ -&gt; InterchangeNameAuthority
+ -&gt; c InterchangeNameAuthority)
+-&gt; (forall (c :: Type -&gt; Type).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c InterchangeNameAuthority)
+-&gt; (InterchangeNameAuthority -&gt; Constr)
+-&gt; (InterchangeNameAuthority -&gt; DataType)
+-&gt; (forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d))
+    -&gt; Maybe (c InterchangeNameAuthority))
+-&gt; (forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c InterchangeNameAuthority))
+-&gt; ((forall b. Data b =&gt; b -&gt; b)
+    -&gt; InterchangeNameAuthority -&gt; InterchangeNameAuthority)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r
+    -&gt; (forall d. Data d =&gt; d -&gt; r')
+    -&gt; InterchangeNameAuthority
+    -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r
+    -&gt; (forall d. Data d =&gt; d -&gt; r')
+    -&gt; InterchangeNameAuthority
+    -&gt; r)
+-&gt; (forall u.
+    (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeNameAuthority -&gt; [u])
+-&gt; (forall u.
+    Int
+    -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeNameAuthority -&gt; u)
+-&gt; (forall (m :: Type -&gt; Type).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; InterchangeNameAuthority -&gt; m InterchangeNameAuthority)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; InterchangeNameAuthority -&gt; m InterchangeNameAuthority)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; InterchangeNameAuthority -&gt; m InterchangeNameAuthority)
+-&gt; Data InterchangeNameAuthority
+InterchangeNameAuthority -&gt; DataType
+InterchangeNameAuthority -&gt; Constr
+(forall b. Data b =&gt; b -&gt; b)
+-&gt; InterchangeNameAuthority -&gt; InterchangeNameAuthority
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; InterchangeNameAuthority
+-&gt; c InterchangeNameAuthority
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c InterchangeNameAuthority
+forall a.
+Typeable a =&gt;
+(forall (c :: Type -&gt; Type).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: Type -&gt; Type).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: Type -&gt; Type).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u.
+Int
+-&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeNameAuthority -&gt; u
+forall u.
+(forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeNameAuthority -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; InterchangeNameAuthority
+-&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; InterchangeNameAuthority
+-&gt; r
+forall (m :: Type -&gt; Type).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeNameAuthority -&gt; m InterchangeNameAuthority
+forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeNameAuthority -&gt; m InterchangeNameAuthority
+forall (c :: Type -&gt; Type).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c InterchangeNameAuthority
+forall (c :: Type -&gt; Type).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; InterchangeNameAuthority
+-&gt; c InterchangeNameAuthority
+forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c InterchangeNameAuthority)
+forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c InterchangeNameAuthority)
+$cCustom :: Constr
+$cDimensionalLibrary :: Constr
+$cUCUM :: Constr
+$tInterchangeNameAuthority :: DataType
+gmapMo :: (forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeNameAuthority -&gt; m InterchangeNameAuthority
+$cgmapMo :: forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeNameAuthority -&gt; m InterchangeNameAuthority
+gmapMp :: (forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeNameAuthority -&gt; m InterchangeNameAuthority
+$cgmapMp :: forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeNameAuthority -&gt; m InterchangeNameAuthority
+gmapM :: (forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeNameAuthority -&gt; m InterchangeNameAuthority
+$cgmapM :: forall (m :: Type -&gt; Type).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeNameAuthority -&gt; m InterchangeNameAuthority
+gmapQi :: Int
+-&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeNameAuthority -&gt; u
+$cgmapQi :: forall u.
+Int
+-&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeNameAuthority -&gt; u
+gmapQ :: (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeNameAuthority -&gt; [u]
+$cgmapQ :: forall u.
+(forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeNameAuthority -&gt; [u]
+gmapQr :: (r' -&gt; r -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; InterchangeNameAuthority
+-&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; InterchangeNameAuthority
+-&gt; r
+gmapQl :: (r -&gt; r' -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; InterchangeNameAuthority
+-&gt; r
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; InterchangeNameAuthority
+-&gt; r
+gmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; InterchangeNameAuthority -&gt; InterchangeNameAuthority
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; InterchangeNameAuthority -&gt; InterchangeNameAuthority
+dataCast2 :: (forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c InterchangeNameAuthority)
+$cdataCast2 :: forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c InterchangeNameAuthority)
+dataCast1 :: (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c InterchangeNameAuthority)
+$cdataCast1 :: forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c InterchangeNameAuthority)
+dataTypeOf :: InterchangeNameAuthority -&gt; DataType
+$cdataTypeOf :: InterchangeNameAuthority -&gt; DataType
+toConstr :: InterchangeNameAuthority -&gt; Constr
+$ctoConstr :: InterchangeNameAuthority -&gt; Constr
+gunfold :: (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c InterchangeNameAuthority
+$cgunfold :: forall (c :: Type -&gt; Type).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c InterchangeNameAuthority
+gfoldl :: (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; InterchangeNameAuthority
+-&gt; c InterchangeNameAuthority
+$cgfoldl :: forall (c :: Type -&gt; Type).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; InterchangeNameAuthority
+-&gt; c InterchangeNameAuthority
+$cp1Data :: Typeable InterchangeNameAuthority
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(forall x.
+ InterchangeNameAuthority -&gt; Rep InterchangeNameAuthority x)
+-&gt; (forall x.
+    Rep InterchangeNameAuthority x -&gt; InterchangeNameAuthority)
+-&gt; Generic InterchangeNameAuthority
+forall x.
+Rep InterchangeNameAuthority x -&gt; InterchangeNameAuthority
+forall x.
+InterchangeNameAuthority -&gt; Rep InterchangeNameAuthority x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cto :: forall x.
+Rep InterchangeNameAuthority x -&gt; InterchangeNameAuthority
+$cfrom :: forall x.
+InterchangeNameAuthority -&gt; Rep InterchangeNameAuthority x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679109692"><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#InterchangeNameAuthority"><span class="hs-identifier hs-type">InterchangeNameAuthority</span></a></span></span><span> </span><span class="hs-keyword">where</span><span> </span><span class="hs-comment">-- instance is derived from Generic instance</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span id="local-6989586621679109689"><span id="local-6989586621679109690"></span></span><span class="hs-keyword">data</span><span> </span><span id="InterchangeName"><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#InterchangeName"><span class="hs-identifier hs-var">InterchangeName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="InterchangeName"><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#InterchangeName"><span class="hs-identifier hs-var">InterchangeName</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="name"><span class="annot"><span class="annottext">InterchangeName -&gt; String
+</span><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#name"><span class="hs-identifier hs-var hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span id="authority"><span class="annot"><span class="annottext">InterchangeName -&gt; InterchangeNameAuthority
+</span><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#authority"><span class="hs-identifier hs-var hs-var">authority</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#InterchangeNameAuthority"><span class="hs-identifier hs-type">InterchangeNameAuthority</span></a></span><span class="hs-special">,</span><span> </span><span id="isAtomic"><span class="annot"><span class="annottext">InterchangeName -&gt; Bool
+</span><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#isAtomic"><span class="hs-identifier hs-var hs-var">isAtomic</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109681"><span id="local-6989586621679109683"><span class="annot"><span class="annottext">InterchangeName -&gt; InterchangeName -&gt; Bool
+(InterchangeName -&gt; InterchangeName -&gt; Bool)
+-&gt; (InterchangeName -&gt; InterchangeName -&gt; Bool)
+-&gt; Eq InterchangeName
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: InterchangeName -&gt; InterchangeName -&gt; Bool
+$c/= :: InterchangeName -&gt; InterchangeName -&gt; Bool
+== :: InterchangeName -&gt; InterchangeName -&gt; Bool
+$c== :: InterchangeName -&gt; InterchangeName -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109666"><span id="local-6989586621679109668"><span id="local-6989586621679109670"><span id="local-6989586621679109672"><span id="local-6989586621679109674"><span id="local-6989586621679109676"><span id="local-6989586621679109678"><span class="annot"><span class="annottext">Eq InterchangeName
+Eq InterchangeName =&gt;
+(InterchangeName -&gt; InterchangeName -&gt; Ordering)
+-&gt; (InterchangeName -&gt; InterchangeName -&gt; Bool)
+-&gt; (InterchangeName -&gt; InterchangeName -&gt; Bool)
+-&gt; (InterchangeName -&gt; InterchangeName -&gt; Bool)
+-&gt; (InterchangeName -&gt; InterchangeName -&gt; Bool)
+-&gt; (InterchangeName -&gt; InterchangeName -&gt; InterchangeName)
+-&gt; (InterchangeName -&gt; InterchangeName -&gt; InterchangeName)
+-&gt; Ord InterchangeName
+InterchangeName -&gt; InterchangeName -&gt; Bool
+InterchangeName -&gt; InterchangeName -&gt; Ordering
+InterchangeName -&gt; InterchangeName -&gt; InterchangeName
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: InterchangeName -&gt; InterchangeName -&gt; InterchangeName
+$cmin :: InterchangeName -&gt; InterchangeName -&gt; InterchangeName
+max :: InterchangeName -&gt; InterchangeName -&gt; InterchangeName
+$cmax :: InterchangeName -&gt; InterchangeName -&gt; InterchangeName
+&gt;= :: InterchangeName -&gt; InterchangeName -&gt; Bool
+$c&gt;= :: InterchangeName -&gt; InterchangeName -&gt; Bool
+&gt; :: InterchangeName -&gt; InterchangeName -&gt; Bool
+$c&gt; :: InterchangeName -&gt; InterchangeName -&gt; Bool
+&lt;= :: InterchangeName -&gt; InterchangeName -&gt; Bool
+$c&lt;= :: InterchangeName -&gt; InterchangeName -&gt; Bool
+&lt; :: InterchangeName -&gt; InterchangeName -&gt; Bool
+$c&lt; :: InterchangeName -&gt; InterchangeName -&gt; Bool
+compare :: InterchangeName -&gt; InterchangeName -&gt; Ordering
+$ccompare :: InterchangeName -&gt; InterchangeName -&gt; Ordering
+$cp1Ord :: Eq InterchangeName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="%24cInterchangeName"><span id="%24tInterchangeName"><span id="local-6989586621679109637"><span id="local-6989586621679109639"><span id="local-6989586621679109641"><span id="local-6989586621679109643"><span id="local-6989586621679109645"><span id="local-6989586621679109647"><span id="local-6989586621679109649"><span id="local-6989586621679109651"><span id="local-6989586621679109653"><span id="local-6989586621679109655"><span id="local-6989586621679109657"><span id="local-6989586621679109659"><span id="local-6989586621679109661"><span id="local-6989586621679109663"><span class="annot"><span class="annottext">Typeable InterchangeName
+DataType
+Constr
+Typeable InterchangeName =&gt;
+(forall (c :: Type -&gt; Type).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; InterchangeName -&gt; c InterchangeName)
+-&gt; (forall (c :: Type -&gt; Type).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c InterchangeName)
+-&gt; (InterchangeName -&gt; Constr)
+-&gt; (InterchangeName -&gt; DataType)
+-&gt; (forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c InterchangeName))
+-&gt; (forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c InterchangeName))
+-&gt; ((forall b. Data b =&gt; b -&gt; b)
+    -&gt; InterchangeName -&gt; InterchangeName)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; InterchangeName -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; InterchangeName -&gt; r)
+-&gt; (forall u.
+    (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeName -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeName -&gt; u)
+-&gt; (forall (m :: Type -&gt; Type).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; InterchangeName -&gt; m InterchangeName)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; InterchangeName -&gt; m InterchangeName)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; InterchangeName -&gt; m InterchangeName)
+-&gt; Data InterchangeName
+InterchangeName -&gt; DataType
+InterchangeName -&gt; Constr
+(forall b. Data b =&gt; b -&gt; b) -&gt; InterchangeName -&gt; InterchangeName
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; InterchangeName -&gt; c InterchangeName
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c InterchangeName
+forall a.
+Typeable a =&gt;
+(forall (c :: Type -&gt; Type).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: Type -&gt; Type).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: Type -&gt; Type).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: Type -&gt; Type).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeName -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeName -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; InterchangeName -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; InterchangeName -&gt; r
+forall (m :: Type -&gt; Type).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeName -&gt; m InterchangeName
+forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeName -&gt; m InterchangeName
+forall (c :: Type -&gt; Type).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c InterchangeName
+forall (c :: Type -&gt; Type).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; InterchangeName -&gt; c InterchangeName
+forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c InterchangeName)
+forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c InterchangeName)
+$cInterchangeName :: Constr
+$tInterchangeName :: DataType
+gmapMo :: (forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeName -&gt; m InterchangeName
+$cgmapMo :: forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeName -&gt; m InterchangeName
+gmapMp :: (forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeName -&gt; m InterchangeName
+$cgmapMp :: forall (m :: Type -&gt; Type).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeName -&gt; m InterchangeName
+gmapM :: (forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeName -&gt; m InterchangeName
+$cgmapM :: forall (m :: Type -&gt; Type).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; InterchangeName -&gt; m InterchangeName
+gmapQi :: Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeName -&gt; u
+$cgmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeName -&gt; u
+gmapQ :: (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeName -&gt; [u]
+$cgmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; InterchangeName -&gt; [u]
+gmapQr :: (r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; InterchangeName -&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; InterchangeName -&gt; r
+gmapQl :: (r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; InterchangeName -&gt; r
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; InterchangeName -&gt; r
+gmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; InterchangeName -&gt; InterchangeName
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; InterchangeName -&gt; InterchangeName
+dataCast2 :: (forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c InterchangeName)
+$cdataCast2 :: forall (t :: Type -&gt; Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c InterchangeName)
+dataCast1 :: (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c InterchangeName)
+$cdataCast1 :: forall (t :: Type -&gt; Type) (c :: Type -&gt; Type).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c InterchangeName)
+dataTypeOf :: InterchangeName -&gt; DataType
+$cdataTypeOf :: InterchangeName -&gt; DataType
+toConstr :: InterchangeName -&gt; Constr
+$ctoConstr :: InterchangeName -&gt; Constr
+gunfold :: (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c InterchangeName
+$cgunfold :: forall (c :: Type -&gt; Type).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c InterchangeName
+gfoldl :: (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; InterchangeName -&gt; c InterchangeName
+$cgfoldl :: forall (c :: Type -&gt; Type).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; InterchangeName -&gt; c InterchangeName
+$cp1Data :: Typeable InterchangeName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(forall x. InterchangeName -&gt; Rep InterchangeName x)
+-&gt; (forall x. Rep InterchangeName x -&gt; InterchangeName)
+-&gt; Generic InterchangeName
+forall x. Rep InterchangeName x -&gt; InterchangeName
+forall x. InterchangeName -&gt; Rep InterchangeName x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cto :: forall x. Rep InterchangeName x -&gt; InterchangeName
+$cfrom :: forall x. InterchangeName -&gt; Rep InterchangeName x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679109631"><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#InterchangeName"><span class="hs-identifier hs-type">InterchangeName</span></a></span></span><span> </span><span class="hs-keyword">where</span><span> </span><span class="hs-comment">-- instance is derived from Generic instance</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679109626"><span id="local-6989586621679109629"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#InterchangeName"><span class="hs-identifier hs-type">InterchangeName</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-31"></span><span>  </span><span id="local-6989586621679109625"><span class="annot"><span class="annottext">show :: InterchangeName -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span id="local-6989586621679109623"><span class="annot"><span class="annottext">n :: InterchangeName
+</span><a href="#local-6989586621679109623"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">InterchangeName -&gt; String
+</span><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#name"><span class="hs-identifier hs-var hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">InterchangeName
+</span><a href="#local-6989586621679109623"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="hs-string">&quot; (Issued by &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">InterchangeNameAuthority -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InterchangeName -&gt; InterchangeNameAuthority
+</span><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#authority"><span class="hs-identifier hs-var hs-var">authority</span></a></span><span> </span><span class="annot"><span class="annottext">InterchangeName
+</span><a href="#local-6989586621679109623"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="hs-string">&quot;)&quot;</span></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- | Determines the authority which issued the interchange name of a unit or unit name.</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- For composite units, this is the least-authoritative interchange name of any constituent name.</span><span>
+</span><span id="line-35"></span><span class="hs-comment">--</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- Note that the least-authoritative authority is the one sorted as greatest by the 'Ord' instance of 'InterchangeNameAuthority'.</span><span>
+</span><span id="line-37"></span><span class="hs-keyword">class</span><span> </span><span id="HasInterchangeName"><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#HasInterchangeName"><span class="hs-identifier hs-var">HasInterchangeName</span></a></span></span><span> </span><span id="local-6989586621679109766"><span class="annot"><a href="#local-6989586621679109766"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-38"></span><span>  </span><span id="interchangeName"><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#interchangeName"><span class="hs-identifier hs-type">interchangeName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679109766"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#InterchangeName"><span class="hs-identifier hs-type">InterchangeName</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#HasInterchangeName"><span class="hs-identifier hs-type">HasInterchangeName</span></a></span><span> </span><span class="annot"><a href="Numeric.Units.Dimensional.UnitNames.InterchangeNames.html#InterchangeName"><span class="hs-identifier hs-type">InterchangeName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-41"></span><span>  </span><span id="local-6989586621679109619"><span class="annot"><span class="annottext">interchangeName :: InterchangeName -&gt; InterchangeName
+</span><a href="#local-6989586621679109619"><span class="hs-identifier hs-var hs-var hs-var hs-var">interchangeName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">InterchangeName -&gt; InterchangeName
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-42"></span></pre></body></html>
