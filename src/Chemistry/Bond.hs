@@ -18,7 +18,7 @@ module Chemistry.Bond (
   ) where
 
 import Data.Data(Data)
-import Data.Default(Default(def))
+import Data.Default.Class(Default(def))
 import Language.Haskell.TH.Syntax(Lift)
 
 -- | A datatype that defines the different types of bonds between atoms.
