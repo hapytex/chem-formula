@@ -29,7 +29,7 @@ import Chemistry.Core(
 
 import Data.Char.Small(asSub)
 import Data.Data(Data)
-import Data.Default(Default(def))
+import Data.Default.Class(Default(def))
 import Data.Hashable(Hashable)
 import qualified Data.HashMap.Strict as HM
 import Data.Function(on)
