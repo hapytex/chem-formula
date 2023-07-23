@@ -14,7 +14,7 @@ module Chemistry.Core (
     -- * A collection where items can be multiplied
     QuantifiedElements(foldQuantified, listElements, listElements', listElementsCounter)
     -- * Rendering formulas as text and HTML
-  , FormulaElement(toFormula, toFormulaPrec, toFormulaMarkup, toFormulaMarkupPrec)
+  , FormulaElement(toFormula, toFormulaColoured, toFormulaPrec, toFormulaPrecColoured, toFormulaMarkup, toFormulaMarkupPrec)
     -- * Items that have weight
   , Weight(weight), quantifiedWeight
     -- * Hill system
@@ -58,6 +58,11 @@ class FormulaElement a where
       -> Text  -- ^ A 'Text' object that represents the given chemical item.
     toFormula = flip (toFormulaPrec 0) empty
 
+    toFormulaColoured
+      :: a
+      -> Text
+    toFormulaColoured = flip (toFormulaPrecColoured 0) empty
+
     -- | Render the given chemical item with the /precedence/ value.
     toFormulaPrec
       :: Int  -- ^ The given precedence value.
@@ -65,6 +70,13 @@ class FormulaElement a where
       -> Text -- ^ The 'Text' object that is the "tail" of the 'Text' that will be generated.
       -> Text -- ^ The 'Text' that represents the chemical item appended with the given tail.
     toFormulaPrec _ = (<>) . toFormula
+
+    toFormulaPrecColoured
+      :: Int
+      -> a
+      -> Text
+      -> Text
+    toFormulaPrecColoured = toFormulaPrec
 
     -- | Render the given chemical item as 'Markup'.
     toFormulaMarkup

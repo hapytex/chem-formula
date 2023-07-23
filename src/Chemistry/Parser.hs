@@ -177,7 +177,7 @@ linearChainParser'' bo el = go'
           go fp Nothing = ChainItem fp
           go fp ~(Just be) = uncurry (Chain fp) be
 
-_parsing :: Stream String Identity t => (a -> Q b) -> ParsecT String () Identity a -> String -> Q b
+_parsing :: Stream String Identity Char => (a -> Q b) -> ParsecT String () Identity a -> String -> Q b
 _parsing f p s = either (fail . show) f (runP p () s s)
 
 _baseQQ :: (Data a, Lift a) => ParsecT String () Identity a -> Type -> QuasiQuoter

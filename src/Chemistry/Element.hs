@@ -25,10 +25,13 @@ module Chemistry.Element (
   , atomNumber, atomicWeight
   -- * Names of the elements
   , elementName
+  -- * Colors
+  , withElementColorS, elementCPK, symbolColoured, symbolColouredS
   ) where
 
-import Chemistry.Core(FormulaElement(toFormula, toFormulaPrec), HillCompare(hillCompare), Weight(weight))
+import Chemistry.Core(FormulaElement(toFormula, toFormulaColoured, toFormulaPrec, toFormulaPrecColoured), HillCompare(hillCompare), Weight(weight))
 
+import Data.Colour.SRGB(Colour, RGB(RGB), sRGB24, toSRGB24)
 import Data.Data(Data)
 import Data.Hashable(Hashable(hashWithSalt))
 import Data.Ix(Ix(range, index, inRange, rangeSize))
@@ -257,6 +260,50 @@ instance HillCompare Element where
 symbol :: Element -- ^ The given element for which we want to obtain the symbol.
     -> String -- ^ The symbol of the given element.
 symbol = show
+
+withElementColorS :: Element -> ShowS -> ShowS
+withElementColorS el f = (("\x1b[38;2" ++ r ++ g ++ b ++ "m") ++) . f . ("\x1b[0m"++)
+  where ~(RGB r g b) = (';':) . show <$> toSRGB24 (elementCPK el)
+
+
+symbolColoured :: Element -> String
+symbolColoured = (`symbolColouredS` "")
+
+symbolColouredS :: Element -> ShowS
+symbolColouredS = (withElementColorS <*> shows)
+
+elementCPK :: (Ord b, Floating b) => Element -> Colour b
+elementCPK H = sRGB24 255 255 255
+elementCPK C = sRGB24 0 0 0
+elementCPK N = sRGB24 0 0 255
+elementCPK O = sRGB24 255 0 0
+elementCPK F = sRGB24 0 128 0
+elementCPK Cl = sRGB24 0 128 0
+elementCPK Br = sRGB24 139 0 0
+elementCPK I = sRGB24 148 0 211
+elementCPK He = sRGB24 0 255 255
+elementCPK Ne = sRGB24 0 255 255
+elementCPK Ar = sRGB24 0 255 255
+elementCPK Kr = sRGB24 0 255 255
+elementCPK Xe = sRGB24 0 255 255
+elementCPK P = sRGB24 255 165 0
+elementCPK S = sRGB24 255 255 0
+elementCPK B = sRGB24 245 245 220
+elementCPK Li = sRGB24 238 130 238
+elementCPK Na = sRGB24 238 130 238
+elementCPK K = sRGB24 238 130 238
+elementCPK Rb = sRGB24 238 130 238
+elementCPK Cs = sRGB24 238 130 238
+elementCPK Fr = sRGB24 238 130 238
+elementCPK Be = sRGB24 0 100 0
+elementCPK Mg = sRGB24 0 100 0
+elementCPK Ca = sRGB24 0 100 0
+elementCPK Sr = sRGB24 0 100 0
+elementCPK Ba = sRGB24 0 100 0
+elementCPK Ra = sRGB24 0 100 0
+elementCPK Ti = sRGB24 128 128 128
+elementCPK Fe = sRGB24 255 140 0
+elementCPK _ = sRGB24 255 192 203
 
 -- | Obtain the name of the given 'Element'.
 elementName :: Element -- ^ The element for which we want to obtain the name.
@@ -487,7 +534,9 @@ instance Arbitrary Element where
 
 instance FormulaElement Element where
     toFormula = pack . symbol
+    toFormulaColoured = pack . symbolColoured
     toFormulaPrec _ = (<>) . toFormula
+    toFormulaPrecColoured _ = (<>) . toFormulaColoured
 
 instance Weight Element where
     weight = atomicWeight
