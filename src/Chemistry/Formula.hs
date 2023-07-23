@@ -23,7 +23,7 @@ module Chemistry.Formula (
 
 import Chemistry.Bond(Bond(BSingle, BDouble, BTriple, BQuadruple), bondToUnicode)
 import Chemistry.Core(
-    FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), QuantifiedElements(listElementsCounter, foldQuantified)
+    FormulaElement(toFormulaPrec, toFormulaPrecColoured, toFormulaMarkupPrec), HillCompare(hillCompare), QuantifiedElements(listElementsCounter, foldQuantified)
   , Weight(weight), quantifiedWeight, showParenText, showParenMarkup
   )
 
@@ -164,6 +164,9 @@ instance FormulaElement a => FormulaElement (FormulaPart a) where
     toFormulaPrec p (FormulaItem e) = toFormulaPrec p e
     toFormulaPrec p (f :* 1) = showParenText (p >= 5) (toFormulaPrec 5 f)
     toFormulaPrec p (f :* n) = showParenText (p >= 5) (toFormulaPrec 5 f . (asSub n <>))
+    toFormulaPrecColoured p (FormulaItem e) = toFormulaPrecColoured p e
+    toFormulaPrecColoured p (f :* 1) = showParenText (p >= 5) (toFormulaPrecColoured 5 f)
+    toFormulaPrecColoured p (f :* n) = showParenText (p >= 5) (toFormulaPrecColoured 5 f . (asSub n <>))
     toFormulaMarkupPrec p (FormulaItem e) = toFormulaMarkupPrec p e
     toFormulaMarkupPrec p (f :* 1) = showParenMarkup (p >= 5) (toFormulaMarkupPrec p f)
     toFormulaMarkupPrec p (f :* n) = showParenMarkup (p >= 5) (toFormulaMarkupPrec p f . (sub (string (show n)) <>))
@@ -188,6 +191,8 @@ instance QuantifiedElements Formula where
 instance FormulaElement a => FormulaElement (Formula a) where
     toFormulaPrec p' (FormulaPart p) = toFormulaPrec p' p
     toFormulaPrec p' (p :- f) = showParenText (p' >= 4) (toFormulaPrec 3 p . toFormulaPrec 3 f)
+    toFormulaPrecColoured p' (FormulaPart p) = toFormulaPrecColoured p' p
+    toFormulaPrecColoured p' (p :- f) = showParenText (p' >= 4) (toFormulaPrecColoured 3 p . toFormulaPrecColoured 3 f)
     toFormulaMarkupPrec p' (FormulaPart p) = toFormulaMarkupPrec p' p
     toFormulaMarkupPrec p' (p :- f) = showParenMarkup (p' >= 4) (toFormulaMarkupPrec 3 p . toFormulaMarkupPrec 3 f)
 
@@ -197,6 +202,8 @@ instance Weight a => Weight (Formula a) where
 instance FormulaElement a => FormulaElement (LinearChain Bond a) where
   toFormulaPrec p' (ChainItem i) = toFormulaPrec p' i
   toFormulaPrec p' (Chain i b is) = toFormulaPrec p' i . cons (bondToUnicode b) . toFormulaPrec p' is
+  toFormulaPrecColoured p' (ChainItem i) = toFormulaPrecColoured p' i
+  toFormulaPrecColoured p' (Chain i b is) = toFormulaPrecColoured p' i . cons (bondToUnicode b) . toFormulaPrecColoured p' is
   toFormulaMarkupPrec p' (ChainItem i) = toFormulaMarkupPrec p' i
   toFormulaMarkupPrec p' (Chain i b is) = toFormulaMarkupPrec p' i . (text (singleton (bondToUnicode b)) <>) . toFormulaMarkupPrec p' is
 

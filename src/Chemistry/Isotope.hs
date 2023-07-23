@@ -16,7 +16,7 @@ module Chemistry.Isotope (
   , isotopeWeight
   ) where
 
-import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaMarkupPrec), HillCompare(hillCompare), Weight(weight), showParenText, showParenMarkup)
+import Chemistry.Core(FormulaElement(toFormulaPrec, toFormulaPrecColoured, toFormulaMarkupPrec), HillCompare(hillCompare), Weight(weight), showParenText, showParenMarkup)
 import Chemistry.Element(Element(..))
 
 import Data.Char.Small(asSup)
@@ -406,6 +406,7 @@ isotopeWeight _ _ = Nothing
 
 instance FormulaElement a => FormulaElement (Isotope a) where
     toFormulaPrec p (Isotope x n) = showParenText (p >= 6) ((asSup n <>) . toFormulaPrec 5 x)
+    toFormulaPrecColoured p (Isotope x n) = showParenText (p >= 6) ((asSup n <>) . toFormulaPrecColoured 5 x)
     toFormulaMarkupPrec p (Isotope x n) = showParenMarkup (p >= 6) ((sup (string (show n)) <>) . toFormulaMarkupPrec 5 x)
 
 
