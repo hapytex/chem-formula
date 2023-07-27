@@ -25,6 +25,10 @@ module Chemistry.Element (
   , atomNumber, atomicWeight
   -- * Names of the elements
   , elementName
+  -- * Possible covalent bonds
+  , covalentBonds
+  -- * Orbitals
+  , molecularOrbital, dd
   -- * Colors
   , withElementColorS, elementCPK, symbolColoured, symbolColouredS
   ) where
@@ -45,6 +49,14 @@ import Numeric.Units.Dimensional.NonSI (dalton)
 
 import Text.Blaze(ToMarkup(toMarkup), preEscapedString)
 import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), arbitraryBoundedEnum)
+
+data Orbital = OrbS | OrbP | OrbD | OrbF | OrbG
+
+maxElectronsPerOrbital :: Int -> Int
+maxElectronsPerOrbital n = 4*n + 2
+
+orbitalNames :: [Char]
+orbitalNames = "spdfgh"
 
 -- | A data type that defines the different chemical elements.
 data Element
@@ -243,6 +255,17 @@ pattern Uus = Ts
 pattern Uuo :: Element
 pattern Uuo = Og
 
+molecularOrbital :: Element -> [(Int, Char, Int)]
+molecularOrbital = fill 0 0 . atomNumber
+  where fill _ _ 0 = []
+        fill m 0 k = (m+1, 's', d) : fill (m - (m-1) `div` 2) ((m+1) `div` 2) (k-d)
+          where d = min 2 k
+        fill m n k = (m+1, "spdfg" !! n, d) : fill (m+1) (n-1) (k-d)
+          where d = min (maxElectronsPerOrbital n) k
+
+-- electronsPerShell :: Element -> [Int]
+-- electronsPerShell = map sum . molecularOrbital
+
 -- | Obtain the atomic number of the given 'Element'.
 atomNumber :: Element -- ^ The element for which we want to calculate the atomic number.
     -> Int -- ^ The atomic number of the given element.
@@ -426,6 +449,20 @@ elementName Mc = "moscovium"
 elementName Lv = "livermorium"
 elementName Ts = "tennessine"
 elementName Og = "oganesson"
+
+covalentBonds :: Element -> Maybe [Int]
+covalentBonds H = Just [1]
+covalentBonds C = Just [4]
+covalentBonds N = Just [3]
+covalentBonds O = Just [2]
+covalentBonds F = Just [1]
+covalentBonds Si = Just [4]
+covalentBonds P = Just [3,5]
+covalentBonds S = Just [2,6]
+covalentBonds Cl = Just [1]
+covalentBonds Se = Just [2]
+covalentBonds Br = Just [1]
+covalentBonds _ = Nothing
 
 -- | Obtain the atomic weight of the given 'Element' given this is specified.
 atomicWeight :: Floating a => Element -- ^ The element for which we want to obtain the atomic weight.
