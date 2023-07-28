@@ -27,8 +27,6 @@ module Chemistry.Element (
   , elementName
   -- * Possible covalent bonds
   , covalentBonds
-  -- * Orbitals
-  , molecularOrbital, dd
   -- * Colors
   , withElementColorS, elementCPK, symbolColoured, symbolColouredS
   ) where
@@ -49,14 +47,6 @@ import Numeric.Units.Dimensional.NonSI (dalton)
 
 import Text.Blaze(ToMarkup(toMarkup), preEscapedString)
 import Test.QuickCheck.Arbitrary(Arbitrary(arbitrary), arbitraryBoundedEnum)
-
-data Orbital = OrbS | OrbP | OrbD | OrbF | OrbG
-
-maxElectronsPerOrbital :: Int -> Int
-maxElectronsPerOrbital n = 4*n + 2
-
-orbitalNames :: [Char]
-orbitalNames = "spdfgh"
 
 -- | A data type that defines the different chemical elements.
 data Element
@@ -254,17 +244,6 @@ pattern Uus = Ts
 -- | A pattern synonym for /ununoctium/, which is the systematic element name of /oganesson/.
 pattern Uuo :: Element
 pattern Uuo = Og
-
-molecularOrbital :: Element -> [(Int, Char, Int)]
-molecularOrbital = fill 0 0 . atomNumber
-  where fill _ _ 0 = []
-        fill m 0 k = (m+1, 's', d) : fill (m - (m-1) `div` 2) ((m+1) `div` 2) (k-d)
-          where d = min 2 k
-        fill m n k = (m+1, "spdfg" !! n, d) : fill (m+1) (n-1) (k-d)
-          where d = min (maxElectronsPerOrbital n) k
-
--- electronsPerShell :: Element -> [Int]
--- electronsPerShell = map sum . molecularOrbital
 
 -- | Obtain the atomic number of the given 'Element'.
 atomNumber :: Element -- ^ The element for which we want to calculate the atomic number.

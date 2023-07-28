@@ -22,6 +22,7 @@ library
     , Chemistry.Element
     , Chemistry.Formula
     , Chemistry.Isotope
+    , Chemistry.Orbit
     , Chemistry.Parser
   build-depends:
       base >= 4.7 && < 5
