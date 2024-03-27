@@ -264,8 +264,8 @@ symbol :: Element -- ^ The given element for which we want to obtain the symbol.
 symbol = show
 
 withElementColorS :: Element -> ShowS -> ShowS
-withElementColorS el f = (("\x1b[38;2" ++ r ++ g ++ b ++ "m") ++) . f . ("\x1b[0m"++)
-  where ~(RGB r g b) = (';':) . show <$> toSRGB24 (elementCPK el)
+withElementColorS el f = ("\x1b[38;2" ++) . r . g . b . ('m' :) . f . ("\x1b[0m"++)
+  where ~(RGB r g b) = (++) . (';':) . show <$> toSRGB24 (elementCPK el)
 
 
 symbolColoured :: Element -> String

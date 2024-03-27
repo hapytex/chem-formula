@@ -51,7 +51,7 @@ import Text.Parsec.Char(digit, char)
 _grouping :: Eq b => (a -> b) -> [a] -> [(b, [a])]
 _grouping f = go
     where go [] = []
-          go ~(x:xs) = (fx, x : ys) : go zs
+          go (x:xs) = (fx, x : ys) : go zs
               where ~(ys, zs) = span ((fx ==) . f) xs
                     fx = f x
 
@@ -164,7 +164,7 @@ formulaParser' :: Stream s m Char
 formulaParser' el = go'
     where go' = go <$> formulaPartParser' el <*> optionMaybe (formulaParser' el)
           go fp Nothing = FormulaPart fp
-          go fp ~(Just t) = fp :- t
+          go fp (Just t) = fp :- t
 
 -- | A function that produces a parser that parses a 'LinearChain' that makes
 -- use of given parsers to parse the bonds and the items in the linear chain.
@@ -175,7 +175,7 @@ linearChainParser'' :: Stream s m t
 linearChainParser'' bo el = go'
     where go' = go <$> el <*> optionMaybe ((,) <$> bo <*> go')
           go fp Nothing = ChainItem fp
-          go fp ~(Just be) = uncurry (Chain fp) be
+          go fp (Just be) = uncurry (Chain fp) be
 
 _parsing :: (a -> Q b) -> ParsecT String () Identity a -> String -> Q b
 _parsing f p s = either (fail . show) f (runP p () s s)
